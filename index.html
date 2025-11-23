@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Drums Class App</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #0d0d0d;
+    color: white;
+  }
+  header {
+    background: #111;
+    padding: 20px;
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    color: #ff5252;
+    letter-spacing: 2px;
+  }
+  section {
+    padding: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s;
+  }
+  .card:hover {
+    transform: translateY(-10px);
+  }
+  h2 {
+    color: #ffa31a;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    line-height: 1.6;
+  }
+  footer {
+    text-align: center;
+    padding: 10px;
+    background: #111;
+    color: #aaa;
+  }
+</style>
+</head>
+<body>
+<header>Drums Class App</header>
+<section>
+  <div class="card">
+    <h2>Admin & Student</h2>
+    <ul>
+      <li>Login system</li>
+      <li>Create / Join Room</li>
+      <li>Room creator becomes Admin</li>
+      <li>Teacher gives tasks</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Display Features</h2>
+    <ul>
+      <li>Split screen</li>
+      <li>Play button</li>
+      <li>Record & upload audio</li>
+      <li>Listen uploaded music</li>
+      <li>Metronome</li>
+      <li>Tempo adjust</li>
+      <li>Room meeting</li>
+      <li>Whiteboard</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Drum Machine</h2>
+    <ul>
+      <li>Beat adjustments show notes in box</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Database</h2>
+    <ul>
+      <li>Student List</li>
+      <li>Track their progress</li>
+    </ul>
+  </div>
+</section>
+<footer>Designed for Music Learning 🎧🥁</footer>
+</body>
+</html>
