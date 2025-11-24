@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Drums Class — Live Studio</title>
+<title>Drums Jam — Full Studio (64-step, Supabase + WebRTC)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
@@ -18,76 +18,78 @@
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:Inter, system-ui, -apple-system, Arial, sans-serif;background:linear-gradient(180deg,#010103,#071018);color:#fff;min-height:100vh;display:flex;flex-direction:column}
+  header{display:flex;align-items:center;gap:12px;padding:12px 18px;background:rgba(255,255,255,0.01);border-bottom:1px solid rgba(255,255,255,0.02)}
+  header img{height:44px;width:44px;border-radius:8px;object-fit:cover}
+  header h1{font-size:18px;margin:0;color:var(--accent)}
+  .small{font-size:13px;color:var(--muted)}
   /* Lobby full-screen */
-  #lobby{
-    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:
+  #lobby{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:
     radial-gradient(800px 400px at 10% 10%, rgba(123,58,255,0.06), transparent),
-    radial-gradient(600px 300px at 90% 90%, rgba(0,240,255,0.04), transparent);
-    z-index:50;
-  }
-  .lobby-card{
-    width:760px;max-width:92vw;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-    border-radius:14px;padding:28px;display:grid;grid-template-columns:1fr 360px;gap:20px;box-shadow:0 10px 40px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03)
-  }
-  .lobby-left{padding:6px}
+    radial-gradient(600px 300px at 90% 90%, rgba(0,240,255,0.04), transparent);z-index:50}
+  .lobby-card{width:920px;max-width:96vw;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:14px;padding:28px;display:grid;grid-template-columns:1fr 360px;gap:20px;box-shadow:0 10px 40px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03)}
   .brand{display:flex;align-items:center;gap:14px}
   .brand .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#031;box-shadow:0 6px 18px rgba(124, 234, 255, 0.06)}
-  .brand h1{margin:0;font-size:20px;color:var(--accent)}
-  .lead{color:var(--muted);margin-top:8px}
-  .lobby-cta{display:flex;gap:10px;margin-top:18px}
   .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 14px;border-radius:10px;color:#fff;cursor:pointer;font-weight:600}
   .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021}
-  .lobby-right{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:10px;padding:16px;border:1px solid rgba(255,255,255,0.03)}
   .input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff}
-  .small{font-size:13px;color:var(--muted)}
-  /* Session container (hidden until join) */
-  .container{display:none;grid-template-columns:1fr 360px;gap:18px;padding:18px;margin-top:72px}
-  .left{display:flex;flex-direction:column;gap:12px}
-  .video-stage{background:linear-gradient(180deg,#0b0b0d,#111217);border-radius:12px;padding:12px;min-height:360px;display:flex;gap:12px}
+  .shareLink{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;word-break:break-all}
+  @media(max-width:980px){.lobby-card{grid-template-columns:1fr;gap:12px;padding:18px}}
+  /* App layout */
+  .main{display:grid;grid-template-columns:1fr 380px;gap:18px;padding:18px;align-items:start}
+  .left-col{display:flex;flex-direction:column;gap:12px}
+  .video-stage{background:linear-gradient(180deg,#0b0b0d,#111217);border-radius:12px;padding:12px;min-height:260px;display:flex;gap:12px}
   .local-video,.remote-video{flex:1;background:#000;border-radius:8px;position:relative;overflow:hidden}
   video{width:100%;height:100%;object-fit:cover;background:#000}
   .controls{display:flex;gap:8px;align-items:center}
-  .btn.toggled{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021}
   .panel{background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
-  .right{display:flex;flex-direction:column;gap:12px}
-  .chat{height:170px;overflow:auto}
-  .chat .msg{padding:8px;border-radius:8px;margin-bottom:8px;background:rgba(255,255,255,0.02)}
   .sequencer{padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent)}
   .seq-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-  .instrument{width:72px;color:var(--muted)}
-  .steps{display:grid;grid-template-columns:repeat(16,1fr);gap:6px;flex:1}
-  .step{height:30px;border-radius:6px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;cursor:pointer}
-  .step.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021}
-  .notation{height:160px;border-radius:8px;overflow:hidden}
+  .instrument{width:96px;color:var(--muted);display:flex;align-items:center}
+  /* grid of square pads: 64 steps x instruments */
+  .grid-wrap{overflow:auto}
+  .grid{display:grid;grid-auto-rows:56px;gap:8px}
+  /* columns: first column labels (96px), then 64 columns of pads */
+  .grid-header{display:grid;grid-template-columns:96px repeat(64,56px);align-items:center;gap:8px}
+  .grid .row{display:grid;grid-template-columns:96px repeat(64,56px);align-items:center;gap:8px}
+  .pad{width:56px;height:56px;border-radius:8px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none}
+  .pad.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021;box-shadow:0 8px 24px rgba(124,234,255,0.06)}
+  .pad.ghost{background:rgba(255,255,255,0.01)}
+  .notation{height:180px;border-radius:8px;overflow:hidden}
   canvas{width:100%;height:100%;display:block}
+  .tabs{display:flex;gap:8px}
+  .tab{padding:8px 12px;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.03)}
+  .tab.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021}
+  .right-col{display:flex;flex-direction:column;gap:12px}
+  .chat{height:220px;overflow:auto}
+  .chat .msg{padding:8px;border-radius:8px;margin-bottom:8px;background:rgba(255,255,255,0.02)}
   footer{padding:12px;text-align:center;color:var(--muted)}
-  input[type=range]{width:160px}
-  .room{display:flex;gap:8px;align-items:center}
-  .shareLink{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;word-break:break-all}
-  @media(max-width:980px){
-    .lobby-card{grid-template-columns:1fr;gap:12px;padding:18px}
-    .container{grid-template-columns:1fr}
-  }
+  @media(max-width:900px){.main{grid-template-columns:1fr}.grid-header,.grid .row{grid-template-columns:96px repeat(32,56px)}}
 </style>
 </head>
 <body>
+<header>
+  <img src="/mnt/data/1000128380.jpg" alt="logo" />
+  <div>
+    <h1>Drums Jam — Full Studio</h1>
+    <div class="small">Dark Studio • 64-step • Supabase realtime + WebRTC video (tabs)</div>
+  </div>
+</header>
+
 <!-- Lobby Screen -->
-<div id="lobby" role="dialog" aria-modal="true">
-  <div class="lobby-card" role="document">
-    <div class="lobby-left">
-      <div class="brand">
+<div id="lobby">
+  <div class="lobby-card">
+    <div>
+      <div class="brand" style="align-items:flex-start">
         <div class="logo">DJ</div>
         <div>
-          <h1>Drums Jam — Live Studio</h1>
-          <div class="small">Dark Studio Lobby — create or join a jam session</div>
+          <h2 style="margin:0;color:var(--accent)">Drums Jam — Dark Studio Lobby</h2>
+          <div class="small" style="margin-top:6px">Create a shareable session link and invite students. Only people with the link/ID can join.</div>
         </div>
       </div>
 
-      <p class="lead">Start a live drum lesson or jam with your students. Create a secure, shareable session link and have people join with that link or ID.</p>
-
-      <div style="margin-top:16px">
+      <div style="margin-top:18px">
         <label class="small">Create a session (shareable link)</label>
-        <div style="display:flex;gap:8px;margin-top:8px">
+        <div style="display:flex;gap:10px;margin-top:10px">
           <button id="lobbyCreate" class="btn primary">Create Session</button>
           <button id="demoCreate" class="btn">Create Local Demo</button>
         </div>
@@ -95,16 +97,21 @@
 
       <div style="margin-top:18px">
         <label class="small">Join a session (paste link or ID)</label>
-        <div style="display:flex;gap:8px;margin-top:8px">
+        <div style="display:flex;gap:10px;margin-top:10px">
           <input id="lobbyJoinInput" class="input" placeholder="Paste meeting link or MEET-XXXX" />
           <button id="lobbyJoinBtn" class="btn">Join</button>
         </div>
-        <div style="margin-top:10px" class="small">Tip: Use the full link or the short ID (MEET-XXXX).</div>
+        <div style="margin-top:8px" class="small">Tip: Use full link or the short ID (MEET-XXXX)</div>
+      </div>
+
+      <div style="margin-top:18px;display:flex;gap:8px">
+        <div class="small">Video layout:</div>
+        <div class="small" style="font-weight:600;color:var(--accent)">Tabs</div>
       </div>
     </div>
 
-    <div class="lobby-right">
-      <div style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div style="display:flex;justify-content:space-between">
         <div>
           <div class="small">Session privacy</div>
           <div style="font-weight:600;margin-top:6px">Link-only access — only those with the link can join</div>
@@ -115,117 +122,181 @@
         </div>
       </div>
 
-      <div style="margin-top:12px">
+      <div style="margin-top:18px">
         <div class="small">Preview</div>
-        <div style="height:140px;border-radius:8px;background:linear-gradient(90deg,rgba(126,249,255,0.03),rgba(155,89,255,0.02));margin-top:8px;display:flex;align-items:center;justify-content:center;color:var(--muted)">Live Session Preview</div>
+        <div style="height:140px;border-radius:8px;background:linear-gradient(90deg,rgba(126,249,255,0.03),rgba(155,89,255,0.02));margin-top:8px;display:flex;align-items:center;justify-content:center;color:var(--muted)">
+          Live studio preview
+        </div>
       </div>
 
       <div style="margin-top:12px">
         <div class="small">Saved sessions (local demo)</div>
         <div id="localSessionsBox" class="small" style="margin-top:8px;color:var(--muted)">No local sessions yet</div>
       </div>
-
     </div>
   </div>
 </div>
 
-<!-- Main Session (hidden until join/create) -->
-<div id="app" class="container" style="display:none;">
-  <div class="left">
-    <div class="panel video-stage">
-      <div class="local-video">
-        <video id="localVideo" autoplay muted playsinline></video>
-        <div style="position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,0.4);padding:6px;border-radius:6px;font-size:13px">You (preview)</div>
-      </div>
-      <div class="remote-video">
-        <video id="remoteVideo" autoplay playsinline></video>
-        <div style="position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,0.4);padding:6px;border-radius:6px;font-size:13px">Room view</div>
-      </div>
-    </div>
+<!-- App -->
+<main id="app" style="display:none;">
+  <div class="main">
+    <div class="left-col">
+      <div class="panel video-stage">
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:600" id="sessionIdText">Session: —</div>
+            <div class="tabs">
+              <div class="tab active" id="tabJam">Jam View</div>
+              <div class="tab" id="tabVideo">Video View</div>
+            </div>
+          </div>
 
-    <div class="panel controls">
-      <div class="room" style="flex:1;align-items:center">
-        <div id="sessionInfo" style="display:flex;flex-direction:column">
-          <div style="font-weight:600" id="sessionIdText">Session: <span class="small">—</span></div>
-          <div id="sessionLinkBox" class="shareLink small" style="margin-top:6px">No session</div>
+          <div id="jamArea" style="display:block;margin-top:8px">
+            <div class="panel sequencer">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <div>
+                  <strong>Drum Sequencer</strong>
+                  <div class="small">64 steps — click pads to toggle (ghost placeholders shown)</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <button id="playBtn" class="btn">Play</button>
+                  <button id="stopBtn" class="btn">Stop</button>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+                <div class="small">Tempo</div>
+                <input type="range" id="tempo" min="40" max="220" value="120" />
+                <div id="tempoLabel" class="small">120 BPM</div>
+                <div style="flex:1"></div>
+                <button id="clearBtn" class="btn">Clear</button>
+              </div>
+
+              <div class="grid-wrap panel" style="padding:10px">
+                <div class="grid-header" id="gridHeader"></div>
+                <div id="gridRows" class="grid"></div>
+              </div>
+            </div>
+
+            <div class="panel notation" style="margin-top:12px">
+              <canvas id="notationCanvas"></canvas>
+            </div>
+          </div>
+
+          <div id="videoArea" style="display:none;margin-top:8px">
+            <div class="panel" style="display:flex;gap:8px;align-items:stretch">
+              <div style="flex:1">
+                <div style="height:220px;border-radius:8px;overflow:hidden">
+                  <video id="remoteVideo" autoplay playsinline></video>
+                </div>
+              </div>
+              <div style="width:180px;display:flex;flex-direction:column;gap:8px">
+                <div style="height:110px;border-radius:8px;overflow:hidden">
+                  <video id="localVideo" autoplay muted playsinline></video>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button id="camBtn" class="btn">Camera</button>
+                  <button id="micBtn" class="btn">Mic</button>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:6px">
+                  <button id="startCall" class="btn primary">Start Call</button>
+                  <button id="endCall" class="btn">End Call</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
-      <div style="flex:1"></div>
-      <button id="camBtn" class="btn">Camera</button>
-      <button id="micBtn" class="btn">Mic</button>
-      <button id="shareBtn" class="btn">Share Screen</button>
-      <button id="recordBtn" class="btn">Record</button>
-    </div>
 
-    <div class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div><strong>Metronome</strong> <span class="small">(plays with sequencer)</span></div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <input type="range" id="tempo" min="40" max="220" value="120"> <div id="tempoLabel">120 BPM</div>
+      <div style="display:flex;gap:12px">
+        <div class="panel" style="flex:1">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>Metronome</strong> <span class="small">(plays with sequencer)</span></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="range" id="metronomeVol" min="0" max="1" step="0.01" value="0.6" />
+              <div class="small">Vol</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="width:220px">
+          <div style="font-weight:600">Session Link</div>
+          <div id="sessionLinkBox" class="shareLink small" style="margin-top:8px">No session</div>
         </div>
       </div>
     </div>
 
-    <div class="panel sequencer">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <strong>Drum Sequencer</strong>
-        <div style="display:flex;gap:8px;align-items:center"><button id="playSeq" class="btn">Play</button><button id="stopSeq" class="btn">Stop</button></div>
+    <aside class="right-col">
+      <div class="panel chat">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Chat / Notes</strong>
+          <div id="sessionShare" class="small"></div>
+        </div>
+        <div id="messages" style="margin-top:8px"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="chatInput" placeholder="Type message" class="input" />
+          <button id="sendChat" class="btn">Send</button>
+        </div>
       </div>
 
-      <div id="rows"></div>
-
-      <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
-        <button id="clearSeq" class="btn">Clear</button>
-        <label class="small">Steps</label>
-        <select id="stepsCount" class="btn"><option>16</option><option>8</option></select>
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Recordings</strong>
+          <small class="small">Local only</small>
+        </div>
+        <div id="recs" style="margin-top:8px"></div>
       </div>
-    </div>
 
+      <div class="panel">
+        <div style="font-weight:600">Participants</div>
+        <div id="presence" class="small" style="margin-top:8px;color:var(--muted)">No presence</div>
+      </div>
+    </aside>
   </div>
+</main>
 
-  <aside class="right">
-    <div class="panel notation">
-      <canvas id="notationCanvas"></canvas>
-    </div>
+<footer>Prototype — Supabase-ready. Create tables and paste your Supabase URL & anon key in the script below to enable cloud sync & signaling.</footer>
 
-    <div class="panel chat">
-      <div style="display:flex;justify-content:space-between;align-items:center"><strong>Chat / Notes</strong><div id="sessionShare" class="small"></div></div>
-      <div id="messages" style="margin-top:8px"></div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <input id="chatInput" placeholder="Type message" class="input">
-        <button id="sendChat" class="btn">Send</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <strong>Recordings</strong>
-        <small class="small">Local only</small>
-      </div>
-      <div id="recs" style="margin-top:8px"></div>
-    </div>
-  </aside>
-</div>
-
-<footer style="margin-top:auto">Prototype — Supabase-ready. To enable real-time sessions, add your Supabase URL & Key in the script below.</footer>
-
-<!-- Supabase JS (v2 UMD) -->
+<!-- Supabase UMD -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 
 <script>
 /* =========================
-   CONFIG - Replace these
+   IMPORTANT SETUP BEFORE RUN
+   1) Create a Supabase project
+   2) Run the SQL below in Supabase SQL editor:
+
+create table if not exists sessions (
+  session_id text primary key,
+  created_at timestamptz
+);
+
+create table if not exists sequencer_state (
+  session_id text primary key,
+  state jsonb,
+  updated_at timestamptz default now()
+);
+
+create table if not exists webrtc_signaling (
+  id bigserial primary key,
+  session_id text,
+  kind text, -- 'offer' | 'answer' | 'ice'
+  payload jsonb,
+  created_at timestamptz default now()
+);
+
+   3) Copy project URL & anon key and paste into the two constants below.
    ========================= */
 const SUPABASE_URL = 'https://YOUR_SUPABASE_URL.supabase.co';
 const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 const APP_ORIGIN = window.location.origin;
 
-/* Initialize supabase client safely (UMD exposes `supabase` on window) */
 let supabase = null;
 if (!SUPABASE_URL.includes('YOUR_SUPABASE') && window.supabase && typeof window.supabase.createClient === 'function') {
   supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 } else {
-  console.warn('Supabase not configured — running in local demo mode. Replace SUPABASE_URL & KEY to enable cloud sync.');
+  console.warn('Supabase not configured — running in local demo mode.');
 }
 
 /* ===== DOM refs ===== */
@@ -237,29 +308,33 @@ const lobbyJoinInput = document.getElementById('lobbyJoinInput');
 const lobbyJoinBtn = document.getElementById('lobbyJoinBtn');
 const localSessionsBox = document.getElementById('localSessionsBox');
 
-const localVideo = document.getElementById('localVideo');
-const remoteVideo = document.getElementById('remoteVideo');
-const camBtn = document.getElementById('camBtn');
-const micBtn = document.getElementById('micBtn');
-const shareBtn = document.getElementById('shareBtn');
-const createRoom = document.getElementById('lobbyCreate');
-const joinRoom = document.getElementById('lobbyJoinBtn');
-const roomId = document.getElementById('lobbyJoinInput');
-const sendChat = document.getElementById('sendChat');
-const chatInput = document.getElementById('chatInput');
-const messages = document.getElementById('messages');
-const recs = document.getElementById('recs');
-const sessionShare = document.getElementById('sessionShare');
-const sessionInfoText = document.getElementById('sessionIdText');
+const sessionIdText = document.getElementById('sessionIdText');
 const sessionLinkBox = document.getElementById('sessionLinkBox');
-const sessionShareBox = document.getElementById('sessionShare');
+const sessionShare = document.getElementById('sessionShare');
+
+const tabJam = document.getElementById('tabJam'), tabVideo = document.getElementById('tabVideo');
+const jamArea = document.getElementById('jamArea'), videoArea = document.getElementById('videoArea');
+
+const playBtn = document.getElementById('playBtn'), stopBtn = document.getElementById('stopBtn');
+const tempoControl = document.getElementById('tempo'), tempoLabel = document.getElementById('tempoLabel');
+const clearBtn = document.getElementById('clearBtn');
+const gridHeader = document.getElementById('gridHeader'), gridRows = document.getElementById('gridRows');
+const notationCanvas = document.getElementById('notationCanvas');
+const messagesBox = document.getElementById('messages'), chatInput = document.getElementById('chatInput'), sendChat = document.getElementById('sendChat');
+const recs = document.getElementById('recs');
+const presenceBox = document.getElementById('presence');
+
+const localVideo = document.getElementById('localVideo'), remoteVideo = document.getElementById('remoteVideo');
+const camBtn = document.getElementById('camBtn'), micBtn = document.getElementById('micBtn');
+const startCall = document.getElementById('startCall'), endCall = document.getElementById('endCall');
+const metronomeVol = document.getElementById('metronomeVol');
 
 let localStream = null;
-let micEnabled = true;
-let camEnabled = true;
-let mediaRecorder = null;
-let recordedChunks = [];
-let currentSession = null; // { id, link }
+let pc = null;
+let dataChannel = null;
+let localTrack = null;
+let participants = {};
+let currentSession = null;
 let isDemoLocal = false;
 
 /* ===== start preview ===== */
@@ -267,128 +342,81 @@ async function startPreview(){
   try{
     localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
     localVideo.srcObject = localStream;
-    remoteVideo.srcObject = localStream; // for demo until real WebRTC wired
     setupAudioGraph();
   }catch(e){console.error('getUserMedia failed',e)}
 }
 startPreview();
 
-camBtn.addEventListener('click',()=>{
-  if(!localStream) return;
-  camEnabled = !camEnabled;
-  localStream.getVideoTracks().forEach(t=>t.enabled = camEnabled);
-  camBtn.classList.toggle('toggled',camEnabled);
-  camBtn.textContent = camEnabled? 'Camera' : 'Camera Off';
-});
-micBtn.addEventListener('click',()=>{
-  if(!localStream) return;
-  micEnabled = !micEnabled;
-  localStream.getAudioTracks().forEach(t=>t.enabled = micEnabled);
-  micBtn.classList.toggle('toggled',micEnabled);
-  micBtn.textContent = micEnabled? 'Mic' : 'Mic Off';
-});
-shareBtn.addEventListener('click',async()=>{
-  try{
-    const s = await navigator.mediaDevices.getDisplayMedia({video:true});
-    remoteVideo.srcObject = s;
-  }catch(e){console.error('share failed',e)}
-});
+/* ===== Tabs ===== */
+tabJam.addEventListener('click',()=>{ tabJam.classList.add('active'); tabVideo.classList.remove('active'); jamArea.style.display='block'; videoArea.style.display='none'; });
+tabVideo.addEventListener('click',()=>{ tabVideo.classList.add('active'); tabJam.classList.remove('active'); jamArea.style.display='none'; videoArea.style.display='block'; });
 
 /* ===== Lobby actions ===== */
-function makeShareableId(){
-  const short = Math.random().toString(36).slice(2,8).toUpperCase();
-  return `MEET-${short}`;
-}
+function makeShareableId(){ const short = Math.random().toString(36).slice(2,8).toUpperCase(); return `MEET-${short}`; }
 async function enterSessionUI(){
-  // hide lobby, show app
-  lobby.style.display = 'none';
-  app.style.display = 'grid';
-  // update session info in header area
+  lobby.style.display='none'; app.style.display='block';
   if(currentSession){
-    sessionInfoText.innerHTML = `Session: <span class="small">${currentSession.id}</span>`;
+    sessionIdText.innerHTML = `Session: <span class="small">${currentSession.id}</span>`;
     sessionLinkBox.textContent = currentSession.link || '';
-    sessionShareBox.innerHTML = `<div class="small">Share: <span class="small">${currentSession.link}</span></div>`;
+    sessionShare.innerHTML = `<div class="small">Share: <a href="${currentSession.link}" style="color:var(--accent)">${currentSession.link}</a></div>`;
   }
-  // store local sessions list
   updateLocalSessionsList();
+  subscribePresence();
 }
 
-/* Create session and enter */
+/* create/join handlers */
 async function createSession(){
   const id = makeShareableId();
   const link = APP_ORIGIN + '/session/' + id;
   currentSession = { id, link };
   isDemoLocal = false;
-
   sessionLinkBox.textContent = link;
-  sessionShareBox.innerHTML = `<div class="small">Share: <span class="small">${link}</span></div>`;
-
-  if (supabase){
+  sessionShare.innerHTML = `<div class="small">Share: <a href="${link}" style="color:var(--accent)">${link}</a></div>`;
+  if(supabase){
     try{
       await supabase.from('sessions').upsert({ session_id: id, created_at: new Date().toISOString() });
       await supabase.from('sequencer_state').upsert({ session_id: id, state: JSON.stringify(seq) });
       subscribeToSession(id);
     }catch(e){ console.warn('supabase create failed', e); }
   } else {
-    // store local demo state
     window._localSessions = window._localSessions || {};
     window._localSessions[id] = { state: JSON.stringify(seq), created_at: new Date().toISOString() };
     isDemoLocal = true;
   }
-
   await enterSessionUI();
   alert('Session created: ' + id);
 }
 
-/* Local demo create (explicit) */
-async function createLocalDemo(){
-  await createSession();
-  // mark as local demo
-  isDemoLocal = true;
-}
+async function createLocalDemo(){ await createSession(); isDemoLocal=true; }
 
-/* Join session (by ID or full link) */
 async function joinSession(){
-  const raw = (roomId.value || lobbyJoinInput.value || '').trim();
-  if(!raw) return alert('Paste a meeting link or ID');
+  const raw = (lobbyJoinInput.value || '').trim();
+  if(!raw) return alert('Paste meeting link or ID');
   const id = raw.includes('/')? raw.split('/').pop() : raw;
   currentSession = { id, link: APP_ORIGIN + '/session/' + id };
   sessionLinkBox.textContent = currentSession.link;
-  sessionShareBox.innerHTML = `<div class="small">Share: <span class="small">${currentSession.link}</span></div>`;
-
+  sessionShare.innerHTML = `<div class="small">Share: <a href="${currentSession.link}" style="color:var(--accent)">${currentSession.link}</a></div>`;
   if(supabase){
     try{
       const { data, error } = await supabase.from('sequencer_state').select('state').eq('session_id', id).limit(1).single();
-      if(error && error.code === 'PGRST116'){
-        alert('No session found with id ' + id);
-        return;
-      }
-      if(data && data.state){
-        try{ applyRemoteState(JSON.parse(data.state)); } catch(e){ console.warn('parse fail', e); }
-      }
+      if(error && error.code === 'PGRST116'){ alert('No session found with id ' + id); return; }
+      if(data && data.state){ try{ applyRemoteState(JSON.parse(data.state)); } catch(e){ console.warn('parse fail',e); } }
       subscribeToSession(id);
     }catch(e){ console.warn('supabase join failed', e); }
   } else {
     const s = window._localSessions && window._localSessions[id];
-    if(s && s.state){
-      applyRemoteState(JSON.parse(s.state));
-      isDemoLocal = true;
-    } else {
-      return alert('Local session not found — create session first (demo mode).');
-    }
+    if(s && s.state){ applyRemoteState(JSON.parse(s.state)); isDemoLocal=true; } else { return alert('Local session not found — create session first (demo mode).'); }
   }
-
   await enterSessionUI();
   alert('Joined session: ' + id);
 }
 
-/* Attach lobby button handlers */
-document.getElementById('lobbyCreate').addEventListener('click', createSession);
-document.getElementById('demoCreate').addEventListener('click', createLocalDemo);
-document.getElementById('lobbyJoinBtn').addEventListener('click', joinSession);
-document.getElementById('lobbyJoinInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') joinSession(); });
+lobbyCreate.addEventListener('click', createSession);
+demoCreate.addEventListener('click', createLocalDemo);
+lobbyJoinBtn.addEventListener('click', joinSession);
+lobbyJoinInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') joinSession(); });
 
-/* display local sessions list */
+/* local sessions list */
 function updateLocalSessionsList(){
   const s = window._localSessions || {};
   const keys = Object.keys(s);
@@ -399,13 +427,11 @@ function updateLocalSessionsList(){
   }).join('');
 }
 
-/* ====== Supabase realtime subscription scaffolding ====== */
+/* ===== Supabase realtime subscription for sequencer state ===== */
 let supabaseSubscription = null;
 function subscribeToSession(sessionId){
   if(!supabase) return;
-  try{
-    if(supabaseSubscription && supabaseSubscription.unsubscribe) supabaseSubscription.unsubscribe();
-  }catch(e){}
+  try{ if(supabaseSubscription && supabaseSubscription.unsubscribe) supabaseSubscription.unsubscribe(); }catch(e){}
   try{
     supabaseSubscription = supabase.channel('realtime-sequencer-'+sessionId)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'sequencer_state', filter: `session_id=eq.${sessionId}` }, payload => {
@@ -420,7 +446,20 @@ function subscribeToSession(sessionId){
   }catch(e){ console.warn('subscribe error', e); }
 }
 
-/* push local state to cloud (debounced) */
+/* presence (lightweight): we write a presence row to sessions table? For demo, we poll */
+function subscribePresence(){
+  // Simple client-side presence using localStorage / heartbeat in demo mode.
+  if(!currentSession) return;
+  if(!supabase){
+    // local demo presence: just show 'you'
+    presenceBox.textContent = 'You (local demo)';
+    return;
+  }
+  // For a production app, you'd use Supabase presence via Realtime or pg_changes on a presence table.
+  presenceBox.textContent = 'Connected (presence via Supabase possible)';
+}
+
+/* push local state to cloud */
 let pushTimeout = null;
 function pushStateToCloud(){
   if(!currentSession) return;
@@ -429,7 +468,7 @@ function pushStateToCloud(){
     clearTimeout(pushTimeout);
     pushTimeout = setTimeout(async ()=>{
       try{ await supabase.from('sequencer_state').upsert(payload); } catch(e){ console.warn('upsert fail', e); }
-    }, 120);
+    }, 100);
   } else {
     window._localSessions = window._localSessions || {};
     if(currentSession && window._localSessions[currentSession.id]) window._localSessions[currentSession.id].state = JSON.stringify(seq);
@@ -440,138 +479,243 @@ function pushStateToCloud(){
 function applyRemoteState(remoteState){
   instruments.forEach(inst=>{
     if(remoteState[inst.id] && Array.isArray(remoteState[inst.id])){
-      const arr = remoteState[inst.id].slice(0, steps);
+      const arr = remoteState[inst.id].slice(0, stepsCountVal);
       seq[inst.id] = arr;
     }
   });
-  buildSequencer();
+  buildGrid();
   renderNotation();
 }
 
-/* =========================
-   Drum audio + sequencer
-   ========================= */
+/* ===== WebAudio drum sounds + metronome ===== */
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 let masterGain = audioCtx.createGain(); masterGain.gain.value = 0.9; masterGain.connect(audioCtx.destination);
 let drumGain = audioCtx.createGain(); drumGain.gain.value = 1; drumGain.connect(masterGain);
 let micSource = null;
-
-async function setupAudioGraph(){
+function setupAudioGraph(){
   if(!localStream) return;
   if(!micSource){
     micSource = audioCtx.createMediaStreamSource(localStream);
     micSource.connect(masterGain);
   }
 }
-function playKick(time){ const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(150, time); o.frequency.exponentialRampToValueAtTime(50, time+0.2); g.gain.setValueAtTime(1, time); g.gain.exponentialRampToValueAtTime(0.001, time+0.3); o.connect(g); g.connect(drumGain); o.start(time); o.stop(time+0.3); }
-function playSnare(time){ const bufferSize = audioCtx.sampleRate * 0.2; const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const data = buffer.getChannelData(0); for (let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * Math.exp(-i/bufferSize*6); } const noise = audioCtx.createBufferSource(); noise.buffer = buffer; const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type='bandpass'; noiseFilter.frequency.value=2000; const g = audioCtx.createGain(); g.gain.setValueAtTime(1, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); noise.connect(noiseFilter); noiseFilter.connect(g); g.connect(drumGain); noise.start(time); noise.stop(time+0.2); }
-function playHiHat(time){ const bufferSize = audioCtx.sampleRate * 0.05; const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const data = buffer.getChannelData(0); for (let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * Math.exp(-i/bufferSize*10); } const noise = audioCtx.createBufferSource(); noise.buffer = buffer; const filt = audioCtx.createBiquadFilter(); filt.type='highpass'; filt.frequency.value=7000; const g = audioCtx.createGain(); g.gain.setValueAtTime(0.6, time); g.gain.exponentialRampToValueAtTime(0.001, time+0.08); noise.connect(filt); filt.connect(g); g.connect(drumGain); noise.start(time); noise.stop(time+0.1); }
+function playKick(time){ const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(120, time); o.frequency.exponentialRampToValueAtTime(45, time+0.18); g.gain.setValueAtTime(1, time); g.gain.exponentialRampToValueAtTime(0.001, time+0.35); o.connect(g); g.connect(drumGain); o.start(time); o.stop(time+0.35); }
+function playSnare(time){ const bufferSize = audioCtx.sampleRate * 0.18; const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const data = buffer.getChannelData(0); for (let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * Math.exp(-i/bufferSize*6); } const noise = audioCtx.createBufferSource(); noise.buffer = buffer; const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type='bandpass'; noiseFilter.frequency.value=2200; const g = audioCtx.createGain(); g.gain.setValueAtTime(1, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.18); noise.connect(noiseFilter); noiseFilter.connect(g); g.connect(drumGain); noise.start(time); noise.stop(time+0.18); }
+function playHiHat(time){ const bufferSize = audioCtx.sampleRate * 0.06; const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const data = buffer.getChannelData(0); for (let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * Math.exp(-i/bufferSize*10); } const noise = audioCtx.createBufferSource(); noise.buffer = buffer; const filt = audioCtx.createBiquadFilter(); filt.type='highpass'; filt.frequency.value=6000; const g = audioCtx.createGain(); g.gain.setValueAtTime(0.6, time); g.gain.exponentialRampToValueAtTime(0.001, time+0.06); noise.connect(filt); filt.connect(g); g.connect(drumGain); noise.start(time); noise.stop(time+0.08); }
+function playTom(time, pitch){ const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(pitch, time); o.frequency.exponentialRampToValueAtTime(pitch*0.7, time+0.18); g.gain.setValueAtTime(0.9, time); g.gain.exponentialRampToValueAtTime(0.001, time+0.35); o.connect(g); g.connect(drumGain); o.start(time); o.stop(time+0.35); }
 
-/* ===== Sequencer & Notation setup ===== */
-const instruments = [{id:'kick',label:'Kick'},{id:'snare',label:'Snare'},{id:'hihat',label:'Hi-Hat'}];
-let steps = 16;
-let seq = {}; instruments.forEach(inst=>{seq[inst.id]=new Array(steps).fill(false)});
-const rows = document.getElementById('rows'); const stepsCount = document.getElementById('stepsCount');
-const playSeq = document.getElementById('playSeq'); const stopSeq = document.getElementById('stopSeq'); const clearSeq = document.getElementById('clearSeq');
-function buildSequencer(){
-  rows.innerHTML='';
+/* Metronome tick */
+function metronomeTick(time){ const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(1500, time); g.gain.setValueAtTime(parseFloat(metronomeVol.value), time); g.gain.exponentialRampToValueAtTime(0.001, time+0.05); o.connect(g); g.connect(masterGain); o.start(time); o.stop(time+0.06); }
+
+/* ===== Sequencer grid (64 steps, square pads) ===== */
+const instruments = [
+  {id:'kick', label:'Kick'},
+  {id:'snare', label:'Snare'},
+  {id:'hihat', label:'Hi-Hat'},
+  {id:'tom1', label:'Tom 1'},
+  {id:'tom2', label:'Tom 2'},
+  {id:'floor', label:'Floor Tom'}
+];
+let stepsCountVal = 64;
+let seq = {};
+instruments.forEach(inst=>{ seq[inst.id] = new Array(stepsCountVal).fill(false); });
+
+function buildGrid(){
+  // header (step numbers)
+  gridHeader.innerHTML = '';
+  const headerRow = document.createElement('div');
+  headerRow.className = 'grid-header';
+  headerRow.innerHTML = '<div style="padding-left:8px;" class="small">Inst</div>';
+  for(let i=0;i<stepsCountVal;i++){
+    const el = document.createElement('div');
+    el.className = 'pad ghost';
+    el.style.height = '32px';
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.justifyContent = 'center';
+    el.style.fontSize = '12px';
+    el.textContent = (i+1);
+    headerRow.appendChild(el);
+  }
+  gridHeader.appendChild(headerRow);
+
+  // rows
+  gridRows.innerHTML = '';
   instruments.forEach(inst=>{
-    const row = document.createElement('div'); row.className='seq-row';
-    const lab = document.createElement('div'); lab.className='instrument'; lab.textContent = inst.label; row.appendChild(lab);
-    const stepsWrap = document.createElement('div'); stepsWrap.className='steps';
-    for(let i=0;i<steps;i++){
-      const s = document.createElement('div'); s.className='step'; s.dataset.i=i; s.dataset.inst=inst.id;
-      s.addEventListener('click',()=>{
+    const row = document.createElement('div');
+    row.className = 'row';
+    const label = document.createElement('div'); label.className='instrument'; label.textContent = inst.label;
+    row.appendChild(label);
+    for(let i=0;i<stepsCountVal;i++){
+      const pad = document.createElement('div');
+      pad.className = 'pad ' + (seq[inst.id][i] ? 'active' : 'ghost');
+      pad.dataset.inst = inst.id; pad.dataset.i = i;
+      pad.innerHTML = seq[inst.id][i] ? '●' : '';
+      pad.addEventListener('click',()=>{
         seq[inst.id][i] = !seq[inst.id][i];
-        s.classList.toggle('active', seq[inst.id][i]);
+        pad.classList.toggle('active', seq[inst.id][i]);
+        pad.classList.toggle('ghost', !seq[inst.id][i]);
+        pad.innerHTML = seq[inst.id][i] ? '●' : '';
         renderNotation();
-        pushStateToCloud();
+        pushStateToCloud(); // sync
+        // if dataChannel exists, send step update for low-latency
+        if(dataChannel && dataChannel.readyState === 'open'){
+          dataChannel.send(JSON.stringify({ type:'step', inst: inst.id, i, val: seq[inst.id][i] }));
+        }
       });
-      if(seq[inst.id][i]) s.classList.add('active');
-      stepsWrap.appendChild(s);
+      row.appendChild(pad);
     }
-    row.appendChild(stepsWrap); rows.appendChild(row);
+    gridRows.appendChild(row);
   });
 }
-buildSequencer();
-stepsCount.addEventListener('change',()=>{ steps = parseInt(stepsCount.value); instruments.forEach(inst=>seq[inst.id]=new Array(steps).fill(false)); buildSequencer(); });
-clearSeq.addEventListener('click',()=>{ instruments.forEach(inst=>seq[inst.id].fill(false)); buildSequencer(); renderNotation(); pushStateToCloud(); });
+buildGrid();
 
-let isPlaying=false; let currentStep=0; let schedulerId=null; const tempoControl = document.getElementById('tempo'); const tempoLabel = document.getElementById('tempoLabel');
-function scheduleStep(){
+/* ===== Playback scheduling ===== */
+let isPlaying = false, playIndex = 0, schedulerId = null;
+function scheduleTick(){
   const bpm = parseInt(tempoControl.value);
-  const interval = (60 / bpm) / 4 * 1000; // 16th steps
+  const intervalMs = (60 / bpm) / 4 * 1000; // 16th notes -> 64 steps = 1 bar of 4/4 * 16? but user wants 64 steps
+  // schedule audio
   const tNow = audioCtx.currentTime;
   instruments.forEach(inst=>{
-    if(seq[inst.id][currentStep]){
+    if(seq[inst.id][playIndex]){
       if(inst.id==='kick') playKick(tNow);
       if(inst.id==='snare') playSnare(tNow);
       if(inst.id==='hihat') playHiHat(tNow);
+      if(inst.id==='tom1') playTom(tNow, 520);
+      if(inst.id==='tom2') playTom(tNow, 380);
+      if(inst.id==='floor') playTom(tNow, 260);
     }
   });
-  renderNotation(currentStep);
-  currentStep = (currentStep+1) % steps;
-  schedulerId = setTimeout(scheduleStep, interval);
+  // metronome on downbeats every 16 steps (optional)
+  if(playIndex % 16 === 0) metronomeTick(tNow);
+  renderNotation(playIndex);
+  playIndex = (playIndex + 1) % stepsCountVal;
+  schedulerId = setTimeout(scheduleTick, intervalMs);
 }
-playSeq.addEventListener('click',()=>{ if(isPlaying) return; isPlaying=true; currentStep=0; scheduleStep(); playSeq.classList.add('toggled'); });
-stopSeq.addEventListener('click',()=>{ if(!isPlaying) return; isPlaying=false; clearTimeout(schedulerId); playSeq.classList.remove('toggled'); renderNotation(-1); });
+playBtn.addEventListener('click',()=>{ if(isPlaying) return; isPlaying=true; playIndex=0; scheduleTick(); playBtn.classList.add('toggled'); });
+stopBtn.addEventListener('click',()=>{ if(!isPlaying) return; isPlaying=false; clearTimeout(schedulerId); playBtn.classList.remove('toggled'); renderNotation(-1); });
 tempoControl.addEventListener('input',()=>{ tempoLabel.textContent = tempoControl.value + ' BPM'; });
 
-/* ===== Notation Canvas (5 lines) ===== */
-const canvas = document.getElementById('notationCanvas'); const ctx = canvas.getContext('2d');
-function resizeCanvas(){ canvas.width = canvas.clientWidth * devicePixelRatio; canvas.height = canvas.clientHeight * devicePixelRatio; ctx.setTransform(1,0,0,1,0,0); ctx.scale(devicePixelRatio, devicePixelRatio); drawStaff(); }
-window.addEventListener('resize',()=>{ resizeCanvas(); });
-resizeCanvas();
+clearBtn.addEventListener('click',()=>{ instruments.forEach(inst=>seq[inst.id].fill(false)); buildGrid(); renderNotation(); pushStateToCloud(); });
+
+/* ===== Notation canvas mapping (5-line staff) ===== */
+const canvas = notationCanvas;
+const ctx = canvas.getContext('2d');
+function resizeNotation(){
+  canvas.width = canvas.clientWidth * devicePixelRatio;
+  canvas.height = canvas.clientHeight * devicePixelRatio;
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  drawStaff();
+}
+window.addEventListener('resize', resizeNotation);
+window.addEventListener('load', resizeNotation);
 
 function drawStaff(){
-  const w = canvas.clientWidth; const h = canvas.clientHeight; ctx.clearRect(0,0,w,h);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  ctx.clearRect(0,0,w,h);
   ctx.save(); ctx.strokeStyle = '#444'; ctx.lineWidth = 1;
-  const margin = 12; const linesY = [];
-  const usableH = h - margin*2; const spacing = usableH / 6; // five lines
-  for(let i=0;i<5;i++){ const y = margin + spacing*(i+1); linesY.push(y); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); }
+  const margin = 12;
+  const usableH = h - margin*2;
+  const spacing = usableH / 6; // gives 5 lines
+  for(let i=0;i<5;i++){
+    const y = margin + spacing*(i+1);
+    ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke();
+  }
   ctx.restore();
   renderNotation();
 }
 
+/* Positions mapping per your spec (from bottom):
+   Lines and spaces (from bottom):
+   line5 (top) index 0? We'll compute y by mapping counts:
+   We'll map rows by "slot index" where 1st space from bottom corresponds to slot 1 etc.
+*/
 function renderNotation(highlightStep=-1){
-  const w = canvas.clientWidth; const h = canvas.clientHeight; ctx.clearRect(0,0,w,h);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  ctx.clearRect(0,0,w,h);
   drawStaffLinesOnly();
-  const left = 14; const right = w - 14; const timelineW = right - left;
-  const stepW = timelineW / steps;
-  const staffPositions = { 'kick': 4, 'snare': 3, 'hihat': 1 }; // mapping rows (A = bottom-most index)
-  // ghost placeholders (A2)
+
+  const left = 18, right = w-18, timelineW = right-left;
+  const stepW = timelineW / stepsCountVal;
+
+  // Compute y positions:
+  const margin = 12;
+  const usableH = h - margin*2;
+  const slot = usableH / 6; // distance unit
+  // bottom-most line/space: we interpret:
+  // Lines are at y = margin + slot*(1..5), spaces are between lines.
+  // For mapping instruments to exact y:
+  // Kick -> 1st space from bottom => between line1 and line2: that's slot*1.5? We'll compute:
+  const lines = [];
+  for(let i=1;i<=5;i++){ lines.push(margin + slot*i); } // line1(bottom) ... line5(top)
+  // spaces are midpoints between adjacent lines: space1 between line1 & line2, etc.
+  const spaces = [];
+  for(let i=0;i<4;i++){ spaces.push( (lines[i]+lines[i+1]) / 2 ); } // space1...space4
+  // Also define a top space above line5 for hi-hat if needed
+  const topSpace = lines[4] - slot; // above line5
+
+  // Instrument mapping per your request:
+  const pos = {
+    kick: spaces[0],        // 1st space from bottom
+    floor: spaces[1],       // 2nd space
+    snare: spaces[2],       // 3rd space
+    tom1: spaces[3],        // 4th space
+    tom2: lines[3],         // 4th line from bottom (lines[3])
+    hihat: lines[4]         // 5th line from bottom (top line)
+  };
+
+  // draw ghost placeholders
   instruments.forEach(inst=>{
-    for(let i=0;i<steps;i++){
+    for(let i=0;i<stepsCountVal;i++){
       const x = left + i*stepW + stepW/2;
-      const row = staffPositions[inst.id];
-      const y = 12 + (h-24)/6 * row;
+      const y = pos[inst.id] || (margin + slot*3);
       ctx.beginPath(); ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.arc(x,y,6,0,Math.PI*2); ctx.fill();
     }
   });
-  // active notes (Option A notation)
+
+  // draw active notes
   instruments.forEach(inst=>{
-    for(let i=0;i<steps;i++){
+    for(let i=0;i<stepsCountVal;i++){
       if(seq[inst.id][i]){
         const x = left + i*stepW + stepW/2;
-        const row = staffPositions[inst.id];
-        const y = 12 + (h-24)/6 * row;
+        const y = pos[inst.id] || (margin + slot*3);
         if(inst.id==='hihat'){
           ctx.beginPath(); ctx.strokeStyle='#81d4fa'; ctx.lineWidth=2; ctx.moveTo(x-6,y-6); ctx.lineTo(x+6,y+6); ctx.moveTo(x-6,y+6); ctx.lineTo(x+6,y-6); ctx.stroke();
         } else {
-          ctx.beginPath(); ctx.fillStyle = (inst.id==='kick'?'#ff8a80':'#ffd54f'); ctx.ellipse(x,y,7,5,0,0,Math.PI*2); ctx.fill();
-          if(inst.id==='snare'){ ctx.beginPath(); ctx.strokeStyle = '#ffd54f'; ctx.lineWidth=2; ctx.moveTo(x+5,y); ctx.lineTo(x+5,y-28); ctx.stroke(); }
+          ctx.beginPath(); ctx.fillStyle = (inst.id==='kick'?'#ff8a80': inst.id==='snare'?'#ffd54f':'#ffd180'); ctx.ellipse(x,y,7,5,0,0,Math.PI*2); ctx.fill();
+          // stem for snare and toms (visual)
+          if(inst.id==='snare' || inst.id==='tom1' || inst.id==='tom2' || inst.id==='floor'){
+            ctx.beginPath(); ctx.strokeStyle = '#ffd54f'; ctx.lineWidth = 2; ctx.moveTo(x+5,y); ctx.lineTo(x+5,y-22); ctx.stroke();
+          }
         }
       }
     }
   });
+
   // playhead highlight
-  if(highlightStep>=0){ ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fillRect(left+highlightStep*stepW,6,stepW,h-12); }
+  if(highlightStep>=0){
+    ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fillRect(left+highlightStep*stepW,6,stepW,h-12);
+  }
 }
 
-function drawStaffLinesOnly(){ const w = canvas.clientWidth; const h = canvas.clientHeight; ctx.save(); ctx.strokeStyle = '#444'; ctx.lineWidth = 1; const margin = 12; const usableH = h - margin*2; const spacing = usableH / 6; for(let i=0;i<5;i++){ const y = margin + spacing*(i+1); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); } ctx.restore(); }
+function drawStaffLinesOnly(){
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  ctx.save(); ctx.strokeStyle = '#444'; ctx.lineWidth = 1;
+  const margin = 12;
+  const usableH = h - margin*2;
+  const spacing = usableH / 6;
+  for(let i=0;i<5;i++){
+    const y = margin + spacing*(i+1);
+    ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke();
+  }
+  ctx.restore();
+}
 
 /* ===== MediaRecorder (local) ===== */
+let mediaRecorder = null, recordedChunks = [];
 function startRecording(){
   const dest = audioCtx.createMediaStreamDestination(); masterGain.connect(dest);
   mediaRecorder = new MediaRecorder(dest.stream);
@@ -586,40 +730,147 @@ function startRecording(){
   mediaRecorder.start();
 }
 function stopRecording(){ if(mediaRecorder && mediaRecorder.state==='recording') mediaRecorder.stop(); }
-const recordBtn = document.getElementById('recordBtn');
-recordBtn.addEventListener('click',()=>{
-  if(recordBtn.classList.contains('toggled')){ stopRecording(); recordBtn.classList.remove('toggled'); recordBtn.textContent='Record'; }
-  else{ startRecording(); recordBtn.classList.add('toggled'); recordBtn.textContent='Recording...'; }
-});
 
-/* ===== Chat & helpers ===== */
-sendChat.addEventListener('click',()=>{
-  const txt = chatInput.value.trim(); if(!txt) return;
-  addMessage('You',txt);
-  chatInput.value='';
-});
-function addMessage(who, txt){
-  const d = document.createElement('div'); d.className='msg'; d.textContent = who+': '+txt; messages.appendChild(d); messages.scrollTop = messages.scrollHeight;
-}
-chatInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ sendChat.click(); } });
+/* ===== Chat handlers ===== */
+sendChat.addEventListener('click',()=>{ const txt = chatInput.value.trim(); if(!txt) return; addMessage('You',txt); chatInput.value=''; if(dataChannel && dataChannel.readyState==='open') dataChannel.send(JSON.stringify({type:'chat',txt})); });
+chatInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') sendChat.click(); });
+function addMessage(who, txt){ const d = document.createElement('div'); d.className='msg'; d.textContent = who+': '+txt; messagesBox.appendChild(d); messagesBox.scrollTop = messagesBox.scrollHeight; }
 
-/* ===== init & sample pattern ===== */
-(function(){
-  seq.kick[0]=true; seq.kick[8]=true; seq.snare[4]=true; seq.snare[12]=true; for(let i=0;i<16;i+=2) seq.hihat[i]=true; buildSequencer(); renderNotation();
-})();
+/* ===== WebRTC signaling via Supabase realtime table (webrtc_signaling) =====
+   Approach: when user clicks Start Call -> create RTCPeerConnection, createOffer -> upsert into webrtc_signaling with kind 'offer'.
+   Other clients listening to webrtc_signaling for this session will pick up the offer and respond with 'answer'.
+   ICE candidates are also sent as 'ice' rows.
+   NOTE: This is a simple signaling approach for demo. For production, handle cleanup, auth, and channel scoping.
+*/
+async function startWebRTCCall(){
+  if(!currentSession) return alert('Join session first');
+  if(!supabase) return alert('WebRTC signaling requires Supabase configured');
 
-/* ===== utility: allow entering link from address (optional) ===== */
-(function(){
-  // if URL contains /session/MEET-XXXX auto-fill
-  const parts = location.pathname.split('/');
-  if(parts.length>=3 && parts[1]==='session' && parts[2]){
-    lobbyJoinInput.value = parts[2];
+  if(pc){ console.warn('PC already exists'); return; }
+
+  // Create peer connection
+  pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+
+  // add local tracks
+  if(localStream){
+    localStream.getTracks().forEach(t=>pc.addTrack(t, localStream));
   }
+
+  // data channel for low-latency sequencer & chat
+  dataChannel = pc.createDataChannel('seqchat');
+  dataChannel.onmessage = (e)=>{ handleDataChannelMessage(e.data); };
+  dataChannel.onopen = ()=>console.log('DC open');
+  dataChannel.onclose = ()=>console.log('DC closed');
+
+  pc.ontrack = (ev)=>{ remoteVideo.srcObject = ev.streams[0]; };
+  pc.onicecandidate = async (ev)=>{ if(ev.candidate){ await supabase.from('webrtc_signaling').insert({ session_id: currentSession.id, kind:'ice', payload: ev.candidate.toJSON() }); } };
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  // post offer to supabase
+  await supabase.from('webrtc_signaling').insert({ session_id: currentSession.id, kind:'offer', payload: offer.toJSON() });
+
+  // listen for answer / ice
+  const channelName = 'webrtc-'+currentSession.id;
+  const sub = supabase.channel(channelName)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'webrtc_signaling', filter: `session_id=eq.${currentSession.id}` }, async payload=>{
+      try{
+        const row = payload.new || payload.record || payload;
+        if(!row) return;
+        if(row.kind === 'answer' && row.payload && !pc.currentRemoteDescription){
+          const answerDesc = new RTCSessionDescription(row.payload);
+          await pc.setRemoteDescription(answerDesc);
+          console.log('Remote answer set');
+        } else if(row.kind === 'ice' && row.payload){
+          try{ await pc.addIceCandidate(row.payload); }catch(e){ console.warn('addIceCandidate failed', e); }
+        } else if(row.kind === 'offer'){
+          // if someone else creates an offer and we aren't in call, we can answer (optional)
+        }
+      }catch(e){ console.warn(e); }
+    }).subscribe();
+
+  // Also listen for remote answers via a single fetch approach (in case another client answered)
+  // For demo: nothing else here.
+  alert('Offer posted. Waiting for answer...');
+}
+
+async function handleIncomingOffers(){
+  if(!supabase || !currentSession) return;
+  // subscribe and react: if we find an 'offer' we will create an answer
+  const channelName = 'webrtc-incoming-'+currentSession.id;
+  const sub = supabase.channel(channelName)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'webrtc_signaling', filter: `session_id=eq.${currentSession.id}` }, async payload=>{
+      try{
+        const row = payload.new || payload.record || payload;
+        if(!row) return;
+        if(row.kind === 'offer'){
+          // create pc if none
+          if(pc) return; // already in call
+          pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+          pc.ontrack = (ev)=>{ remoteVideo.srcObject = ev.streams[0]; };
+          pc.onicecandidate = async (ev)=>{ if(ev.candidate){ await supabase.from('webrtc_signaling').insert({ session_id: currentSession.id, kind:'ice', payload: ev.candidate.toJSON() }); } };
+          pc.ondatachannel = (ev)=>{ dataChannel = ev.channel; dataChannel.onmessage = e => handleDataChannelMessage(e.data); };
+
+          // add local tracks
+          if(localStream){ localStream.getTracks().forEach(t=>pc.addTrack(t, localStream)); }
+
+          // set remote desc and create answer
+          const offerDesc = new RTCSessionDescription(row.payload);
+          await pc.setRemoteDescription(offerDesc);
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          // post answer
+          await supabase.from('webrtc_signaling').insert({ session_id: currentSession.id, kind:'answer', payload: answer.toJSON() });
+          console.log('Posted answer for offer id', row.id);
+        } else if(row.kind === 'ice' && row.payload){
+          if(pc) try{ await pc.addIceCandidate(row.payload); } catch(e){ console.warn('ICE add fail', e); }
+        }
+      }catch(e){ console.warn('handle incoming offer failed', e); }
+    })
+    .subscribe();
+}
+
+/* Data channel handler for sequencer updates and chat */
+function handleDataChannelMessage(msg){
+  try{
+    const data = JSON.parse(msg);
+    if(data.type==='step'){
+      seq[data.inst][data.i] = data.val;
+      buildGrid();
+      renderNotation();
+    } else if(data.type==='chat'){
+      addMessage('Peer', data.txt);
+    }
+  }catch(e){ console.warn('dc parse', e); }
+}
+
+/* Buttons: start / end call */
+startCall.addEventListener('click', async ()=>{
+  if(!currentSession) return alert('Join a session first');
+  if(!supabase) return alert('Supabase required for signaling');
+  await startWebRTCCall();
+  // also subscribe for incoming offers (so this client can answer others)
+  await handleIncomingOffers();
+});
+endCall.addEventListener('click', async ()=>{
+  if(pc){ pc.close(); pc = null; }
+  if(dataChannel){ dataChannel = null; }
+  // cleanup signaling rows? For demo, we won't delete rows
+  alert('Call ended (local).');
+});
+
+/* ===== Data wiring for realtime: apply DC + push to Supabase on big changes handled above via pushStateToCloud ===== */
+
+/* ===== Misc init: initial pattern + build grid & canvas size ===== */
+(function init(){
+  // friendly starter pattern
+  seq.kick[0]=true; seq.kick[16]=true; seq.snare[8]=true; seq.snare[24]=true;
+  for(let i=0;i<64;i+=4) seq.hihat[i]=true;
+  seq.tom1[20]=true; seq.tom2[28]=true; seq.floor[32]=true;
+  buildGrid();
+  setTimeout(resizeNotation, 200);
 })();
-
-/* Make sure canvas is sized after fonts load */
-window.addEventListener('load', resizeCanvas);
-
 </script>
 </body>
 </html>
