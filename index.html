@@ -110,7 +110,7 @@
 
       <div style="margin-top:12px">
         <div class="small">Preview</div>
-        <div style="height:140px;border-radius:8px;background:linear-gradient(90deg,rgba(126,249,255,0.03),rgba(155,89,255,255,0.02));margin-top:8px;display:flex;align-items:center;justify-content:center;color:var(--muted)">Live Session Preview</div>
+        <div style="height:140px;border-radius:8px;background:linear-gradient(90deg,rgba(126,249,255,0.03),rgba(155,89,255,0.02));margin-top:8px;display:flex;align-items:center;justify-content:center;color:var(--muted)">Live Session Preview</div>
       </div>
 
       <div style="margin-top:12px">
@@ -211,12 +211,15 @@
 <script>
 /* ===== Sequencer changes ===== */
 const instruments = [{id:'kick',label:'Kick'},{id:'snare',label:'Snare'},{id:'hihat',label:'Hi-Hat'}];
-let steps = 64;
+let steps = 64; // default to 64 steps
 let seq = {};
 instruments.forEach(inst => seq[inst.id] = new Array(steps).fill(false));
 
 const rows = document.getElementById('rows'); 
 const stepsCount = document.getElementById('stepsCount');
+const playSeq = document.getElementById('playSeq'); 
+const stopSeq = document.getElementById('stopSeq'); 
+const clearSeq = document.getElementById('clearSeq');
 
 /* Build sequencer UI */
 function buildSequencer(){
@@ -230,6 +233,8 @@ function buildSequencer(){
       s.addEventListener('click',()=>{
         seq[inst.id][i] = !seq[inst.id][i];
         s.classList.toggle('active', seq[inst.id][i]);
+        renderNotation();
+        pushStateToCloud();
       });
       if(seq[inst.id][i]) s.classList.add('active');
       stepsWrap.appendChild(s);
@@ -244,50 +249,17 @@ stepsCount.addEventListener('change',()=>{
   steps = parseInt(stepsCount.value);
   instruments.forEach(inst => seq[inst.id] = new Array(steps).fill(false));
   buildSequencer();
+  renderNotation();
 });
 
-/* Initialize sample pattern */
+/* Initialize sample pattern for 64 steps */
 (function(){
   seq.kick[0]=true; seq.kick[16]=true; seq.kick[32]=true; seq.kick[48]=true;
   seq.snare[8]=true; seq.snare[24]=true; seq.snare[40]=true; seq.snare[56]=true;
   for(let i=0;i<64;i+=4) seq.hihat[i]=true;
   buildSequencer();
+  renderNotation();
 })();
-
-/* ===== Lobby buttons ===== */
-const lobby = document.getElementById('lobby');
-const app = document.getElementById('app');
-const lobbyCreate = document.getElementById('lobbyCreate');
-const demoCreate = document.getElementById('demoCreate');
-const lobbyJoinBtn = document.getElementById('lobbyJoinBtn');
-const lobbyJoinInput = document.getElementById('lobbyJoinInput');
-const sessionIdText = document.getElementById('sessionIdText');
-const sessionLinkBox = document.getElementById('sessionLinkBox');
-
-function enterSession(sessionId){
-  lobby.style.display = 'none';
-  app.style.display = 'grid';
-  sessionIdText.querySelector('span').textContent = sessionId;
-  sessionLinkBox.textContent = `https://example.com/session/${sessionId}`;
-}
-
-// Create session button
-lobbyCreate.addEventListener('click', ()=>{
-  const newId = 'MEET-' + Math.floor(Math.random()*9000+1000);
-  enterSession(newId);
-});
-
-// Create local demo
-demoCreate.addEventListener('click', ()=>{
-  const demoId = 'LOCAL-DEMO';
-  enterSession(demoId);
-});
-
-// Join session
-lobbyJoinBtn.addEventListener('click', ()=>{
-  const val = lobbyJoinInput.value.trim();
-  if(val) enterSession(val);
-});
 </script>
 </body>
 </html>
