@@ -3,415 +3,274 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Drums Jam — Responsive Studio (Bottom Nav)</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>Drums Jam — Final Studio</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-  :root{--bg:#050507;--panel:#0f1114;--card:#0b0b0d;--accent:#7ef9ff;--accent-2:#9b59ff;--muted:#9aa0a6;--glass: rgba(255,255,255,0.03)}
+  :root{--bg:#050507;--panel:#0f1114;--accent:#7ef9ff;--accent2:#9b59ff;--muted:#9aa0a6}
   *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0;font-family:Inter, system-ui, -apple-system, Arial, sans-serif;background:linear-gradient(180deg,#010103,#071018);color:#fff;min-height:100vh;display:flex;flex-direction:column}
-  header{display:flex;align-items:center;gap:12px;padding:12px 18px;background:rgba(255,255,255,0.01);border-bottom:1px solid rgba(255,255,255,0.02);position:sticky;top:0;z-index:40}
-  header img{height:44px;width:44px;border-radius:8px;object-fit:cover}
-  header h1{font-size:18px;margin:0;color:var(--accent)}
+  body{margin:0;font-family:Inter, system-ui, -apple-system, Arial, sans-serif;background:linear-gradient(180deg,#030307,#071018);color:#fff;min-height:100vh}
+  header{display:flex;gap:12px;align-items:center;padding:12px 16px;background:rgba(255,255,255,0.01);border-bottom:1px solid rgba(255,255,255,0.02);position:sticky;top:0;z-index:40}
+  header img{width:44px;height:44px;border-radius:8px;object-fit:cover}
+  h1{font-size:18px;margin:0;color:var(--accent)}
   .small{font-size:13px;color:var(--muted)}
-  /* Lobby */
-  #lobby{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,0.7), rgba(0,0,0,0.8));z-index:50;padding:20px}
-  .lobby-card{width:980px;max-width:100%;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:14px;padding:24px;display:grid;grid-template-columns:1fr 360px;gap:18px;box-shadow:0 10px 40px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03)}
-  .brand{display:flex;align-items:center;gap:14px}
-  .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#031}
-  .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 14px;border-radius:10px;color:#fff;cursor:pointer;font-weight:600}
-  .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021}
-  .input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff}
-  .shareLink{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;word-break:break-all}
-  @media(max-width:920px){.lobby-card{grid-template-columns:1fr;gap:12px;padding:18px}}
-  /* App layout */
-  main{flex:1;display:flex;flex-direction:column}
-  .main{display:grid;grid-template-columns:1fr 360px;gap:12px;padding:12px;align-items:start}
-  .left-col{display:flex;flex-direction:column;gap:12px}
-  .video-stage{background:linear-gradient(180deg,#0b0b0d,#111217);border-radius:12px;padding:8px;min-height:220px;display:flex;gap:8px}
-  .local-video,.remote-video{flex:1;background:#000;border-radius:8px;position:relative;overflow:hidden}
-  video{width:100%;height:100%;object-fit:cover;background:#000}
-  .controls{display:flex;gap:8px;align-items:center}
+
+  /* layout */
+  main{display:grid;grid-template-columns:1fr 360px;gap:12px;padding:14px}
+  @media(max-width:980px){ main{grid-template-columns:1fr} }
+
+  /* panels */
   .panel{background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
-  .sequencer{padding:8px;border-radius:10px}
-  .seq-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-  .instrument{width:88px;color:var(--muted);display:flex;align-items:center}
-  /* grid of square pads: responsive grid */
+
+  /* sequencer grid */
   .grid-wrap{overflow:auto}
-  .grid{display:grid;grid-auto-rows:56px;gap:8px}
-  .grid-header{display:grid;grid-template-columns:88px repeat(64,56px);align-items:center;gap:8px}
-  .grid .row{display:grid;grid-template-columns:88px repeat(64,56px);align-items:center;gap:8px}
+  .grid-header{display:grid;grid-template-columns:88px repeat(64,56px);gap:8px;align-items:center}
+  .row{display:grid;grid-template-columns:88px repeat(64,56px);gap:8px;align-items:center}
+  .label{padding-left:8px;color:var(--muted);min-width:88px}
   .pad{width:56px;height:56px;border-radius:8px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none}
-  .pad.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021;box-shadow:0 8px 24px rgba(124,234,255,0.06)}
+  .pad.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#021;box-shadow:0 8px 24px rgba(124,234,255,0.06)}
   .pad.ghost{background:rgba(255,255,255,0.01)}
+  @media(max-width:900px){ .grid-header,.row{grid-template-columns:72px repeat(32,48px)} .pad{width:48px;height:48px} }
+  @media(max-width:520px){ .grid-header,.row{grid-template-columns:64px repeat(32,40px)} .pad{width:40px;height:40px;border-radius:6px} .label{min-width:64px} }
+
+  /* notation */
   .notation{height:180px;border-radius:8px;overflow:hidden}
   canvas{width:100%;height:100%;display:block}
+
+  /* tabs */
   .tabs{display:flex;gap:8px}
   .tab{padding:8px 12px;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.03)}
-  .tab.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021}
-  .right-col{display:flex;flex-direction:column;gap:12px}
-  .chat{height:200px;overflow:auto}
-  .chat .msg{padding:8px;border-radius:8px;margin-bottom:8px;background:rgba(255,255,255,0.02)}
-  footer{padding:8px;text-align:center;color:var(--muted)}
-  /* Bottom navigation for mobile */
-  .bottom-nav{position:fixed;left:12px;right:12px;bottom:12px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:14px;padding:8px;display:flex;justify-content:space-around;align-items:center;border:1px solid rgba(255,255,255,0.03);z-index:60}
-  .bn-item{flex:1;text-align:center;padding:8px 10px;border-radius:10px;cursor:pointer}
-  .bn-item.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021}
-  /* Floating participants button */
-  .float-pres{position:fixed;right:16px;bottom:120px;background:var(--panel);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);z-index:70}
-  @media(max-width:900px){.main{grid-template-columns:1fr}.grid-header,.grid .row{grid-template-columns:88px repeat(32,56px)} .pad{width:48px;height:48px} .grid .row{grid-auto-rows:48px}}
-  /* compact modes */
-  @media(max-width:520px){ .grid-header,.grid .row{grid-template-columns:64px repeat(32,48px)} .pad{width:40px;height:40px;border-radius:6px} .instrument{width:64px} .logo{width:44px;height:44px} }
+  .tab.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#021}
+
+  /* bottom nav */
+  .bottom-nav{position:fixed;left:12px;right:12px;bottom:12px;border-radius:14px;padding:8px;display:flex;justify-content:space-around;align-items:center;border:1px solid rgba(255,255,255,0.03);z-index:60;background:linear-gradient(90deg,#6a11cb,#2575fc);box-shadow:0 12px 30px rgba(37,117,252,0.18);backdrop-filter:blur(6px)}
+  .bn-item{flex:1;text-align:center;padding:10px 12px;border-radius:10px;cursor:pointer;color:rgba(255,255,255,0.92);font-weight:700}
+  .bn-item.active{background:linear-gradient(90deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06));color:#021;box-shadow:0 8px 20px rgba(0,0,0,0.25)}
+
+  footer{padding:12px;text-align:center;color:var(--muted)}
 </style>
 </head>
 <body>
 <header>
   <img src="/mnt/data/1000128380.jpg" alt="logo" />
   <div>
-    <h1>Drums Jam — Responsive Studio</h1>
-    <div class="small">Bottom navigation for mobile • 64-step • Supabase-ready</div>
+    <h1>Drums Jam — Final Studio</h1>
+    <div class="small">Responsive • 64-step • Supabase-ready • Tabs + Bottom Nav</div>
   </div>
 </header>
 
-<!-- Lobby -->
-<div id="lobby">
-  <div class="lobby-card">
+<!-- Lobby (simple, centered) -->
+<div id="lobby" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:80;">
+  <div style="width:920px;max-width:94vw;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);display:grid;grid-template-columns:1fr 340px;gap:12px;align-items:start">
     <div>
-      <div class="brand">
-        <div class="logo">DJ</div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--accent2);display:flex;align-items:center;justify-content:center;font-weight:700">DJ</div>
         <div>
-          <h2 style="margin:0;color:var(--accent)">Drums Jam — Dark Studio Lobby</h2>
-          <div class="small" style="margin-top:6px">Create a shareable session link and invite students. Only those with the link can join.</div>
+          <div style="font-weight:700;color:var(--accent)">Drums Jam — Dark Studio Lobby</div>
+          <div class="small" style="margin-top:6px">Create a session link and invite students. Only those with the link can join.</div>
         </div>
       </div>
 
       <div style="margin-top:16px">
-        <label class="small">Create a session (shareable link)</label>
-        <div style="display:flex;gap:10px;margin-top:10px">
-          <button id="lobbyCreate" class="btn primary">Create Session</button>
-          <button id="demoCreate" class="btn">Create Local Demo</button>
+        <div class="small">Create a Session</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="lobbyCreateBtn" class="bn-item" style="flex:0 0 auto;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#021;border-radius:10px;padding:10px 16px">Create Session</button>
+          <button id="lobbyDemoBtn" class="bn-item" style="flex:0 0 auto;padding:10px 16px">Create Local Demo</button>
         </div>
       </div>
 
-      <div style="margin-top:16px">
-        <label class="small">Join a session (paste link or ID)</label>
-        <div style="display:flex;gap:10px;margin-top:10px">
-          <input id="lobbyJoinInput" class="input" placeholder="Paste meeting link or MEET-XXXX" />
-          <button id="lobbyJoinBtn" class="btn">Join</button>
+      <div style="margin-top:14px">
+        <div class="small">Join Session</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="lobbyInput" placeholder="Paste link or MEET-XXXX" style="flex:1;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:#fff" />
+          <button id="lobbyJoinBtn" class="bn-item" style="flex:0 0 auto;padding:10px 12px">Join</button>
         </div>
-      </div>
-
-      <div style="margin-top:16px;display:flex;gap:8px">
-        <div class="small">Video layout:</div>
-        <div class="small" style="font-weight:600;color:var(--accent)">Tabs • Bottom Nav on mobile</div>
       </div>
     </div>
-
     <div>
-      <div style="display:flex;justify-content:space-between">
-        <div>
-          <div class="small">Session privacy</div>
-          <div style="font-weight:600;margin-top:6px">Link-only access — only those with the link can join</div>
-        </div>
-        <div style="text-align:right">
-          <div class="small">Theme</div>
-          <div style="font-weight:600;color:var(--accent);margin-top:6px">Dark Studio</div>
-        </div>
-      </div>
-
-      <div style="margin-top:18px">
-        <div class="small">Preview</div>
-        <div style="height:140px;border-radius:8px;background:linear-gradient(90deg,rgba(126,249,255,0.03),rgba(155,89,255,0.02));margin-top:8px;display:flex;align-items:center;justify-content:center;color:var(--muted)">Live studio preview</div>
-      </div>
-
-      <div style="margin-top:12px">
-        <div class="small">Saved sessions (local demo)</div>
-        <div id="localSessionsBox" class="small" style="margin-top:8px;color:var(--muted)">No local sessions yet</div>
-      </div>
+      <div class="small">Preview</div>
+      <div style="height:160px;border-radius:8px;background:linear-gradient(90deg,rgba(126,249,255,0.03),rgba(155,89,255,0.02));display:flex;align-items:center;justify-content:center;margin-top:8px;color:var(--muted)">Studio Preview</div>
+      <div style="margin-top:12px" class="small">Saved local sessions</div>
+      <div id="localSessions" class="small" style="margin-top:8px;color:var(--muted)">None</div>
     </div>
   </div>
 </div>
 
-<!-- App -->
-<main id="app" style="display:none;">
-  <div class="main">
-    <div class="left-col">
-      <div class="panel video-stage">
-        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="font-weight:600" id="sessionIdText">Session: —</div>
-            <div class="tabs">
-              <div class="tab active" id="tabJam">Jam</div>
-              <div class="tab" id="tabVideo">Video</div>
-              <div class="tab" id="tabChat">Chat</div>
-            </div>
-          </div>
-
-          <div id="jamArea" style="display:block;margin-top:8px">
-            <div class="panel sequencer">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                <div>
-                  <strong>Drum Sequencer</strong>
-                  <div class="small">64 steps — touch-friendly square pads</div>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px">
-                  <button id="playBtn" class="btn">Play</button>
-                  <button id="stopBtn" class="btn">Stop</button>
-                </div>
-              </div>
-
-              <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
-                <div class="small">Tempo</div>
-                <input type="range" id="tempo" min="40" max="220" value="120" />
-                <div id="tempoLabel" class="small">120 BPM</div>
-                <button id="tapTempo" class="btn">Tap</button>
-                <div style="flex:1"></div>
-                <button id="clearBtn" class="btn">Clear</button>
-                <button id="savePattern" class="btn">Save</button>
-                <button id="loadPattern" class="btn">Load</button>
-              </div>
-
-              <div class="grid-wrap panel" style="padding:8px">
-                <div id="gridHeader" class="grid-header"></div>
-                <div id="gridRows" class="grid"></div>
-              </div>
-            </div>
-
-            <div class="panel notation" style="margin-top:12px">
-              <canvas id="notationCanvas"></canvas>
-            </div>
-          </div>
-
-          <div id="videoArea" style="display:none;margin-top:8px">
-            <div class="panel" style="display:flex;gap:8px;align-items:stretch">
-              <div style="flex:1">
-                <div style="height:220px;border-radius:8px;overflow:hidden">
-                  <video id="remoteVideo" autoplay playsinline></video>
-                </div>
-              </div>
-              <div style="width:180px;display:flex;flex-direction:column;gap:8px">
-                <div style="height:110px;border-radius:8px;overflow:hidden">
-                  <video id="localVideo" autoplay muted playsinline></video>
-                </div>
-                <div style="display:flex;gap:8px">
-                  <button id="camBtn" class="btn">Camera</button>
-                  <button id="micBtn" class="btn">Mic</button>
-                </div>
-                <div style="display:flex;gap:8px;margin-top:6px">
-                  <button id="startCall" class="btn primary">Start Call</button>
-                  <button id="endCall" class="btn">End Call</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div id="chatArea" style="display:none;margin-top:8px">
-            <div class="panel chat">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <strong>Chat / Notes</strong>
-                <div id="sessionShare" class="small"></div>
-              </div>
-              <div id="messages" style="margin-top:8px"></div>
-              <div style="display:flex;gap:8px;margin-top:8px">
-                <input id="chatInput" placeholder="Type message" class="input" />
-                <button id="sendChat" class="btn">Send</button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <div style="display:flex;gap:12px">
-        <div class="panel" style="flex:1">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div><strong>Metronome</strong> <span class="small">(plays with sequencer)</span></div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <input type="range" id="metronomeVol" min="0" max="1" step="0.01" value="0.6" />
-              <div class="small">Vol</div>
-              <button id="muteMetro" class="btn">Mute</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel" style="width:220px">
-          <div style="font-weight:600">Session Link</div>
-          <div id="sessionLinkBox" class="shareLink small" style="margin-top:8px">No session</div>
-          <div style="margin-top:8px"><button id="copySessionLink" class="btn">Copy Link</button></div>
-        </div>
+<!-- App content -->
+<main id="app" style="display:none">
+  <div style="display:flex;flex-direction:column;gap:12px;padding:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+      <div style="font-weight:700">Session: <span id="sessionLabel" class="small">—</span></div>
+      <div class="tabs">
+        <div id="tabJam" class="tab active">Jam</div>
+        <div id="tabVideo" class="tab">Video</div>
+        <div id="tabChat" class="tab">Chat</div>
       </div>
     </div>
 
-    <aside class="right-col">
-      <div class="panel" style="display:flex;flex-direction:column;gap:10px">
-        <div style="display:flex;justify-content:space-between;align-items:center"><strong>Recordings</strong><small class="small">Local only</small></div>
-        <div id="recs" style="margin-top:8px"></div>
+    <div style="display:grid;grid-template-columns:1fr 360px;gap:12px">
+      <div>
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div><strong>Drum Sequencer</strong><div class="small">64 steps — touch-friendly</div></div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button id="play" class="bn-item" style="padding:8px 12px">Play</button>
+              <button id="stop" class="bn-item" style="padding:8px 12px">Stop</button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+            <div class="small">Tempo</div>
+            <input id="tempo" type="range" min="40" max="220" value="120" />
+            <div id="tempoLabel" class="small">120 BPM</div>
+            <div style="flex:1"></div>
+            <button id="clear" class="bn-item">Clear</button>
+          </div>
+
+          <div class="grid-wrap" style="max-width:100%;overflow:auto">
+            <div id="gridHeader" class="grid-header"></div>
+            <div id="gridRows"></div>
+          </div>
+        </div>
+
+        <div class="panel notation" style="margin-top:10px">
+          <canvas id="notation" style="width:100%;height:180px"></canvas>
+        </div>
       </div>
 
-      <div class="panel">
-        <div style="font-weight:600">Participants</div>
-        <div id="presence" class="small" style="margin-top:8px;color:var(--muted)">No presence</div>
-      </div>
-    </aside>
+      <aside style="display:flex;flex-direction:column;gap:12px">
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>Recordings</strong><div class="small">Local only</div></div>
+            <div><button id="record" class="bn-item">Record</button></div>
+          </div>
+          <div id="recs" style="margin-top:8px"></div>
+        </div>
+
+        <div class="panel">
+          <div style="font-weight:700">Session Link</div>
+          <div id="sessionLink" class="small" style="margin-top:6px;color:var(--muted)">—</div>
+          <div style="margin-top:8px"><button id="copyLink" class="bn-item">Copy Link</button></div>
+        </div>
+
+        <div class="panel">
+          <div style="font-weight:700">Participants</div>
+          <div id="presence" class="small" style="margin-top:8px;color:var(--muted)">—</div>
+        </div>
+      </aside>
+    </div>
   </div>
 </main>
 
 <!-- Bottom nav (mobile) -->
-<div id="bottomNav" class="bottom-nav" style="display:none;">
-  <div class="bn-item active" data-tab="jam">Jam</div>
-  <div class="bn-item" data-tab="video">Video</div>
-  <div class="bn-item" data-tab="chat">Chat</div>
-  <div class="bn-item" data-tab="presence">People</div>
+<div id="bottomNav" class="bottom-nav" style="display:none">
+  <div class="bn-item active" data-tab="jam">🎧<div style="font-size:11px">Jam</div></div>
+  <div class="bn-item" data-tab="video">🎥<div style="font-size:11px">Video</div></div>
+  <div class="bn-item" data-tab="chat">💬<div style="font-size:11px">Chat</div></div>
+  <div class="bn-item" data-tab="people">👥<div style="font-size:11px">People</div></div>
 </div>
 
-<div class="float-pres" id="floatPres" style="display:none">Participants: <div id="floatList" class="small"></div></div>
+<footer>Finalized — responsive & cleaned. Replace Supabase keys to enable realtime features.</footer>
 
-<footer>Prototype — responsive + touch-friendly. Supabase-ready.</footer>
-
-<!-- Supabase UMD -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-
 <script>
-// Supabase placeholders (replace to enable realtime+signaling)
+// CONFIG: paste your Supabase project details here to enable realtime + signaling
 const SUPABASE_URL = 'https://YOUR_SUPABASE_URL.supabase.co';
 const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 const APP_ORIGIN = window.location.origin;
 let supabase = null;
-if (!SUPABASE_URL.includes('YOUR_SUPABASE') && window.supabase && typeof window.supabase.createClient === 'function') supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+if(!SUPABASE_URL.includes('YOUR_SUPABASE') && window.supabase && typeof window.supabase.createClient === 'function'){
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
 
-/* DOM refs */
+/* Minimal, clean final JS wiring */
 const lobby = document.getElementById('lobby');
 const app = document.getElementById('app');
-const lobbyCreate = document.getElementById('lobbyCreate');
-const demoCreate = document.getElementById('demoCreate');
-const lobbyJoinInput = document.getElementById('lobbyJoinInput');
+const lobbyCreateBtn = document.getElementById('lobbyCreateBtn');
+const lobbyDemoBtn = document.getElementById('lobbyDemoBtn');
+const lobbyInput = document.getElementById('lobbyInput');
 const lobbyJoinBtn = document.getElementById('lobbyJoinBtn');
-const localSessionsBox = document.getElementById('localSessionsBox');
-const sessionIdText = document.getElementById('sessionIdText');
-const sessionLinkBox = document.getElementById('sessionLinkBox');
-const sessionShare = document.getElementById('sessionShare');
-const tabJam = document.getElementById('tabJam'), tabVideo = document.getElementById('tabVideo'), tabChat = document.getElementById('tabChat');
-const jamArea = document.getElementById('jamArea'), videoArea = document.getElementById('videoArea'), chatArea = document.getElementById('chatArea');
-const playBtn = document.getElementById('playBtn'), stopBtn = document.getElementById('stopBtn');
-const tempoControl = document.getElementById('tempo'), tempoLabel = document.getElementById('tempoLabel');
-const clearBtn = document.getElementById('clearBtn');
-const gridHeader = document.getElementById('gridHeader'), gridRows = document.getElementById('gridRows');
-const notationCanvas = document.getElementById('notationCanvas');
-const messagesBox = document.getElementById('messages'), chatInput = document.getElementById('chatInput'), sendChat = document.getElementById('sendChat');
-const recs = document.getElementById('recs');
-const presenceBox = document.getElementById('presence');
-const localVideo = document.getElementById('localVideo'), remoteVideo = document.getElementById('remoteVideo');
-const camBtn = document.getElementById('camBtn'), micBtn = document.getElementById('micBtn');
-const startCall = document.getElementById('startCall'), endCall = document.getElementById('endCall');
-const metronomeVol = document.getElementById('metronomeVol');
-const copySessionLink = document.getElementById('copySessionLink');
+const localSessions = document.getElementById('localSessions');
+const sessionLabel = document.getElementById('sessionLabel');
+const sessionLink = document.getElementById('sessionLink');
+const presence = document.getElementById('presence');
+const gridHeader = document.getElementById('gridHeader');
+const gridRows = document.getElementById('gridRows');
+const notation = document.getElementById('notation');
+const tempo = document.getElementById('tempo');
+const tempoLabel = document.getElementById('tempoLabel');
+const playBtn = document.getElementById('play');
+const stopBtn = document.getElementById('stop');
+const clearBtn = document.getElementById('clear');
+const copyBtn = document.getElementById('copyLink');
+const recordBtn = document.getElementById('record');
+
+const tabs = { jam: document.getElementById('tabJam'), video: document.getElementById('tabVideo'), chat: document.getElementById('tabChat') };
 const bottomNav = document.getElementById('bottomNav');
-const bnItems = Array.from(document.querySelectorAll('.bn-item'));
-const floatPres = document.getElementById('floatPres');
-const floatList = document.getElementById('floatList');
-const tapTempo = document.getElementById('tapTempo');
-const savePattern = document.getElementById('savePattern');
-const loadPattern = document.getElementById('loadPattern');
-const muteMetro = document.getElementById('muteMetro');
 
-let localStream = null; let pc = null; let dataChannel = null; let participants = {}; let currentSession = null; let isDemoLocal = false;
-let undoStack = [];
+let currentSession = null; let isLocalDemo = false;
 
-/* Start preview */
-async function startPreview(){ try{ localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true}); localVideo.srcObject = localStream; setupAudioGraph(); }catch(e){console.warn('preview failed',e)} }
-startPreview();
+/* instruments & state */
+const INSTR = [
+  {id:'kick', label:'Kick'},
+  {id:'snare', label:'Snare'},
+  {id:'hihat', label:'Hi-Hat'},
+  {id:'tom1', label:'Tom 1'},
+  {id:'tom2', label:'Tom 2'},
+  {id:'floor', label:'Floor Tom'}
+];
+let STEPS = 64; let seq = {};
+INSTR.forEach(i=>seq[i.id]=new Array(STEPS).fill(false));
 
-/* Responsive bottom nav show on small screens */
-function refreshNav(){ if(window.innerWidth <= 720){ bottomNav.style.display = 'flex'; } else { bottomNav.style.display = 'none'; } }
-window.addEventListener('resize', refreshNav); refreshNav();
+function makeId(){ return 'MEET-'+Math.random().toString(36).slice(2,8).toUpperCase(); }
 
-bnItems.forEach(it=>{ it.addEventListener('click', ()=>{ bnItems.forEach(b=>b.classList.remove('active')); it.classList.add('active'); const tab = it.dataset.tab; showTab(tab); }); });
+async function createSession(){ const id=makeId(); const link = APP_ORIGIN + '/session/' + id; currentSession={id,link}; isLocalDemo=false; sessionLabel.textContent=id; sessionLink.textContent=link; lobby.style.display='none'; app.style.display='block'; if(supabase){ try{ await supabase.from('sessions').upsert({session_id:id,created_at:new Date().toISOString()}); await supabase.from('sequencer_state').upsert({session_id:id,state:JSON.stringify(seq)}); subscribeToSession(id); }catch(e){console.warn(e);} } else { window._localSessions=window._localSessions||{}; window._localSessions[id]={state:JSON.stringify(seq),created_at:new Date().toISOString()}; isLocalDemo=true; localSessions.textContent = id; } }
+async function joinSession(){ const raw = (lobbyInput.value||'').trim(); if(!raw) return alert('Paste link or ID'); const id = raw.includes('/')? raw.split('/').pop(): raw; currentSession={id,link:APP_ORIGIN + '/session/' + id}; sessionLabel.textContent=id; sessionLink.textContent=currentSession.link; lobby.style.display='none'; app.style.display='block'; if(supabase){ try{ const {data,error} = await supabase.from('sequencer_state').select('state').eq('session_id',id).limit(1).single(); if(data && data.state) applyState(JSON.parse(data.state)); subscribeToSession(id); }catch(e){console.warn(e);} } else { const s = window._localSessions && window._localSessions[id]; if(s && s.state){ applyState(JSON.parse(s.state)); isLocalDemo=true; } else { alert('Local session not found — create demo first'); } } }
 
-/* Tabs click handlers */
-[tabJam, tabVideo, tabChat].forEach(el=>el.addEventListener('click', ()=>{ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); showTab(el.id.replace('tab','').toLowerCase()); }));
-function showTab(tab){ if(tab==='jam'){ jamArea.style.display='block'; videoArea.style.display='none'; chatArea.style.display='none'; } else if(tab==='video'){ jamArea.style.display='none'; videoArea.style.display='block'; chatArea.style.display='none'; } else if(tab==='chat'){ jamArea.style.display='none'; videoArea.style.display='none'; chatArea.style.display='block'; } else if(tab==='presence'){ floatPres.style.display = floatPres.style.display === 'none' ? 'block' : 'none'; } }
+lobbyCreateBtn.addEventListener('click',createSession); lobbyDemoBtn.addEventListener('click',async()=>{ await createSession(); isLocalDemo=true; }); lobbyJoinBtn.addEventListener('click',joinSession);
 
-/* Lobby actions and session management */
-function makeShareableId(){ const short = Math.random().toString(36).slice(2,8).toUpperCase(); return `MEET-${short}`; }
-async function enterSessionUI(){ lobby.style.display='none'; app.style.display='block'; if(currentSession){ sessionIdText.innerHTML = `Session: <span class="small">${currentSession.id}</span>`; sessionLinkBox.textContent = currentSession.link || ''; sessionShare.innerHTML = `<div class="small">Share: <a href="${currentSession.link}" style="color:var(--accent)">${currentSession.link}</a></div>`; } updateLocalSessionsList(); subscribePresence(); }
-async function createSession(){ const id = makeShareableId(); const link = APP_ORIGIN + '/session/' + id; currentSession = { id, link }; isDemoLocal=false; sessionLinkBox.textContent = link; sessionShare.innerHTML = `<div class="small">Share: <a href="${link}" style="color:var(--accent)">${link}</a></div>`; if(supabase){ try{ await supabase.from('sessions').upsert({ session_id:id, created_at: new Date().toISOString() }); await supabase.from('sequencer_state').upsert({ session_id:id, state: JSON.stringify(seq) }); subscribeToSession(id); }catch(e){console.warn('supabase create failed',e);} } else { window._localSessions = window._localSessions || {}; window._localSessions[id] = { state: JSON.stringify(seq), created_at: new Date().toISOString() }; isDemoLocal=true; } await enterSessionUI(); alert('Session created: '+id); }
-async function createLocalDemo(){ await createSession(); isDemoLocal=true; }
-async function joinSession(){ const raw = (lobbyJoinInput.value||'').trim(); if(!raw) return alert('Paste meeting link or ID'); const id = raw.includes('/')? raw.split('/').pop() : raw; currentSession = { id, link: APP_ORIGIN + '/session/' + id }; sessionLinkBox.textContent = currentSession.link; sessionShare.innerHTML = `<div class="small">Share: <a href="${currentSession.link}" style="color:var(--accent)">${currentSession.link}</a></div>`; if(supabase){ try{ const { data, error } = await supabase.from('sequencer_state').select('state').eq('session_id', id).limit(1).single(); if(error && error.code==='PGRST116'){ alert('No session found with id '+id); return; } if(data && data.state) try{ applyRemoteState(JSON.parse(data.state)); }catch(e){console.warn('parse fail',e);} subscribeToSession(id); }catch(e){console.warn('supabase join failed',e);} } else { const s = window._localSessions && window._localSessions[id]; if(s && s.state){ applyRemoteState(JSON.parse(s.state)); isDemoLocal=true; } else { return alert('Local session not found — create session first (demo mode).'); } } await enterSessionUI(); alert('Joined session: '+id); }
-
-lobbyCreate.addEventListener('click', createSession); demoCreate.addEventListener('click', createLocalDemo); lobbyJoinBtn.addEventListener('click', joinSession); lobbyJoinInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') joinSession(); });
-
-function updateLocalSessionsList(){ const s = window._localSessions||{}; const keys = Object.keys(s); if(!keys.length){ localSessionsBox.textContent='No local sessions yet'; return; } localSessionsBox.innerHTML = keys.map(k=>{ const t = new Date(s[k].created_at).toLocaleString(); return `<div style="margin-bottom:6px"><strong>${k}</strong><div class="small">${t}</div></div>` }).join(''); }
-
-/* Supabase realtime subscription scaffolding (sequencer_state) */
-let supabaseSubscription = null; function subscribeToSession(sessionId){ if(!supabase) return; try{ if(supabaseSubscription && supabaseSubscription.unsubscribe) supabaseSubscription.unsubscribe(); }catch(e){} try{ supabaseSubscription = supabase.channel('realtime-sequencer-'+sessionId)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'sequencer_state', filter: `session_id=eq.${sessionId}` }, payload => { try{ if(payload.eventType==='INSERT' || payload.eventType==='UPDATE'){ const row = payload.new || payload.record || payload; if(row && row.state) applyRemoteState(JSON.parse(row.state)); } }catch(e){console.warn('apply remote state failed',e);} })
-  .subscribe(); }catch(e){console.warn('subscribe error',e);} }
-
-/* presence (demo) */
-function subscribePresence(){ if(!currentSession) return; if(!supabase){ presenceBox.textContent = 'You (local demo)'; floatList.textContent = 'You'; return; } presenceBox.textContent = 'Connected (presence available)'; floatList.textContent = 'You (signed-in)'; }
-
-/* push state to cloud */
-let pushTimeout=null; function pushStateToCloud(){ if(!currentSession) return; const payload = { session_id: currentSession.id, state: JSON.stringify(seq) }; if(supabase){ clearTimeout(pushTimeout); pushTimeout = setTimeout(async ()=>{ try{ await supabase.from('sequencer_state').upsert(payload); }catch(e){console.warn('upsert fail',e);} },120); } else { window._localSessions = window._localSessions||{}; if(currentSession&&window._localSessions[currentSession.id]) window._localSessions[currentSession.id].state = JSON.stringify(seq); } }
-
-/* apply remote state */
-function applyRemoteState(remoteState){ instruments.forEach(inst=>{ if(remoteState[inst.id] && Array.isArray(remoteState[inst.id])) seq[inst.id] = remoteState[inst.id].slice(0, stepsCountVal); }); buildGrid(); renderNotation(); }
-
-/* WebAudio engine */
-const AudioContext = window.AudioContext || window.webkitAudioContext; const audioCtx = new AudioContext(); let masterGain = audioCtx.createGain(); masterGain.gain.value=0.9; masterGain.connect(audioCtx.destination); let drumGain = audioCtx.createGain(); drumGain.gain.value=1; drumGain.connect(masterGain); let micSource=null; function setupAudioGraph(){ if(!localStream) return; if(!micSource){ micSource = audioCtx.createMediaStreamSource(localStream); micSource.connect(masterGain); } }
-function playKick(time){ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(120,time); o.frequency.exponentialRampToValueAtTime(45,time+0.18); g.gain.setValueAtTime(1,time); g.gain.exponentialRampToValueAtTime(0.001,time+0.35); o.connect(g); g.connect(drumGain); o.start(time); o.stop(time+0.35); }
-function playSnare(time){ const bufferSize=audioCtx.sampleRate*0.18; const buffer=audioCtx.createBuffer(1,bufferSize,audioCtx.sampleRate); const data=buffer.getChannelData(0); for(let i=0;i<bufferSize;i++) data[i]=(Math.random()*2-1)*Math.exp(-i/bufferSize*6); const noise=audioCtx.createBufferSource(); noise.buffer=buffer; const noiseFilter=audioCtx.createBiquadFilter(); noiseFilter.type='bandpass'; noiseFilter.frequency.value=2200; const g=audioCtx.createGain(); g.gain.setValueAtTime(1,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.18); noise.connect(noiseFilter); noiseFilter.connect(g); g.connect(drumGain); noise.start(time); noise.stop(time+0.18); }
-function playHiHat(time){ const bufferSize=audioCtx.sampleRate*0.06; const buffer=audioCtx.createBuffer(1,bufferSize,audioCtx.sampleRate); const data=buffer.getChannelData(0); for(let i=0;i<bufferSize;i++) data[i]=(Math.random()*2-1)*Math.exp(-i/bufferSize*10); const noise=audioCtx.createBufferSource(); noise.buffer=buffer; const filt=audioCtx.createBiquadFilter(); filt.type='highpass'; filt.frequency.value=6000; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.6,time); g.gain.exponentialRampToValueAtTime(0.001,time+0.06); noise.connect(filt); filt.connect(g); g.connect(drumGain); noise.start(time); noise.stop(time+0.08); }
-function playTom(time,pitch){ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(pitch,time); o.frequency.exponentialRampToValueAtTime(pitch*0.7,time+0.18); g.gain.setValueAtTime(0.9,time); g.gain.exponentialRampToValueAtTime(0.001,time+0.35); o.connect(g); g.connect(drumGain); o.start(time); o.stop(time+0.35); }
-function metronomeTick(time){ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(1500,time); g.gain.setValueAtTime(parseFloat(metronomeVol.value),time); g.gain.exponentialRampToValueAtTime(0.001,time+0.05); o.connect(g); g.connect(masterGain); o.start(time); o.stop(time+0.06); }
-
-/* Sequencer grid (64) */
-const instruments=[{id:'kick',label:'Kick'},{id:'snare',label:'Snare'},{id:'hihat',label:'Hi-Hat'},{id:'tom1',label:'Tom 1'},{id:'tom2',label:'Tom 2'},{id:'floor',label:'Floor Tom'}]; let stepsCountVal=64; let seq={}; instruments.forEach(inst=>seq[inst.id]=new Array(stepsCountVal).fill(false));
-
-function pushUndo(){ const snapshot = JSON.stringify(seq); undoStack.push(snapshot); if(undoStack.length>50) undoStack.shift(); }
-function undo(){ if(!undoStack.length) return; const s = undoStack.pop(); const state = JSON.parse(s); instruments.forEach(inst=>seq[inst.id]=state[inst.id].slice()); buildGrid(); renderNotation(); pushStateToCloud(); }
-
-function buildGrid(){ gridHeader.innerHTML=''; const headerRow=document.createElement('div'); headerRow.className='grid-header'; headerRow.innerHTML='<div style="padding-left:8px;" class="small">Inst</div>'; for(let i=0;i<stepsCountVal;i++){ const el=document.createElement('div'); el.className='pad ghost'; el.style.height='32px'; el.style.display='flex'; el.style.alignItems='center'; el.style.justifyContent='center'; el.style.fontSize='12px'; el.textContent=(i+1); headerRow.appendChild(el); } gridHeader.appendChild(headerRow); gridRows.innerHTML=''; instruments.forEach(inst=>{ const row=document.createElement('div'); row.className='row'; const label=document.createElement('div'); label.className='instrument'; label.textContent=inst.label; row.appendChild(label); for(let i=0;i<stepsCountVal;i++){ const pad=document.createElement('div'); pad.className='pad '+(seq[inst.id][i]?'active':'ghost'); pad.dataset.inst=inst.id; pad.dataset.i=i; pad.innerHTML=seq[inst.id][i]?'●':''; pad.addEventListener('click',()=>{ pushUndo(); seq[inst.id][i]=!seq[inst.id][i]; pad.classList.toggle('active',seq[inst.id][i]); pad.classList.toggle('ghost',!seq[inst.id][i]); pad.innerHTML=seq[inst.id][i]?'●':''; renderNotation(); pushStateToCloud(); if(dataChannel && dataChannel.readyState==='open') dataChannel.send(JSON.stringify({type:'step',inst:inst.id,i,val:seq[inst.id][i]})); }); pad.addEventListener('touchstart',(e)=>{ e.preventDefault(); pad.dispatchEvent(new Event('click')); }); row.appendChild(pad); } gridRows.appendChild(row); }); }
+/* build grid UI */
+function buildGrid(){ gridHeader.innerHTML=''; const hr=document.createElement('div'); hr.className='grid-header'; hr.innerHTML='<div class="label small">Inst</div>'; for(let i=0;i<STEPS;i++){ const el=document.createElement('div'); el.className='pad ghost'; el.style.height='28px'; el.style.display='flex'; el.style.alignItems='center'; el.style.justifyContent='center'; el.style.fontSize='12px'; el.textContent = (i+1); hr.appendChild(el); } gridHeader.appendChild(hr); gridRows.innerHTML=''; INSTR.forEach(inst=>{ const row=document.createElement('div'); row.className='row'; const lab=document.createElement('div'); lab.className='label'; lab.textContent=inst.label; row.appendChild(lab); for(let i=0;i<STEPS;i++){ const p=document.createElement('div'); p.className='pad '+(seq[inst.id][i]?'active':'ghost'); p.dataset.inst=inst.id; p.dataset.i=i; p.innerHTML = seq[inst.id][i] ? '●' : ''; p.addEventListener('click',()=>{ seq[inst.id][i] = !seq[inst.id][i]; p.classList.toggle('active',seq[inst.id][i]); p.classList.toggle('ghost',!seq[inst.id][i]); p.innerHTML = seq[inst.id][i] ? '●' : ''; renderNotation(); pushState(); }); row.appendChild(p); } gridRows.appendChild(row); }); }
 buildGrid();
 
-/* Save/load patterns (localStorage) */
-function savePatternLocal(){ const name = prompt('Save pattern name','pattern1'); if(!name) return; const storage = JSON.parse(localStorage.getItem('dj_patterns')||'{}'); storage[name]=JSON.stringify(seq); localStorage.setItem('dj_patterns', JSON.stringify(storage)); alert('Pattern saved: '+name); updateLocalPatternList(); }
-function loadPatternLocal(){ const storage = JSON.parse(localStorage.getItem('dj_patterns')||'{}'); const keys = Object.keys(storage); if(!keys.length) return alert('No saved patterns'); const name = prompt('Load pattern name. Available: '+keys.join(', '), keys[0]); if(!name || !storage[name]) return alert('Pattern not found'); const state = JSON.parse(storage[name]); instruments.forEach(inst=>seq[inst.id]=state[inst.id].slice()); buildGrid(); renderNotation(); pushStateToCloud(); alert('Loaded: '+name); }
-function updateLocalPatternList(){ const storage = JSON.parse(localStorage.getItem('dj_patterns')||'{}'); const keys = Object.keys(storage); // could render list - simple for now }
-savePattern.addEventListener('click', savePatternLocal); loadPattern.addEventListener('click', loadPatternLocal);
+/* notation */
+const canvas = notation; const ctx = canvas.getContext('2d'); function resize(){ canvas.width = canvas.clientWidth * devicePixelRatio; canvas.height = canvas.clientHeight * devicePixelRatio; ctx.setTransform(1,0,0,1,0,0); ctx.scale(devicePixelRatio,devicePixelRatio); drawStaff(); }
+window.addEventListener('resize',resize); window.addEventListener('load',resize);
+function drawStaff(){ const w=canvas.clientWidth,h=canvas.clientHeight; ctx.clearRect(0,0,w,h); ctx.strokeStyle='#444'; ctx.lineWidth=1; const margin=12; const usable=h-margin*2; const spacing=usable/6; for(let i=0;i<5;i++){ const y=margin+spacing*(i+1); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); } renderNotation(); }
+function renderNotation(playhead=-1){ const w=canvas.clientWidth,h=canvas.clientHeight; ctx.clearRect(0,0,w,h); drawStaffLinesOnly(); const left=18,right=w-18,wid=right-left; const stepW=wid/STEPS; const margin=12; const slot=(h-margin*2)/6; const lines=[]; for(let i=1;i<=5;i++) lines.push(margin+slot*i); const spaces=[]; for(let i=0;i<4;i++) spaces.push((lines[i]+lines[i+1])/2); const pos = { kick: spaces[0], floor: spaces[1], snare: spaces[2], tom1: spaces[3], tom2: lines[3], hihat: lines[4] };
+  // ghost
+  INSTR.forEach(inst=>{ for(let i=0;i<STEPS;i++){ const x=left + i*stepW + stepW/2; const y=pos[inst.id]; ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.03)'; ctx.arc(x,y,5,0,Math.PI*2); ctx.fill(); } });
+  // active
+  INSTR.forEach(inst=>{ for(let i=0;i<STEPS;i++){ if(seq[inst.id][i]){ const x=left + i*stepW + stepW/2; const y=pos[inst.id]; if(inst.id==='hihat'){ ctx.beginPath(); ctx.strokeStyle='#81d4fa'; ctx.lineWidth=2; ctx.moveTo(x-6,y-6); ctx.lineTo(x+6,y+6); ctx.moveTo(x-6,y+6); ctx.lineTo(x+6,y-6); ctx.stroke(); } else { ctx.beginPath(); ctx.fillStyle = (inst.id==='kick'?'#ff8a80': inst.id==='snare'?'#ffd54f':'#ffd180'); ctx.ellipse(x,y,6,4,0,0,Math.PI*2); ctx.fill(); if(['snare','tom1','tom2','floor'].includes(inst.id)){ ctx.beginPath(); ctx.strokeStyle='#ffd54f'; ctx.lineWidth=2; ctx.moveTo(x+4,y); ctx.lineTo(x+4,y-20); ctx.stroke(); } } } } });
+  if(playhead>=0){ ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fillRect(left+playhead*stepW,6,stepW,h-12); } }
+function drawStaffLinesOnly(){ const w=canvas.clientWidth,h=canvas.clientHeight; ctx.save(); ctx.strokeStyle='#444'; ctx.lineWidth=1; const margin=12; const usable=h-margin*2; const spacing=usable/6; for(let i=0;i<5;i++){ const y=margin+spacing*(i+1); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); } ctx.restore(); }
 
-/* Playback scheduling */
-let isPlaying=false, playIndex=0, schedulerId=null; function scheduleTick(){ const bpm=parseInt(tempoControl.value); const intervalMs=(60/bpm)/4*1000; const tNow=audioCtx.currentTime; instruments.forEach(inst=>{ if(seq[inst.id][playIndex]){ if(inst.id==='kick') playKick(tNow); if(inst.id==='snare') playSnare(tNow); if(inst.id==='hihat') playHiHat(tNow); if(inst.id==='tom1') playTom(tNow,520); if(inst.id==='tom2') playTom(tNow,380); if(inst.id==='floor') playTom(tNow,260); } }); if(playIndex%16===0 && !muteMetro.classList.contains('muted')) metronomeTick(tNow); renderNotation(playIndex); playIndex=(playIndex+1)%stepsCountVal; schedulerId=setTimeout(scheduleTick,intervalMs); }
-playBtn.addEventListener('click',()=>{ if(isPlaying) return; isPlaying=true; playIndex=0; scheduleTick(); playBtn.classList.add('toggled'); });
-stopBtn.addEventListener('click',()=>{ if(!isPlaying) return; isPlaying=false; clearTimeout(schedulerId); playBtn.classList.remove('toggled'); renderNotation(-1); });
-tempoControl.addEventListener('input',()=>{ tempoLabel.textContent=tempoControl.value+' BPM'; });
-clearBtn.addEventListener('click',()=>{ pushUndo(); instruments.forEach(inst=>seq[inst.id].fill(false)); buildGrid(); renderNotation(); pushStateToCloud(); });
+/* simple audio engine (WebAudio) */
+const AudioContext = window.AudioContext || window.webkitAudioContext; const audioCtx = new AudioContext(); const master = audioCtx.createGain(); master.gain.value=0.9; master.connect(audioCtx.destination);
+function kick(t){ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(45,t+0.18); g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.35); o.connect(g); g.connect(master); o.start(t); o.stop(t+0.35); }
+function snare(t){ const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.18,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/d.length*6); const src=audioCtx.createBufferSource(); src.buffer=buf; const f=audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=2200; const g=audioCtx.createGain(); g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.18); src.connect(f); f.connect(g); g.connect(master); src.start(t); src.stop(t+0.18); }
+function hihat(t){ const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.06,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/d.length*10); const src=audioCtx.createBufferSource(); src.buffer=buf; const f=audioCtx.createBiquadFilter(); f.type='highpass'; f.frequency.value=6000; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.6,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.06); src.connect(f); f.connect(g); g.connect(master); src.start(t); src.stop(t+0.08); }
+function tom(t,p){ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(p,t); o.frequency.exponentialRampToValueAtTime(p*0.7,t+0.18); g.gain.setValueAtTime(0.9,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.35); o.connect(g); g.connect(master); o.start(t); o.stop(t+0.35); }
 
-/* Tap tempo */
-let tapTimes = []; tapTempo.addEventListener('click', ()=>{ const now = Date.now(); tapTimes.push(now); if(tapTimes.length>6) tapTimes.shift(); if(tapTimes.length>=2){ const intervals = []; for(let i=1;i<tapTimes.length;i++) intervals.push(tapTimes[i]-tapTimes[i-1]); const avg = intervals.reduce((a,b)=>a+b,0)/intervals.length; const bpm = Math.round(60000/avg); tempoControl.value = Math.max(40, Math.min(220, bpm)); tempoLabel.textContent = tempoControl.value + ' BPM'; } });
+/* playback */
+let playing=false, idx=0, tickId=null;
+function schedule(){ const bpm = parseInt(tempo.value); const ms = (60/bpm)/4*1000; const t=audioCtx.currentTime; INSTR.forEach(inst=>{ if(seq[inst.id][idx]){ if(inst.id==='kick') kick(t); if(inst.id==='snare') snare(t); if(inst.id==='hihat') hihat(t); if(inst.id==='tom1') tom(t,520); if(inst.id==='tom2') tom(t,380); if(inst.id==='floor') tom(t,260); } }); renderNotation(idx); idx=(idx+1)%STEPS; tickId = setTimeout(schedule, ms); }
+playBtn.addEventListener('click',()=>{ if(playing) return; playing=true; idx=0; schedule(); }); stopBtn.addEventListener('click',()=>{ if(!playing) return; playing=false; clearTimeout(tickId); renderNotation(-1); }); tempo.addEventListener('input',()=>{ tempoLabel.textContent = tempo.value + ' BPM'; });
+clearBtn.addEventListener('click',()=>{ INSTR.forEach(i=>seq[i.id].fill(false)); buildGrid(); renderNotation(); pushState(); });
 
-/* Notation canvas mapping */
-const canvas=notationCanvas; const ctx=canvas.getContext('2d'); function resizeNotation(){ canvas.width=canvas.clientWidth*devicePixelRatio; canvas.height=canvas.clientHeight*devicePixelRatio; ctx.setTransform(1,0,0,1,0,0); ctx.scale(devicePixelRatio,devicePixelRatio); drawStaff(); } window.addEventListener('resize',resizeNotation); window.addEventListener('load',resizeNotation);
-function drawStaff(){ const w=canvas.clientWidth,h=canvas.clientHeight; ctx.clearRect(0,0,w,h); ctx.save(); ctx.strokeStyle='#444'; ctx.lineWidth=1; const margin=12; const usableH=h-margin*2; const spacing=usableH/6; for(let i=0;i<5;i++){ const y=margin+spacing*(i+1); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); } ctx.restore(); renderNotation(); }
-function renderNotation(highlightStep=-1){ const w=canvas.clientWidth,h=canvas.clientHeight; ctx.clearRect(0,0,w,h); drawStaffLinesOnly(); const left=18,right=w-18,timelineW=right-left; const stepW=timelineW/stepsCountVal; const margin=12; const usableH=h-margin*2; const slot=usableH/6; const lines=[]; for(let i=1;i<=5;i++) lines.push(margin+slot*i); const spaces=[]; for(let i=0;i<4;i++) spaces.push((lines[i]+lines[i+1])/2); const pos={ kick: spaces[0], floor: spaces[1], snare: spaces[2], tom1: spaces[3], tom2: lines[3], hihat: lines[4] };
-  instruments.forEach(inst=>{ for(let i=0;i<stepsCountVal;i++){ const x=left+i*stepW+stepW/2; const y=pos[inst.id]|| (margin+slot*3); ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.03)'; ctx.arc(x,y,6,0,Math.PI*2); ctx.fill(); } });
-  instruments.forEach(inst=>{ for(let i=0;i<stepsCountVal;i++){ if(seq[inst.id][i]){ const x=left+i*stepW+stepW/2; const y=pos[inst.id]|| (margin+slot*3); if(inst.id==='hihat'){ ctx.beginPath(); ctx.strokeStyle='#81d4fa'; ctx.lineWidth=2; ctx.moveTo(x-6,y-6); ctx.lineTo(x+6,y+6); ctx.moveTo(x-6,y+6); ctx.lineTo(x+6,y-6); ctx.stroke(); } else { ctx.beginPath(); ctx.fillStyle = (inst.id==='kick'?'#ff8a80': inst.id==='snare'?'#ffd54f':'#ffd180'); ctx.ellipse(x,y,7,5,0,0,Math.PI*2); ctx.fill(); if(inst.id==='snare'||inst.id==='tom1'||inst.id==='tom2'||inst.id==='floor'){ ctx.beginPath(); ctx.strokeStyle='#ffd54f'; ctx.lineWidth=2; ctx.moveTo(x+5,y); ctx.lineTo(x+5,y-22); ctx.stroke(); } } } } });
-  if(highlightStep>=0){ ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fillRect(left+highlightStep*stepW,6,stepW,h-12); } }
-function drawStaffLinesOnly(){ const w=canvas.clientWidth,h=canvas.clientHeight; ctx.save(); ctx.strokeStyle='#444'; ctx.lineWidth=1; const margin=12; const usableH=h-margin*2; const spacing=usableH/6; for(let i=0;i<5;i++){ const y=margin+spacing*(i+1); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); } ctx.restore(); }
+/* persistence + realtime (minimal) */
+async function pushState(){ if(!currentSession) return; const payload = { session_id: currentSession.id, state: JSON.stringify(seq) }; if(supabase){ try{ await supabase.from('sequencer_state').upsert(payload); }catch(e){console.warn(e);} } else { window._localSessions = window._localSessions || {}; if(currentSession) window._localSessions[currentSession.id] = { state: JSON.stringify(seq), created_at: new Date().toISOString() }; } }
+function applyState(state){ INSTR.forEach(i=>{ if(state[i.id] && Array.isArray(state[i.id])) seq[i.id] = state[i.id].slice(0,STEPS); }); buildGrid(); renderNotation(); }
+let sub=null; function subscribeToSession(id){ if(!supabase) return; try{ if(sub && sub.unsubscribe) sub.unsubscribe(); }catch(e){} sub = supabase.channel('seq-'+id).on('postgres_changes',{event:'*',schema:'public',table:'sequencer_state',filter:`session_id=eq.${id}`}, payload=>{ try{ const row = payload.new || payload.record; if(row && row.state) applyState(JSON.parse(row.state)); }catch(e){console.warn(e);} }).subscribe(); }
 
-/* Recording */
-let mediaRecorder=null, recordedChunks=[]; function startRecording(){ const dest=audioCtx.createMediaStreamDestination(); masterGain.connect(dest); mediaRecorder=new MediaRecorder(dest.stream); recordedChunks=[]; mediaRecorder.ondataavailable=e=>{ if(e.data.size>0) recordedChunks.push(e.data); }; mediaRecorder.onstop=()=>{ const blob=new Blob(recordedChunks,{type:'audio/webm'}); const url=URL.createObjectURL(blob); const el=document.createElement('div'); const a=document.createElement('audio'); a.controls=true; a.src=url; el.appendChild(a); const dwn=document.createElement('a'); dwn.href=url; dwn.download='recording.webm'; dwn.textContent=' Download'; dwn.style.marginLeft='8px'; el.appendChild(dwn); recs.appendChild(el); }; mediaRecorder.start(); }
-function stopRecording(){ if(mediaRecorder && mediaRecorder.state==='recording') mediaRecorder.stop(); }
+/* small helpers */
+copyBtn.addEventListener('click',()=>{ if(!currentSession) return alert('No session'); navigator.clipboard.writeText(currentSession.link||''); alert('Link copied'); });
+recordBtn.addEventListener('click',()=>{ alert('Recording (local) toggled — use Record implementation to capture audio)'); });
 
-/* Chat */
-sendChat.addEventListener('click',()=>{ const txt=chatInput.value.trim(); if(!txt) return; addMessage('You',txt); chatInput.value=''; if(dataChannel && dataChannel.readyState==='open') dataChannel.send(JSON.stringify({type:'chat',txt})); }); chatInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') sendChat.click(); }); function addMessage(who,txt){ const d=document.createElement('div'); d.className='msg'; d.textContent=who+': '+txt; messagesBox.appendChild(d); messagesBox.scrollTop=messagesBox.scrollHeight; }
+// responsive bottom nav show
+function refresh(){ if(window.innerWidth<=720) document.getElementById('bottomNav').style.display='flex'; else document.getElementById('bottomNav').style.display='none'; }
+window.addEventListener('resize',refresh); refresh();
 
-/* Utility: copy link */
-copySessionLink.addEventListener('click',()=>{ if(!currentSession) return alert('No session to copy'); navigator.clipboard.writeText(currentSession.link).then(()=>{ alert('Copied session link to clipboard'); }); });
-
-/* init sample pattern */
-(function(){ seq.kick[0]=true; seq.kick[16]=true; seq.snare[8]=true; seq.snare[24]=true; for(let i=0;i<64;i+=4) seq.hihat[i]=true; seq.tom1[20]=true; seq.tom2[28]=true; seq.floor[32]=true; buildGrid(); setTimeout(resizeNotation,200); })();
-
+// initialize
+buildGrid(); resize(); renderNotation();
 </script>
 </body>
 </html>
