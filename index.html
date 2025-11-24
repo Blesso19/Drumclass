@@ -1,612 +1,333 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Drums Jam — Online Studio</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<style>
-:root{
-  --bg:#050507; --panel:#0f1114; --accent:#7ef9ff; --accent2:#9b59ff; --muted:#9aa0a6;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,-apple-system,Arial,sans-serif;background:linear-gradient(180deg,#030307,#071018);color:#fff;min-height:100vh}
-header{display:flex;gap:12px;align-items:center;padding:12px 16px;background:rgba(255,255,255,0.01);border-bottom:1px solid rgba(255,255,255,0.02);position:sticky;top:0;z-index:40}
-header img{width:44px;height:44px;border-radius:8px;object-fit:cover}
-h1{font-size:18px;margin:0;color:var(--accent)}
-.small{font-size:13px;color:var(--muted)}
-main{display:grid;grid-template-columns:1fr 360px;gap:12px;padding:14px}
-@media(max-width:980px){main{grid-template-columns:1fr}}
-.panel{background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
-.grid-wrap{overflow:auto}
-.grid-header{display:grid;grid-template-columns:88px repeat(64,56px);gap:8px;align-items:center}
-.row{display:grid;grid-template-columns:88px repeat(64,56px);gap:8px;align-items:center}
-.label{padding-left:8px;color:var(--muted);min-width:88px}
-.pad{width:56px;height:56px;border-radius:8px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none}
-.pad.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#021;box-shadow:0 8px 24px rgba(124,234,255,0.06)}
-.pad.ghost{background:rgba(255,255,255,0.01)}
-@media(max-width:900px){.grid-header,.row{grid-template-columns:72px repeat(32,48px)}.pad{width:48px;height:48px}}
-@media(max-width:520px){.grid-header,.row{grid-template-columns:64px repeat(32,40px)}.pad{width:40px;height:40px;border-radius:6px}.label{min-width:64px}}
-.notation{height:180px;border-radius:8px;overflow:hidden}
-canvas{width:100%;height:100%;display:block}
-.tabs{display:flex;gap:8px}
-.tab{padding:8px 12px;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.03)}
-.tab.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#021}
-.bottom-nav{position:fixed;left:12px;right:12px;bottom:12px;border-radius:14px;padding:8px;display:flex;justify-content:space-around;align-items:center;border:1px solid rgba(255,255,255,0.03);z-index:60;background:linear-gradient(90deg,#6a11cb,#2575fc);box-shadow:0 12px 30px rgba(37,117,252,0.18);backdrop-filter:blur(6px)}
-.bn-item{flex:1;text-align:center;padding:10px 12px;border-radius:10px;cursor:pointer;color:rgba(255,255,255,0.92);font-weight:700}
-.bn-item.active{background:linear-gradient(90deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06));color:#021;box-shadow:0 8px 20px rgba(0,0,0,0.25)}
-footer{padding:12px;text-align:center;color:var(--muted)}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>JamMeet — Single HTML</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--muted:#94a3b8;--accent:#06b6d4;--glass:rgba(255,255,255,0.04)}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{background:linear-gradient(180deg,#0f172a 0%, #071029 100%);color:#e6eef8;display:flex;align-items:flex-start;justify-content:center;padding:20px}
+    .app{width:100%;max-width:1200px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    h1{font-size:20px;margin:0}
+    .tabs{display:flex;gap:8px}
+    .tab{padding:8px 12px;border-radius:8px;background:var(--glass);cursor:pointer;color:var(--muted);border:1px solid rgba(255,255,255,0.03)}
+    .tab.active{background:linear-gradient(90deg,var(--accent),#7dd3fc);color:#022;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+
+    main{display:grid;grid-template-columns:1fr 320px;gap:16px}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.03)}
+
+    /* Video area */
+    .video-wrap{display:flex;gap:12px;flex-direction:column}
+    @media(min-width:880px){.video-wrap{flex-direction:row}}
+    .video-stage{flex:1;min-height:240px;background:#000;border-radius:10px;overflow:hidden;position:relative}
+    video{width:100%;height:100%;object-fit:cover;background:#000}
+    .controls{display:flex;flex-direction:column;gap:8px;width:260px}
+    .btn{display:inline-block;padding:10px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.03);cursor:pointer;color:var(--muted);text-align:center}
+    .btn.primary{background:var(--accent);color:#022}
+    .small{font-size:13px;padding:8px;border-radius:6px}
+
+    /* Jam layout */
+    .jam-grid{display:grid;grid-template-columns:1fr 320px;gap:12px}
+    .pads{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .pad{padding:18px;border-radius:10px;text-align:center;cursor:pointer;user-select:none;font-weight:600}
+
+    /* Sequencer */
+    .seq-row{display:flex;gap:6px;align-items:center}
+    .seq-steps{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;flex:1}
+    .step{height:40px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);cursor:pointer}
+    .step.on{background:var(--accent);color:#022}
+    .step.playing{box-shadow:0 0 0 3px rgba(6,182,212,0.12)}
+
+    /* Score */
+    .staff{background:transparent;padding:10px}
+
+    /* sidebar */
+    aside .list{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+    .participant{display:flex;align-items:center;gap:10px}
+    .avatar{width:36px;height:36px;border-radius:999px;flex-shrink:0;background:linear-gradient(90deg,#7dd3fc,#0ea5a4)}
+
+    footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* responsive */
+    @media(max-width:980px){main{grid-template-columns:1fr} .controls{width:100%} .jam-grid{grid-template-columns:1fr} .pads{grid-template-columns:repeat(3,1fr)} }
+  </style>
 </head>
 <body>
-<header>
-  <!-- logo uses the uploaded file path -->
-  <img src="/mnt/data/1000128380.jpg" alt="logo"/>
-  <div>
-    <h1>Drums Jam — Online Studio</h1>
-    <div class="small">64-step • realtime • chat • WebRTC</div>
-  </div>
-</header>
+  <div class="app" id="app">
+    <header>
+      <h1>JamMeet — Single HTML</h1>
+      <nav class="tabs" id="tabs">
+        <div class="tab active" data-tab="video">Video</div>
+        <div class="tab" data-tab="jam">Jam</div>
+        <div class="tab" data-tab="score">Score</div>
+        <div class="tab" data-tab="fx">Live FX</div>
+      </nav>
+    </header>
 
-<!-- Lobby -->
-<div id="lobby" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:80;">
-  <div style="width:920px;max-width:94vw;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);display:grid;grid-template-columns:1fr 340px;gap:12px;align-items:start">
-    <div>
-      <div style="display:flex;gap:12px;align-items:center">
-        <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700">DJ</div>
+    <main>
+      <section class="panel" id="mainPanel">
+        <!-- content changes by tab -->
+        <div id="content">
+          <!-- Video tab default content (rendered by JS) -->
+        </div>
+      </section>
+
+      <aside class="panel">
         <div>
-          <div style="font-weight:700;color:var(--accent)">Drums Jam — Start or Join</div>
-          <div class="small" style="margin-top:6px">Create a session or paste an ID to join. Online mode uses Supabase realtime.</div>
+          <h3 style="margin:0 0 6px 0">Session</h3>
+          <div style="color:var(--muted);font-size:13px">Local demo — no backend. Use Jam tab to create beats live.</div>
         </div>
-      </div>
 
-      <div style="margin-top:16px">
-        <div class="small">Create a Session</div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button id="createBtn" class="bn-item" style="flex:0 0 auto;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#021;padding:10px 16px;border-radius:8px">Create</button>
-          <button id="createDemoBtn" class="bn-item" style="flex:0 0 auto;padding:10px 16px;border-radius:8px">Local Demo</button>
+        <div class="list">
+          <div>
+            <h4 style="margin:8px 0 6px 0">Participants</h4>
+            <div class="participant"><div class="avatar"></div><div style="flex:1">You (host)</div><div style="font-size:12px;color:var(--muted)">audio muted</div></div>
+            <div class="participant"><div class="avatar" style="background:linear-gradient(90deg,#fda4af,#fb7185)"></div><div style="flex:1">Guest (placeholder)</div><div style="font-size:12px;color:var(--muted)">video off</div></div>
+          </div>
+
+          <div>
+            <h4 style="margin:8px 0 6px 0">Shortcuts</h4>
+            <div style="font-size:13px;color:var(--muted);line-height:1.6">Space → Play / Stop<br>Numbers 1–8 → Toggle steps<br>Click pad → Trigger sound</div>
+          </div>
+
         </div>
-      </div>
+        <div style="margin-top:12px;color:var(--muted);font-size:12px">Made with ❤️ — JamMeet prototype</div>
+      </aside>
+    </main>
 
-      <div style="margin-top:14px">
-        <div class="small">Join Session</div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <input id="joinInput" placeholder="Paste link or MEET-XXXX" style="flex:1;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:#fff"/>
-          <button id="joinBtn" class="bn-item" style="flex:0 0 auto;padding:10px 12px;border-radius:8px">Join</button>
-        </div>
-      </div>
-    </div>
-
-    <div>
-      <div class="small">Preview</div>
-      <div style="height:160px;border-radius:8px;background:linear-gradient(90deg,rgba(126,249,255,0.03),rgba(155,89,255,0.02));display:flex;align-items:center;justify-content:center;margin-top:8px;color:var(--muted)">Studio Preview</div>
-      <div style="margin-top:12px" class="small">Local sessions</div>
-      <div id="localSessions" class="small" style="margin-top:8px;color:var(--muted)">None</div>
-    </div>
+    <footer>Responsive single-file app — works on mobile, tablet and desktop.</footer>
   </div>
-</div>
 
-<!-- App -->
-<main id="app" style="display:none">
-  <div style="display:flex;flex-direction:column;gap:12px;padding:12px">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-      <div style="font-weight:700">Session: <span id="sessionId" class="small">—</span></div>
-      <div class="tabs">
-        <div id="tabJam" class="tab active">Jam</div>
-        <div id="tabVideo" class="tab">Video</div>
-        <div id="tabChat" class="tab">Chat</div>
+  <script>
+  // ----- Application state & helpers -----
+  const TABS = document.querySelectorAll('.tab');
+  const content = document.getElementById('content');
+  let currentTab = 'video';
+
+  const pads = [
+    { id: 'kick', label: 'Kick', color: ['#0f172a','#0ea5a4'] },
+    { id: 'snare', label: 'Snare', color: ['#0f172a','#7c3aed'] },
+    { id: 'hhc', label: 'HiHat C', color: ['#0f172a','#f97316'] },
+    { id: 'hho', label: 'HiHat O', color: ['#0f172a','#f59e0b'] },
+    { id: 'tom1', label: 'Tom 1', color: ['#0f172a','#ef4444'] },
+    { id: 'ride', label: 'Ride', color: ['#0f172a','#60a5fa'] }
+  ];
+  let sequence = pads.map(()=> new Array(8).fill(false));
+  let bpm = 100; let isPlaying=false; let stepIndex = 0; let playTimer = null;
+  const padToLine = { kick:4, snare:2, hhc:1, hho:0, tom1:3, ride:1 };
+
+  // WebAudio
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const audioCtx = new AudioContext();
+
+  function playKick(time){
+    const ctx = audioCtx; const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.frequency.setValueAtTime(150, time); o.frequency.exponentialRampToValueAtTime(0.001, time+0.5);
+    g.gain.setValueAtTime(1, time); g.gain.exponentialRampToValueAtTime(0.001, time+0.5);
+    o.connect(g); g.connect(ctx.destination); o.start(time); o.stop(time+0.6);
+  }
+  function playSnare(time){
+    const ctx = audioCtx;
+    const bufferSize = ctx.sampleRate * 0.2; const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0); for(let i=0;i<bufferSize;i++) data[i]=(Math.random()*2-1);
+    const noise = ctx.createBufferSource(); noise.buffer=buffer; const noiseFilter=ctx.createBiquadFilter(); noiseFilter.type='highpass'; noiseFilter.frequency.value=1000;
+    const noiseGain=ctx.createGain(); noiseGain.gain.setValueAtTime(1,time); noiseGain.gain.exponentialRampToValueAtTime(0.01,time+0.2);
+    noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(ctx.destination); noise.start(time); noise.stop(time+0.25);
+    const o = ctx.createOscillator(); o.type='triangle'; o.frequency.setValueAtTime(180,time); const g=ctx.createGain(); g.gain.setValueAtTime(0.7,time); g.gain.exponentialRampToValueAtTime(0.01,time+0.2);
+    o.connect(g); g.connect(ctx.destination); o.start(time); o.stop(time+0.25);
+  }
+  function playHiHat(time, open=false){
+    const ctx=audioCtx; const bufferSize = ctx.sampleRate * (open?0.12:0.05); const buffer=ctx.createBuffer(1,bufferSize,ctx.sampleRate);
+    const data=buffer.getChannelData(0); for(let i=0;i<bufferSize;i++) data[i]=(Math.random()*2-1);
+    const noise = ctx.createBufferSource(); noise.buffer=buffer; const filter=ctx.createBiquadFilter(); filter.type='highpass'; filter.frequency.value=7000;
+    const gain=ctx.createGain(); gain.gain.setValueAtTime(0.6,time); gain.gain.exponentialRampToValueAtTime(open?0.05:0.001,time + (open?0.6:0.06));
+    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination); noise.start(time); noise.stop(time + (open?0.6:0.06));
+  }
+  function playTom(time){ const ctx=audioCtx; const o=ctx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(250,time); o.frequency.exponentialRampToValueAtTime(120,time+0.3); const g=ctx.createGain(); g.gain.setValueAtTime(0.9,time); g.gain.exponentialRampToValueAtTime(0.01,time+0.3); o.connect(g); g.connect(ctx.destination); o.start(time); o.stop(time+0.4); }
+  function triggerPad(id, when=0){ const t = when || audioCtx.currentTime; if(id==='kick') playKick(t); if(id==='snare') playSnare(t); if(id==='hhc'||id==='hho') playHiHat(t, id==='hho'); if(id==='tom1') playTom(t); if(id==='ride') playHiHat(t,true); }
+
+  // ----- UI Rendering for tabs -----
+  function render(){
+    if(currentTab==='video') renderVideo();
+    else if(currentTab==='jam') renderJam();
+    else if(currentTab==='score') renderScore();
+    else renderFX();
+  }
+
+  // Video tab
+  let localStream = null; let cameraOn=false; let micOn=false; function renderVideo(){
+    content.innerHTML = `
+      <div class="video-wrap">
+        <div class="video-stage" id="videoStage">
+          <video id="localVideo" autoplay playsinline muted style="min-height:240px"></video>
+          <div id="cameraOverlay" style="position:absolute;left:12px;top:12px;color:var(--muted);font-size:13px"></div>
+        </div>
+        <div class="controls">
+          <button id="startBtn" class="btn primary">Start Camera</button>
+          <button id="micBtn" class="btn small">Mic Off</button>
+          <button id="shareBtn" class="btn small">Share Screen (placeholder)</button>
+          <button id="inviteBtn" class="btn small">Invite (placeholder)</button>
+        </div>
       </div>
-    </div>
+      <div style="margin-top:12px;color:var(--muted);font-size:13px">Controls: Toggle camera and mic. This demo shows local preview only (no signaling).</div>
+    `;
 
-    <div style="display:grid;grid-template-columns:1fr 360px;gap:12px">
-      <!-- Left / Jam -->
-      <div>
-        <div class="panel">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <div><strong>Drum Sequencer</strong><div class="small">64 steps — touch-friendly</div></div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <button id="playBtn" class="bn-item" style="padding:8px 12px">Play</button>
-              <button id="stopBtn" class="bn-item" style="padding:8px 12px">Stop</button>
+    document.getElementById('startBtn').addEventListener('click', async ()=>{
+      if(!cameraOn){
+        try{ localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:micOn}); document.getElementById('localVideo').srcObject = localStream; cameraOn=true; document.getElementById('startBtn').textContent='Stop Camera'; document.getElementById('cameraOverlay').textContent='Camera on'; }
+        catch(e){ alert('Camera or mic access denied/unavailable'); }
+      } else {
+        if(localStream){ localStream.getTracks().forEach(t=>t.stop()); localStream=null; }
+        document.getElementById('localVideo').srcObject=null; cameraOn=false; document.getElementById('startBtn').textContent='Start Camera'; document.getElementById('cameraOverlay').textContent='Camera off';
+      }
+    });
+    document.getElementById('micBtn').addEventListener('click', ()=>{
+      micOn = !micOn; document.getElementById('micBtn').textContent = micOn? 'Mic On' : 'Mic Off';
+    });
+  }
+
+  // Jam tab
+  function renderJam(){
+    content.innerHTML = `
+      <div class="jam-grid">
+        <div>
+          <div style="margin-bottom:10px"><strong>Drum Pads</strong></div>
+          <div class="pads" id="pads"></div>
+
+          <div style="margin-top:12px;background:rgba(255,255,255,0.02);padding:10px;border-radius:8px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><strong>Sequencer</strong><div style="color:var(--muted);font-size:13px">BPM <span id="bpmDisplay">${bpm}</span></div></div>
+            <input id="bpmRange" type="range" min="60" max="180" value="${bpm}" style="width:100%" />
+            <div style="margin-top:8px;overflow:auto">
+              <div id="seqArea"></div>
+            </div>
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <button id="playBtn" class="btn primary">Play</button>
+              <button id="resetBtn" class="btn small">Reset</button>
+              <button id="clearBtn" class="btn small">Clear</button>
             </div>
           </div>
-
-          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-            <div class="small">Tempo</div>
-            <input id="tempo" type="range" min="40" max="220" value="120"/>
-            <div id="tempoLabel" class="small">120 BPM</div>
-            <div style="flex:1"></div>
-            <button id="clearBtn" class="bn-item">Clear</button>
-            <button id="saveBtn" class="bn-item">Save</button>
-            <button id="loadBtn" class="bn-item">Load</button>
-          </div>
-
-          <div class="grid-wrap panel" style="padding:6px">
-            <div id="gridHeader" class="grid-header"></div>
-            <div id="gridRows" class="grid-rows"></div>
-          </div>
         </div>
 
-        <div class="panel notation" style="margin-top:10px">
-          <canvas id="notation" style="width:100%;height:180px"></canvas>
+        <div>
+          <div><strong>Mixer & Notes</strong></div>
+          <div style="margin-top:8px">
+            ${pads.map(p=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="width:80px">${p.label}</div><input class="vol" data-pad="${p.id}" type="range" min="0" max="1" step="0.01" value="0.9" style="flex:1" /><div style="font-size:12px;color:var(--muted);width:40px;text-align:right">Line ${padToLine[p.id]+1}</div></div>`).join('')}
+          </div>
+
+          <div style="margin-top:12px">
+            <strong>Notes / Annotations</strong>
+            <textarea id="notes" style="width:100%;height:120px;margin-top:8px;border-radius:8px;padding:8px;background:transparent;border:1px solid rgba(255,255,255,0.03);color:inherit" placeholder="Write performance notes / notation hints..."></textarea>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button id="expJson" class="btn small">Export Sequence (JSON)</button>
+            <button id="expPng" class="btn small">Download Notation (PNG)</button>
+          </div>
         </div>
       </div>
+    `;
 
-      <!-- Right / Controls -->
-      <aside style="display:flex;flex-direction:column;gap:12px">
-        <div class="panel">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div><strong>Recording</strong><div class="small">Local audio</div></div>
-            <div><button id="recordBtn" class="bn-item">Record</button></div>
-          </div>
-          <div id="recordings" style="margin-top:8px"></div>
-        </div>
+    // render pads
+    const padsWrap = document.getElementById('pads'); padsWrap.innerHTML = '';
+    pads.forEach((p, i)=>{
+      const btn = document.createElement('div'); btn.className='pad'; btn.textContent = p.label; btn.style.background = `linear-gradient(90deg, ${p.color[0]}, ${p.color[1]})`; btn.addEventListener('click', ()=>{ triggerPad(p.id); animatePad(btn);} ); padsWrap.appendChild(btn);
+    });
 
-        <div class="panel">
-          <div style="font-weight:700">Session Link</div>
-          <div id="sessionLink" class="small" style="margin-top:6px;color:var(--muted)">—</div>
-          <div style="margin-top:8px"><button id="copyBtn" class="bn-item">Copy Link</button></div>
-        </div>
-
-        <div class="panel">
-          <div style="font-weight:700">Participants</div>
-          <div id="presenceList" class="small" style="margin-top:8px;color:var(--muted)">—</div>
-          <div style="margin-top:8px"><button id="startCallBtn" class="bn-item">Start Call</button><button id="endCallBtn" class="bn-item" style="margin-left:8px">End Call</button></div>
-        </div>
-      </aside>
-    </div>
-
-    <div class="panel" id="videoPanel" style="display:none">
-      <div style="display:flex;gap:8px;align-items:flex-start">
-        <div style="flex:1"><video id="remoteVideo" autoplay playsinline style="width:100%;height:360px;background:#000;border-radius:8px"></video></div>
-        <div style="width:200px;display:flex;flex-direction:column;gap:8px">
-          <video id="localVideo" autoplay muted playsinline style="width:100%;height:140px;background:#000;border-radius:8px"></video>
-          <div style="display:flex;gap:8px"><button id="camBtn" class="bn-item">Camera</button><button id="micBtn" class="bn-item">Mic</button></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</main>
-
-<div id="bottomNav" class="bottom-nav" style="display:none">
-  <div class="bn-item active" data-tab="jam">🎧<div style="font-size:11px">Jam</div></div>
-  <div class="bn-item" data-tab="video">🎥<div style="font-size:11px">Video</div></div>
-  <div class="bn-item" data-tab="chat">💬<div style="font-size:11px">Chat</div></div>
-  <div class="bn-item" data-tab="people">👥<div style="font-size:11px">People</div></div>
-</div>
-
-<footer>Ready — paste Supabase credentials in the script to enable the online features.</footer>
-
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-
-<script>
-/* ------------------ CONFIG ------------------ **
- * Replace these with your Supabase details
- * ------------------ */
-const SUPABASE_URL = 'https://YOUR_SUPABASE_URL.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-const APP_ORIGIN = window.location.origin;
-let supabase = null;
-if (!SUPABASE_URL.includes('YOUR_SUPABASE') && window.supabase && typeof window.supabase.createClient === 'function') {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-} else {
-  console.warn('Supabase not configured — running local demo mode.');
-}
-
-/* ------------------ DOM ------------------ */
-const lobby = document.getElementById('lobby');
-const app = document.getElementById('app');
-const createBtn = document.getElementById('createBtn');
-const createDemoBtn = document.getElementById('createDemoBtn');
-const joinInput = document.getElementById('joinInput');
-const joinBtn = document.getElementById('joinBtn');
-const localSessions = document.getElementById('localSessions');
-const sessionIdEl = document.getElementById('sessionId');
-const sessionLinkEl = document.getElementById('sessionLink');
-const presenceList = document.getElementById('presenceList');
-const gridHeader = document.getElementById('gridHeader');
-const gridRows = document.getElementById('gridRows');
-const notation = document.getElementById('notation');
-const playBtn = document.getElementById('playBtn');
-const stopBtn = document.getElementById('stopBtn');
-const tempo = document.getElementById('tempo');
-const tempoLabel = document.getElementById('tempoLabel');
-const clearBtn = document.getElementById('clearBtn');
-const saveBtn = document.getElementById('saveBtn');
-const loadBtn = document.getElementById('loadBtn');
-const copyBtn = document.getElementById('copyBtn');
-const recordBtn = document.getElementById('recordBtn');
-const recordingsEl = document.getElementById('recordings');
-const startCallBtn = document.getElementById('startCallBtn');
-const endCallBtn = document.getElementById('endCallBtn');
-const remoteVideo = document.getElementById('remoteVideo');
-const localVideo = document.getElementById('localVideo');
-const videoPanel = document.getElementById('videoPanel');
-const bottomNav = document.getElementById('bottomNav');
-const bnItems = Array.from(document.querySelectorAll('.bn-item'));
-
-const tabJam = document.getElementById('tabJam');
-const tabVideo = document.getElementById('tabVideo');
-const tabChat = document.getElementById('tabChat');
-
-/* ------------------ State ------------------ */
-const INSTR = [
-  {id:'kick',label:'Kick'},
-  {id:'snare',label:'Snare'},
-  {id:'hihat',label:'Hi-Hat'},
-  {id:'tom1',label:'Tom 1'},
-  {id:'tom2',label:'Tom 2'},
-  {id:'floor',label:'Floor Tom'}
-];
-let STEPS = 64;
-let seq = {};
-INSTR.forEach(i=>seq[i.id] = new Array(STEPS).fill(false));
-
-let currentSession = null;
-let isLocalDemo = false;
-let userId = 'u-'+Math.random().toString(36).slice(2,8);
-
-/* ------------------ Helpers ------------------ */
-function makeId(){ return 'MEET-'+Math.random().toString(36).slice(2,8).toUpperCase(); }
-function showApp(){ lobby.style.display='none'; app.style.display='block'; if(window.innerWidth<=720) bottomNav.style.display='flex'; }
-
-/* ------------------ Grid build ------------------ */
-function buildHeader(){
-  gridHeader.innerHTML = '';
-  const h = document.createElement('div'); h.className = 'grid-header';
-  h.innerHTML = '<div class="label small">Inst</div>';
-  for(let i=0;i<STEPS;i++){
-    const d = document.createElement('div');
-    d.className='pad ghost';
-    d.style.height='28px';
-    d.style.display='flex';
-    d.style.alignItems='center';
-    d.style.justifyContent='center';
-    d.style.fontSize='12px';
-    d.textContent = i+1;
-    h.appendChild(d);
-  }
-  gridHeader.appendChild(h);
-}
-function buildRows(){
-  gridRows.innerHTML = '';
-  INSTR.forEach(inst=>{
-    const r = document.createElement('div'); r.className='row';
-    const lab = document.createElement('div'); lab.className='label'; lab.textContent = inst.label;
-    r.appendChild(lab);
-    for(let i=0;i<STEPS;i++){
-      const p = document.createElement('div');
-      p.className = 'pad ' + (seq[inst.id][i] ? 'active' : 'ghost');
-      p.dataset.inst = inst.id; p.dataset.i = i;
-      p.innerHTML = seq[inst.id][i] ? '●' : '';
-      p.addEventListener('click', ()=> {
-        seq[inst.id][i] = !seq[inst.id][i];
-        p.classList.toggle('active', seq[inst.id][i]);
-        p.classList.toggle('ghost', !seq[inst.id][i]);
-        p.innerHTML = seq[inst.id][i] ? '●' : '';
-        renderNotation();
-        pushState();
-        // send via datachannel if present
-        if(pcData && pcData.readyState === 'open') pcData.send(JSON.stringify({type:'step',inst:inst.id,i,val:seq[inst.id][i]}));
+    // seq area
+    const seqArea = document.getElementById('seqArea'); seqArea.innerHTML = '';
+    sequence.forEach((row, rIdx)=>{
+      const rowDiv = document.createElement('div'); rowDiv.className='seq-row';
+      const label = document.createElement('div'); label.style.width='72px'; label.style.textAlign='right'; label.style.marginRight='8px'; label.textContent = pads[rIdx].label;
+      rowDiv.appendChild(label);
+      const stepsDiv = document.createElement('div'); stepsDiv.className='seq-steps';
+      row.forEach((cell,cIdx)=>{
+        const s = document.createElement('div'); s.className='step'+(cell?' on':''); s.textContent = cIdx+1; if(isPlaying && stepIndex===cIdx) s.classList.add('playing');
+        s.addEventListener('click', ()=>{ sequence[rIdx][cIdx]=!sequence[rIdx][cIdx]; render(); });
+        stepsDiv.appendChild(s);
       });
-      r.appendChild(p);
-    }
-    gridRows.appendChild(r);
+      rowDiv.appendChild(stepsDiv); seqArea.appendChild(rowDiv);
+    });
+
+    // controls
+    document.getElementById('bpmRange').addEventListener('input', (e)=>{ bpm = Number(e.target.value); document.getElementById('bpmDisplay').textContent=bpm; if(isPlaying) restartLoop(); });
+    document.getElementById('playBtn').addEventListener('click', ()=>{ if(!isPlaying) startLoop(); else stopLoop(); render(); });
+    document.getElementById('resetBtn').addEventListener('click', ()=>{ stepIndex=0; render(); });
+    document.getElementById('clearBtn').addEventListener('click', ()=>{ sequence = pads.map(()=> new Array(8).fill(false)); render(); });
+    document.getElementById('expJson').addEventListener('click', ()=>{ const data = {bpm, sequence, pads}; const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='sequence.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+    document.getElementById('expPng').addEventListener('click', ()=>{ alert('PNG export of notation: use Score tab → right-click save or use screenshot.'); });
+
+    // volume sliders (non-functional in simple synth but present)
+    document.querySelectorAll('.vol').forEach(el=>el.addEventListener('input', ()=>{}));
+  }
+
+  // Score tab
+  function renderScore(){
+    // create notation svg for the current stepIndex
+    content.innerHTML = `
+      <div>
+        <div style="margin-bottom:8px"><strong>Five-line Notation (live)</strong></div>
+        <div class="staff" id="staffArea"></div>
+        <div style="margin-top:8px;display:flex;align-items:center;gap:8px"><label style="color:var(--muted)">View step</label><input id="scoreStep" type="range" min="0" max="7" value="${stepIndex}" style="flex:1" /><div style="width:36px;text-align:right">${stepIndex+1}</div></div>
+        <div style="margin-top:8px;color:var(--muted);font-size:13px">Each dot represents a drum hit on the mapped staff line. Use Jam tab to edit the sequence and Score to preview.</div>
+      </div>
+    `;
+
+    drawStaff(document.getElementById('staffArea'), stepIndex);
+    document.getElementById('scoreStep').addEventListener('input',(e)=>{ stepIndex = Number(e.target.value); document.querySelector('#scoreStep + div')?.remove(); drawStaff(document.getElementById('staffArea'), stepIndex); document.querySelector('#scoreStep').nextSibling && (document.querySelector('#scoreStep').nextSibling.textContent = stepIndex+1); });
+  }
+
+  function renderFX(){
+    content.innerHTML = `
+      <div style="text-align:center;padding:18px">
+        <h3 style="margin:0 0 8px 0">Live FX & Visuals</h3>
+        <div style="color:var(--muted);margin-bottom:12px">Play with reverb, delay and beat visuals (placeholders).</div>
+        <div style="display:flex;gap:8px;justify-content:center"><button class="btn small">Reverb</button><button class="btn small">Delay</button><button class="btn small">Beat Visualizer</button></div>
+      </div>
+    `;
+  }
+
+  // draw staff SVG with notes for a step
+  function drawStaff(container, showStep){
+    const w = Math.min(container.clientWidth || 800, 900); const h = 140; container.innerHTML = '';
+    const xmlns = 'http://www.w3.org/2000/svg'; const svg = document.createElementNS(xmlns,'svg'); svg.setAttribute('viewBox',`0 0 ${w} ${h}`); svg.style.width='100%'; svg.style.height='140px';
+    // lines
+    const left=20; const right=w-20; for(let i=0;i<5;i++){ const y=20 + i*24; const line = document.createElementNS(xmlns,'line'); line.setAttribute('x1',left); line.setAttribute('x2',right); line.setAttribute('y1',y); line.setAttribute('y2',y); line.setAttribute('stroke','#cbd5e1'); line.setAttribute('stroke-opacity','0.25'); svg.appendChild(line);} 
+    // step columns
+    for(let i=0;i<8;i++){ const x = left + 60 + i*( (right-left-120)/7 ); const l = document.createElementNS(xmlns,'line'); l.setAttribute('x1',x); l.setAttribute('x2',x); l.setAttribute('y1',8); l.setAttribute('y2',h-8); l.setAttribute('stroke','#ffffff'); l.setAttribute('stroke-opacity','0.03'); svg.appendChild(l); }
+    // notes
+    const notes = sequence.map((row,rIdx)=>({pad:pads[rIdx].id,active:row[showStep],line:padToLine[pads[rIdx].id]})).filter(n=>n.active);
+    notes.forEach((n,idx)=>{ const x = left + 60 + showStep*( (right-left-120)/7 ); const y = 20 + (4 - n.line)*24; const c = document.createElementNS(xmlns,'circle'); c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',8); c.setAttribute('fill','#06b6d4'); svg.appendChild(c); });
+    container.appendChild(svg);
+  }
+
+  // ----- Sequencer loop control -----
+  function startLoop(){ if(audioCtx.state==='suspended') audioCtx.resume(); isPlaying=true; scheduleLoop(); }
+  function stopLoop(){ isPlaying=false; if(playTimer){ clearInterval(playTimer); playTimer=null; } }
+  function restartLoop(){ stopLoop(); if(isPlaying) startLoop(); }
+  function scheduleLoop(){ if(playTimer) clearInterval(playTimer); const interval = (60 / bpm) / 2 * 1000; playTimer = setInterval(()=>{ stepIndex = (stepIndex+1)%8; // trigger sounds
+      const t = audioCtx.currentTime + 0.02; sequence.forEach((row,rIdx)=>{ if(row[stepIndex]) triggerPad(pads[rIdx].id, t); }); render(); }, interval); }
+
+  // small UI helpers
+  function animatePad(el){ el.style.transform='scale(0.98)'; setTimeout(()=>el.style.transform='scale(1)',80); }
+
+  // keyboard controls
+  window.addEventListener('keydown',(e)=>{
+    if(e.code==='Space'){ e.preventDefault(); if(!isPlaying) startLoop(); else stopLoop(); render(); }
+    if(e.key>='1' && e.key<='8'){ const idx = Number(e.key)-1; // toggle first row's step for demo
+      // toggle every row at that column (or you could choose a focused row). We'll toggle all for quick demo.
+      sequence.forEach(row=> row[idx] = !row[idx]); render(); }
   });
-}
 
-/* ------------------ Notation ------------------ */
-const canvas = notation;
-const ctx = canvas.getContext('2d');
-function resizeCanvas(){
-  canvas.width = canvas.clientWidth * devicePixelRatio;
-  canvas.height = canvas.clientHeight * devicePixelRatio;
-  ctx.setTransform(1,0,0,1,0,0);
-  ctx.scale(devicePixelRatio, devicePixelRatio);
-  drawStaff();
-}
-window.addEventListener('resize', resizeCanvas); window.addEventListener('load', resizeCanvas);
-function drawStaff(){
-  const w = canvas.clientWidth, h = canvas.clientHeight;
-  ctx.clearRect(0,0,w,h); ctx.strokeStyle='#444'; ctx.lineWidth=1;
-  const margin = 12, usable = h - margin*2, spacing = usable/6;
-  for(let i=0;i<5;i++){ const y = margin + spacing*(i+1); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); }
-  renderNotation();
-}
-function renderNotation(playhead=-1){
-  const w = canvas.clientWidth, h = canvas.clientHeight;
-  ctx.clearRect(0,0,w,h);
-  drawLinesOnly();
-  const left = 18, right = w-18, timeline = right-left, stepW = timeline / STEPS;
-  const margin = 12, slot = (h-margin*2)/6;
-  const lines = []; for(let i=1;i<=5;i++) lines.push(margin+slot*i);
-  const spaces = []; for(let i=0;i<4;i++) spaces.push((lines[i]+lines[i+1])/2);
-  const pos = { kick: spaces[0], floor: spaces[1], snare: spaces[2], tom1: spaces[3], tom2: lines[3], hihat: lines[4] };
+  // tab switching
+  TABS.forEach(t=>t.addEventListener('click', ()=>{ TABS.forEach(x=>x.classList.remove('active')); t.classList.add('active'); currentTab = t.dataset.tab; render(); }));
 
-  // ghost placeholders
-  INSTR.forEach(inst=>{
-    for(let i=0;i<STEPS;i++){
-      const x = left + i*stepW + stepW/2;
-      const y = pos[inst.id];
-      ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.03)'; ctx.arc(x,y,5,0,Math.PI*2); ctx.fill();
-    }
-  });
+  // initial render
+  render();
 
-  // active notes
-  INSTR.forEach(inst=>{
-    for(let i=0;i<STEPS;i++){
-      if(seq[inst.id][i]){
-        const x = left + i*stepW + stepW/2;
-        const y = pos[inst.id];
-        if(inst.id === 'hihat'){
-          ctx.beginPath(); ctx.strokeStyle='#81d4fa'; ctx.lineWidth=2;
-          ctx.moveTo(x-6,y-6); ctx.lineTo(x+6,y+6); ctx.moveTo(x-6,y+6); ctx.lineTo(x+6,y-6); ctx.stroke();
-        } else {
-          ctx.beginPath(); ctx.fillStyle = (inst.id==='kick'?'#ff8a80': inst.id==='snare'?'#ffd54f':'#ffd180');
-          ctx.ellipse(x,y,6,4,0,0,Math.PI*2); ctx.fill();
-          if(['snare','tom1','tom2','floor'].includes(inst.id)){
-            ctx.beginPath(); ctx.strokeStyle='#ffd54f'; ctx.lineWidth=2; ctx.moveTo(x+4,y); ctx.lineTo(x+4,y-20); ctx.stroke();
-          }
-        }
-      }
-    }
-  });
-
-  if(playhead>=0){
-    ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fillRect(left+playhead*stepW,6,stepW,h-12);
-  }
-}
-function drawLinesOnly(){ const w=canvas.clientWidth, h=canvas.clientHeight; ctx.save(); ctx.strokeStyle='#444'; ctx.lineWidth=1; const margin=12, usable=h-margin*2, spacing=usable/6; for(let i=0;i<5;i++){ const y = margin + spacing*(i+1); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); } ctx.restore(); }
-
-/* ------------------ Audio ------------------ */
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
-const master = audioCtx.createGain(); master.gain.value = 0.9; master.connect(audioCtx.destination);
-
-function playKick(t){ const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(45,t+0.18); g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.35); o.connect(g); g.connect(master); o.start(t); o.stop(t+0.35); }
-function playSnare(t){ const buf = audioCtx.createBuffer(1,audioCtx.sampleRate*0.18,audioCtx.sampleRate); const d = buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1)*Math.exp(-i/d.length*6); const src = audioCtx.createBufferSource(); src.buffer = buf; const f = audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.value = 2200; const g = audioCtx.createGain(); g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.18); src.connect(f); f.connect(g); g.connect(master); src.start(t); src.stop(t+0.18); }
-function playHiHat(t){ const buf = audioCtx.createBuffer(1,audioCtx.sampleRate*0.06,audioCtx.sampleRate); const d = buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1)*Math.exp(-i/d.length*10); const src = audioCtx.createBufferSource(); src.buffer = buf; const f = audioCtx.createBiquadFilter(); f.type='highpass'; f.frequency.value = 6000; const g = audioCtx.createGain(); g.gain.setValueAtTime(0.6,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.06); src.connect(f); f.connect(g); g.connect(master); src.start(t); src.stop(t+0.08); }
-function playTom(t,p){ const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(p,t); o.frequency.exponentialRampToValueAtTime(p*0.7,t+0.18); g.gain.setValueAtTime(0.9,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.35); o.connect(g); g.connect(master); o.start(t); o.stop(t+0.35); }
-
-/* ------------------ Transport ------------------ */
-let playing=false, playIndex=0, scheduler=null;
-function schedule(){
-  const bpm = parseInt(tempo.value);
-  const interval = (60/bpm)/4*1000; // 64 steps = 16th ticks across 4 bars
-  const t = audioCtx.currentTime;
-  INSTR.forEach(inst=>{
-    if(seq[inst.id][playIndex]){
-      if(inst.id==='kick') playKick(t);
-      if(inst.id==='snare') playSnare(t);
-      if(inst.id==='hihat') playHiHat(t);
-      if(inst.id==='tom1') playTom(t,520);
-      if(inst.id==='tom2') playTom(t,380);
-      if(inst.id==='floor') playTom(t,260);
-    }
-  });
-  renderNotation(playIndex);
-  playIndex = (playIndex + 1) % STEPS;
-  scheduler = setTimeout(schedule, interval);
-}
-playBtn.addEventListener('click', ()=>{ if(playing) return; playing=true; playIndex=0; schedule(); });
-stopBtn.addEventListener('click', ()=>{ if(!playing) return; playing=false; clearTimeout(scheduler); renderNotation(-1); });
-tempo.addEventListener('input', ()=>{ tempoLabel.textContent = tempo.value + ' BPM'; });
-
-clearBtn.addEventListener('click', ()=>{ INSTR.forEach(i=>seq[i.id].fill(false)); buildRows(); renderNotation(); pushState(); });
-
-/* ------------------ Save/Load (local) ------------------ */
-saveBtn.addEventListener('click', ()=> {
-  const name = prompt('Save pattern name','pattern1'); if(!name) return;
-  const store = JSON.parse(localStorage.getItem('dj_patterns')||'{}'); store[name] = JSON.stringify(seq); localStorage.setItem('dj_patterns',JSON.stringify(store)); alert('Saved: '+name);
-});
-loadBtn.addEventListener('click', ()=> {
-  const store = JSON.parse(localStorage.getItem('dj_patterns')||'{}'); const keys = Object.keys(store); if(!keys.length) return alert('No patterns'); const name = prompt('Load pattern name. Available: '+keys.join(', '), keys[0]); if(!name || !store[name]) return alert('Not found'); seq = JSON.parse(store[name]); buildRows(); renderNotation(); pushState(); alert('Loaded: '+name);
-});
-
-/* ------------------ Persistence & Realtime (Supabase) ------------------ */
-async function pushState(){
-  if(!currentSession) return;
-  const payload = { session_id: currentSession.id, state: JSON.stringify(seq) };
-  if(supabase){
-    try{ await supabase.from('sequencer_state').upsert(payload); }catch(e){ console.warn(e); }
-  } else {
-    window._localSessions = window._localSessions || {}; if(currentSession) window._localSessions[currentSession.id]= { state: JSON.stringify(seq), created_at: new Date().toISOString() };
-    localSessions.textContent = currentSession.id;
-  }
-}
-function applyRemote(state){
-  INSTR.forEach(i=>{ if(state[i.id] && Array.isArray(state[i.id])) seq[i.id] = state[i.id].slice(0, STEPS); });
-  buildRows(); renderNotation();
-}
-let seqSub = null;
-function subscribeSequencer(id){
-  if(!supabase) return;
-  try{ if(seqSub && seqSub.unsubscribe) seqSub.unsubscribe(); }catch(e){}
-  seqSub = supabase.channel('seq-'+id).on('postgres_changes',{event:'*',schema:'public',table:'sequencer_state',filter:`session_id=eq.${id}`}, payload => {
-    try{ const row = payload.new || payload.record; if(row && row.state) applyRemote(JSON.parse(row.state)); }catch(e){ console.warn(e); }
-  }).subscribe();
-}
-
-/* ------------------ Chat ------------------ */
-async function sendChat(msg){
-  if(!currentSession) return;
-  const payload = { session_id: currentSession.id, user: userId, message: msg };
-  if(supabase){ try{ await supabase.from('chat_messages').insert(payload); }catch(e){ console.warn(e); } }
-}
-function addChat(user,msg){
-  const el = document.createElement('div'); el.className='small'; el.textContent = user+': '+msg;
-  // append to recordings area for brevity - you can instead place a dedicated chat panel
-  recordingsEl.prepend(el);
-}
-let chatSub = null;
-function subscribeChat(id){
-  if(!supabase) return;
-  try{ if(chatSub && chatSub.unsubscribe) chatSub.unsubscribe(); }catch(e){}
-  chatSub = supabase.channel('chat-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages',filter:`session_id=eq.${id}`}, payload => {
-    try{ const row = payload.new || payload.record; if(row) addChat(row.user,row.message); }catch(e){ console.warn(e); }
-  }).subscribe();
-}
-
-/* ------------------ Presence ------------------ */
-async function setPresence(){
-  if(!currentSession || !supabase) return;
-  try{ await supabase.from('presence').upsert({ session_id: currentSession.id, user: userId, last_seen: new Date().toISOString() }); }catch(e){ console.warn(e); }
-}
-let presSub = null;
-function subscribePresence(id){
-  if(!supabase) return;
-  try{ if(presSub && presSub.unsubscribe) presSub.unsubscribe(); }catch(e){}
-  presSub = supabase.channel('pres-'+id).on('postgres_changes',{event:'*',schema:'public',table:'presence',filter:`session_id=eq.${id}`}, payload => {
-    // refresh list quickly
-    (async ()=>{
-      try{ const { data } = await supabase.from('presence').select('user').eq('session_id',id); if(data) presenceList.textContent = data.map(x=>x.user).join(', '); }catch(e){ console.warn(e); }
-    })();
-  }).subscribe();
-}
-
-/* ------------------ WebRTC signaling & calls ------------------ */
-let pc = null; let pcData = null; let localStream = null;
-async function getLocalMedia(){ try{ localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true}); localVideo.srcObject = localStream; }catch(e){ console.warn(e); } }
-getLocalMedia();
-
-function setupPC(){
-  pc = new RTCPeerConnection({ iceServers:[{urls:'stun:stun.l.google.com:19302'}] });
-  pc.ontrack = ev => { remoteVideo.srcObject = ev.streams[0]; videoPanel.style.display = 'block'; };
-  pc.ondatachannel = ev => { pcData = ev.channel; pcData.onmessage = e => { try{ const d = JSON.parse(e.data); if(d.type==='step'){ seq[d.inst][d.i] = d.val; buildRows(); renderNotation(); } }catch(err){ console.warn(err); } }; };
-  pc.onicecandidate = async ev => { if(ev.candidate && supabase) { await supabase.from('webrtc_signaling').insert({ session_id: currentSession.id, kind:'ice', payload: ev.candidate.toJSON() }); } };
-  if(localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-}
-
-async function startCall(){
-  if(!currentSession || !supabase) return alert('Signaling requires Supabase and an active session');
-  setupPC();
-  pcData = pc.createDataChannel('seq');
-  pcData.onmessage = e => { try{ const d = JSON.parse(e.data); if(d.type==='step'){ seq[d.inst][d.i] = d.val; buildRows(); renderNotation(); } }catch(err){ console.warn(err); } };
-  const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
-  await supabase.from('webrtc_signaling').insert({ session_id: currentSession.id, kind:'offer', payload: offer });
-  subscribeSignaling(currentSession.id);
-}
-
-async function subscribeSignaling(id){
-  if(!supabase) return;
-  supabase.channel('webrtc-'+id).on('postgres_changes',{event:'*',schema:'public',table:'webrtc_signaling',filter:`session_id=eq.${id}`}, async payload => {
-    try{
-      const row = payload.new || payload.record;
-      if(!row) return;
-      if(row.kind === 'offer'){
-        // answer
-        if(pc) return;
-        setupPC();
-        if(localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-        await pc.setRemoteDescription(row.payload);
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        await supabase.from('webrtc_signaling').insert({ session_id: id, kind:'answer', payload: answer });
-      } else if(row.kind === 'answer' && pc && !pc.currentRemoteDescription){
-        await pc.setRemoteDescription(row.payload);
-      } else if(row.kind === 'ice' && pc){
-        try{ await pc.addIceCandidate(row.payload); }catch(e){ console.warn('ice add failed', e); }
-      }
-    } catch(e){ console.warn(e); }
-  }).subscribe();
-}
-
-async function endCall(){
-  if(pc){ pc.close(); pc = null; }
-  pcData = null;
-  videoPanel.style.display = 'none';
-}
-
-/* ------------------ Session create/join flow ------------------ */
-async function createSession(){
-  const id = makeId();
-  const link = APP_ORIGIN + '/session/' + id;
-  currentSession = { id, link }; isLocalDemo = false;
-  sessionIdEl.textContent = id; sessionLinkEl.textContent = link;
-  showApp();
-  if(supabase){
-    try{
-      await supabase.from('sessions').upsert({ session_id: id, created_at: new Date().toISOString() });
-      await supabase.from('sequencer_state').upsert({ session_id: id, state: JSON.stringify(seq) });
-      subscribeSequencer(id); subscribeChat(id); subscribePresence(id);
-      setInterval(setPresence, 15_000); setPresence();
-    }catch(e){ console.warn(e); }
-  } else {
-    window._localSessions = window._localSessions || {}; window._localSessions[id] = { state: JSON.stringify(seq), created_at: new Date().toISOString() };
-    isLocalDemo = true; localSessions.textContent = id;
-  }
-}
-
-async function createDemo(){ await createSession(); isLocalDemo = true; }
-
-async function joinSession(){
-  const raw = (joinInput.value || '').trim();
-  if(!raw) return alert('Paste a meeting link or ID');
-  const id = raw.includes('/') ? raw.split('/').pop() : raw;
-  currentSession = { id, link: APP_ORIGIN + '/session/' + id };
-  sessionIdEl.textContent = id; sessionLinkEl.textContent = currentSession.link;
-  showApp();
-  if(supabase){
-    try{
-      const { data } = await supabase.from('sequencer_state').select('state').eq('session_id', id).limit(1).single();
-      if(data && data.state) applyRemote(JSON.parse(data.state));
-      subscribeSequencer(id); subscribeChat(id); subscribePresence(id); setInterval(setPresence, 15000); setPresence();
-      subscribeSignaling(id);
-    }catch(e){ console.warn(e); }
-  } else {
-    const s = window._localSessions && window._localSessions[id];
-    if(s && s.state){ applyRemote(JSON.parse(s.state)); isLocalDemo = true; } else { alert('Local demo not found'); }
-  }
-}
-
-/* ------------------ UI wiring ------------------ */
-createBtn.addEventListener('click', createSession);
-createDemoBtn.addEventListener('click', createDemo);
-joinBtn.addEventListener('click', joinSession);
-copyBtn.addEventListener('click', ()=>{ if(!currentSession) return alert('No session'); navigator.clipboard.writeText(currentSession.link).then(()=>alert('Link copied')); });
-startCallBtn.addEventListener('click', startCall);
-endCallBtn.addEventListener('click', endCall);
-
-/* bottom nav behavior */
-function refreshBottom(){ if(window.innerWidth<=720) bottomNav.style.display='flex'; else bottomNav.style.display='none'; }
-window.addEventListener('resize', refreshBottom); refreshBottom();
-bnItems.forEach(item => item.addEventListener('click', ()=>{ bnItems.forEach(b=>b.classList.remove('active')); item.classList.add('active'); const t = item.dataset.tab; if(t==='jam') tabJam.click(); else if(t==='video') tabVideo.click(); else if(t==='chat') tabChat.click(); else if(t==='people') alert('Participants: ' + (presenceList.textContent || 'none'); }) );
-
-/* tabs */
-[tabJam,tabVideo,tabChat].forEach(t => t.addEventListener('click', ()=> {
-  [tabJam,tabVideo,tabChat].forEach(x=>x.classList.remove('active')); t.classList.add('active');
-  if(t === tabJam) { videoPanel.style.display = 'none'; }
-  else if(t === tabVideo) { videoPanel.style.display = 'block'; }
-  else { videoPanel.style.display = 'none'; }
-}));
-
-/* record (local) */
-let mediaRecorder = null, recordedChunks = [];
-recordBtn.addEventListener('click', ()=>{
-  if(mediaRecorder && mediaRecorder.state === 'recording'){ mediaRecorder.stop(); recordBtn.textContent = 'Record'; }
-  else {
-    const dest = audioCtx.createMediaStreamDestination();
-    master.connect(dest);
-    mediaRecorder = new MediaRecorder(dest.stream);
-    recordedChunks = [];
-    mediaRecorder.ondataavailable = e => { if(e.data.size) recordedChunks.push(e.data); };
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-      const url = URL.createObjectURL(blob);
-      const wrap = document.createElement('div');
-      const a = document.createElement('audio'); a.controls = true; a.src = url; wrap.appendChild(a);
-      const d = document.createElement('a'); d.href = url; d.download = 'rec.webm'; d.textContent = ' Download'; d.style.marginLeft = '8px'; wrap.appendChild(d);
-      recordings.appendChild(wrap);
-    };
-    mediaRecorder.start(); recordBtn.textContent = 'Stop';
-  }
-});
-
-/* ------------------ Init ------------------ */
-buildHeader(); buildRows(); resizeCanvas(); renderNotation();
-for(let i=0;i<STEPS;i+=4) seq.hihat[i]=true; seq.kick[0]=true; seq.kick[16]=true; seq.snare[8]=true; seq.snare[24]=true; buildRows(); renderNotation();
-
-</script>
+  // expose some functions for console tinkering
+  window._jammeet = {sequence, pads, triggerPad, startLoop, stopLoop};
+  </script>
 </body>
 </html>
- 
