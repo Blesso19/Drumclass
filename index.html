@@ -282,5 +282,42 @@ window.addEventListener('resize',refreshBottom); refreshBottom();
 /* init */
 buildTracks(); resize(); renderNotation(); for(let i=0;i<STEPS;i+=4) seq.hihat[i]=true; seq.kick[0]=true; seq.kick[16]=true; seq.snare[8]=true; seq.snare[24]=true; buildTracks(); renderNotation();
 </script>
+<script>
+// Lobby buttons
+const lobby = document.getElementById('lobby');
+const app = document.getElementById('app');
+const lobbyCreate = document.getElementById('lobbyCreate');
+const demoCreate = document.getElementById('demoCreate');
+const lobbyJoinBtn = document.getElementById('lobbyJoinBtn');
+const lobbyJoinInput = document.getElementById('lobbyJoinInput');
+const sessionIdText = document.getElementById('sessionIdText');
+const sessionLinkBox = document.getElementById('sessionLinkBox');
+
+function enterSession(sessionId){
+  lobby.style.display = 'none';
+  app.style.display = 'grid';
+  sessionIdText.querySelector('span').textContent = sessionId;
+  sessionLinkBox.textContent = `https://example.com/session/${sessionId}`;
+}
+
+// Create session button
+lobbyCreate.addEventListener('click', ()=>{
+  const newId = 'MEET-' + Math.floor(Math.random()*9000+1000);
+  enterSession(newId);
+});
+
+// Create local demo
+demoCreate.addEventListener('click', ()=>{
+  const demoId = 'LOCAL-DEMO';
+  enterSession(demoId);
+});
+
+// Join session
+lobbyJoinBtn.addEventListener('click', ()=>{
+  const val = lobbyJoinInput.value.trim();
+  if(val) enterSession(val);
+});
+</script>
+
 </body>
 </html>
