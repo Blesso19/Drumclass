@@ -1,16 +1,13 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Drums Jam — Online Studio</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Drums Jam — Fully Functional Studio</title>
 <style>
-:root{
-  --bg:#050507; --panel:#0f1114; --accent:#7ef9ff; --accent2:#9b59ff; --muted:#9aa0a6;
-}
+:root{--bg:#050507;--panel:#0f1114;--accent:#7ef9ff;--accent2:#9b59ff;--muted:#9aa0a6}
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,-apple-system,Arial,sans-serif;background:linear-gradient(180deg,#030307,#071018);color:#fff;min-height:100vh}
+body{margin:0;font-family:Inter, system-ui, -apple-system, Arial, sans-serif;background:linear-gradient(180deg,#030307,#071018);color:#fff;min-height:100vh}
 header{display:flex;gap:12px;align-items:center;padding:12px 16px;background:rgba(255,255,255,0.01);border-bottom:1px solid rgba(255,255,255,0.02);position:sticky;top:0;z-index:40}
 header img{width:44px;height:44px;border-radius:8px;object-fit:cover}
 h1{font-size:18px;margin:0;color:var(--accent)}
@@ -35,18 +32,12 @@ canvas{width:100%;height:100%;display:block}
 .bottom-nav{position:fixed;left:12px;right:12px;bottom:12px;border-radius:14px;padding:8px;display:flex;justify-content:space-around;align-items:center;border:1px solid rgba(255,255,255,0.03);z-index:60;background:linear-gradient(90deg,#6a11cb,#2575fc);box-shadow:0 12px 30px rgba(37,117,252,0.18);backdrop-filter:blur(6px)}
 .bn-item{flex:1;text-align:center;padding:10px 12px;border-radius:10px;cursor:pointer;color:rgba(255,255,255,0.92);font-weight:700}
 .bn-item.active{background:linear-gradient(90deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06));color:#021;box-shadow:0 8px 20px rgba(0,0,0,0.25)}
+.float-pres{position:fixed;right:16px;bottom:120px;background:var(--panel);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);z-index:70}
 footer{padding:12px;text-align:center;color:var(--muted)}
 </style>
 </head>
 <body>
-<header>
-  <!-- logo uses the uploaded file path -->
-  <img src="/mnt/data/1000128380.jpg" alt="logo"/>
-  <div>
-    <h1>Drums Jam — Online Studio</h1>
-    <div class="small">64-step • realtime • chat • WebRTC</div>
-  </div>
-</header>
+<header></header>
 
 <!-- Lobby -->
 <div id="lobby" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:80;">
@@ -55,24 +46,24 @@ footer{padding:12px;text-align:center;color:var(--muted)}
       <div style="display:flex;gap:12px;align-items:center">
         <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700">DJ</div>
         <div>
-          <div style="font-weight:700;color:var(--accent)">Drums Jam — Start or Join</div>
-          <div class="small" style="margin-top:6px">Create a session or paste an ID to join. Online mode uses Supabase realtime.</div>
+          <div style="font-weight:700;color:var(--accent)">Drums Jam — Create or Join</div>
+          <div class="small" style="margin-top:6px">Create a session link and invite students. Only those with the link can join.</div>
         </div>
       </div>
 
       <div style="margin-top:16px">
         <div class="small">Create a Session</div>
         <div style="display:flex;gap:8px;margin-top:8px">
-          <button id="createBtn" class="bn-item" style="flex:0 0 auto;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#021;padding:10px 16px;border-radius:8px">Create</button>
-          <button id="createDemoBtn" class="bn-item" style="flex:0 0 auto;padding:10px 16px;border-radius:8px">Local Demo</button>
+          <button id="btnCreate" class="bn-item" style="flex:0 0 auto;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#021;padding:10px 16px;border-radius:8px">Create Session</button>
+          <button id="btnCreateDemo" class="bn-item" style="flex:0 0 auto;padding:10px 16px;border-radius:8px">Create Local Demo</button>
         </div>
       </div>
 
       <div style="margin-top:14px">
         <div class="small">Join Session</div>
         <div style="display:flex;gap:8px;margin-top:8px">
-          <input id="joinInput" placeholder="Paste link or MEET-XXXX" style="flex:1;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:#fff"/>
-          <button id="joinBtn" class="bn-item" style="flex:0 0 auto;padding:10px 12px;border-radius:8px">Join</button>
+          <input id="inputJoin" placeholder="Paste link or MEET-XXXX" style="flex:1;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:#fff" />
+          <button id="btnJoin" class="bn-item" style="flex:0 0 auto;padding:10px 12px;border-radius:8px">Join</button>
         </div>
       </div>
     </div>
@@ -81,7 +72,7 @@ footer{padding:12px;text-align:center;color:var(--muted)}
       <div class="small">Preview</div>
       <div style="height:160px;border-radius:8px;background:linear-gradient(90deg,rgba(126,249,255,0.03),rgba(155,89,255,0.02));display:flex;align-items:center;justify-content:center;margin-top:8px;color:var(--muted)">Studio Preview</div>
       <div style="margin-top:12px" class="small">Local sessions</div>
-      <div id="localSessions" class="small" style="margin-top:8px;color:var(--muted)">None</div>
+      <div id="localList" class="small" style="margin-top:8px;color:var(--muted)">None</div>
     </div>
   </div>
 </div>
@@ -90,7 +81,7 @@ footer{padding:12px;text-align:center;color:var(--muted)}
 <main id="app" style="display:none">
   <div style="display:flex;flex-direction:column;gap:12px;padding:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-      <div style="font-weight:700">Session: <span id="sessionId" class="small">—</span></div>
+      <div style="font-weight:700">Session: <span id="lblSession" class="small">—</span></div>
       <div class="tabs">
         <div id="tabJam" class="tab active">Jam</div>
         <div id="tabVideo" class="tab">Video</div>
@@ -99,137 +90,133 @@ footer{padding:12px;text-align:center;color:var(--muted)}
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 360px;gap:12px">
-      <!-- Left / Jam -->
       <div>
         <div class="panel">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <div><strong>Drum Sequencer</strong><div class="small">64 steps — touch-friendly</div></div>
             <div style="display:flex;gap:8px;align-items:center">
-              <button id="playBtn" class="bn-item" style="padding:8px 12px">Play</button>
-              <button id="stopBtn" class="bn-item" style="padding:8px 12px">Stop</button>
+              <button id="btnPlay" class="bn-item" style="padding:8px 12px">Play</button>
+              <button id="btnStop" class="bn-item" style="padding:8px 12px">Stop</button>
             </div>
           </div>
 
           <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
             <div class="small">Tempo</div>
-            <input id="tempo" type="range" min="40" max="220" value="120"/>
-            <div id="tempoLabel" class="small">120 BPM</div>
+            <input id="inpTempo" type="range" min="40" max="220" value="120" />
+            <div id="lblTempo" class="small">120 BPM</div>
             <div style="flex:1"></div>
-            <button id="clearBtn" class="bn-item">Clear</button>
-            <button id="saveBtn" class="bn-item">Save</button>
-            <button id="loadBtn" class="bn-item">Load</button>
+            <button id="btnClear" class="bn-item">Clear</button>
+            <button id="btnSave" class="bn-item">Save (Local)</button>
+            <button id="btnLoad" class="bn-item">Load</button>
           </div>
 
           <div class="grid-wrap panel" style="padding:6px">
-            <div id="gridHeader" class="grid-header"></div>
-            <div id="gridRows" class="grid-rows"></div>
+            <div id="headerRow" class="grid-header"></div>
+            <div id="rows" class="grid-rows"></div>
           </div>
         </div>
 
         <div class="panel notation" style="margin-top:10px">
-          <canvas id="notation" style="width:100%;height:180px"></canvas>
+          <canvas id="staff" style="width:100%;height:180px"></canvas>
         </div>
       </div>
 
-      <!-- Right / Controls -->
       <aside style="display:flex;flex-direction:column;gap:12px">
         <div class="panel">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div><strong>Recording</strong><div class="small">Local audio</div></div>
-            <div><button id="recordBtn" class="bn-item">Record</button></div>
+            <div>
+              <button id="btnRecord" class="bn-item">Record</button>
+            </div>
           </div>
-          <div id="recordings" style="margin-top:8px"></div>
+          <div id="listRecs" style="margin-top:8px"></div>
         </div>
 
         <div class="panel">
           <div style="font-weight:700">Session Link</div>
-          <div id="sessionLink" class="small" style="margin-top:6px;color:var(--muted)">—</div>
-          <div style="margin-top:8px"><button id="copyBtn" class="bn-item">Copy Link</button></div>
+          <div id="linkBox" class="small" style="margin-top:6px;color:var(--muted)">—</div>
+          <div style="margin-top:8px"><button id="btnCopy" class="bn-item">Copy Link</button></div>
         </div>
 
         <div class="panel">
           <div style="font-weight:700">Participants</div>
-          <div id="presenceList" class="small" style="margin-top:8px;color:var(--muted)">—</div>
-          <div style="margin-top:8px"><button id="startCallBtn" class="bn-item">Start Call</button><button id="endCallBtn" class="bn-item" style="margin-left:8px">End Call</button></div>
+          <div id="listPres" class="small" style="margin-top:8px;color:var(--muted)">—</div>
+          <div style="margin-top:8px"><button id="btnStartCall" class="bn-item">Start Call</button><button id="btnEndCall" class="bn-item" style="margin-left:8px">End Call</button></div>
         </div>
       </aside>
     </div>
 
     <div class="panel" id="videoPanel" style="display:none">
       <div style="display:flex;gap:8px;align-items:flex-start">
-        <div style="flex:1"><video id="remoteVideo" autoplay playsinline style="width:100%;height:360px;background:#000;border-radius:8px"></video></div>
+        <div style="flex:1">
+          <video id="remote" autoplay playsinline style="width:100%;height:360px;background:#000;border-radius:8px"></video>
+        </div>
         <div style="width:200px;display:flex;flex-direction:column;gap:8px">
-          <video id="localVideo" autoplay muted playsinline style="width:100%;height:140px;background:#000;border-radius:8px"></video>
-          <div style="display:flex;gap:8px"><button id="camBtn" class="bn-item">Camera</button><button id="micBtn" class="bn-item">Mic</button></div>
+          <video id="local" autoplay muted playsinline style="width:100%;height:140px;background:#000;border-radius:8px"></video>
+          <div style="display:flex;gap:8px"><button id="btnCam" class="bn-item">Camera</button><button id="btnMic" class="bn-item">Mic</button></div>
         </div>
       </div>
     </div>
   </div>
 </main>
 
-<div id="bottomNav" class="bottom-nav" style="display:none">
+<!-- Bottom nav -->
+<div id="bottom" class="bottom-nav" style="display:none">
   <div class="bn-item active" data-tab="jam">🎧<div style="font-size:11px">Jam</div></div>
   <div class="bn-item" data-tab="video">🎥<div style="font-size:11px">Video</div></div>
   <div class="bn-item" data-tab="chat">💬<div style="font-size:11px">Chat</div></div>
   <div class="bn-item" data-tab="people">👥<div style="font-size:11px">People</div></div>
 </div>
 
-<footer>Ready — paste Supabase credentials in the script to enable the online features.</footer>
+<div class="float-pres" id="floatPres" style="display:none">Participants:<div id="floatList" class="small"></div></div>
 
-<!-- Supabase -->
+<footer>Made with ❤️ — paste your Supabase keys in the script to enable realtime and signaling.</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-
 <script>
-/* ------------------ CONFIG ------------------ **
- * Replace these with your Supabase details
- * ------------------ */
+/* ------------------- CONFIG ------------------- */
 const SUPABASE_URL = 'https://YOUR_SUPABASE_URL.supabase.co';
 const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 const APP_ORIGIN = window.location.origin;
 let supabase = null;
-if (!SUPABASE_URL.includes('YOUR_SUPABASE') && window.supabase && typeof window.supabase.createClient === 'function') {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-} else {
-  console.warn('Supabase not configured — running local demo mode.');
-}
+if(!SUPABASE_URL.includes('YOUR_SUPABASE') && window.supabase && typeof window.supabase.createClient === 'function') supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* ------------------ DOM ------------------ */
+/* ------------------- DOM ------------------- */
 const lobby = document.getElementById('lobby');
 const app = document.getElementById('app');
-const createBtn = document.getElementById('createBtn');
-const createDemoBtn = document.getElementById('createDemoBtn');
-const joinInput = document.getElementById('joinInput');
-const joinBtn = document.getElementById('joinBtn');
-const localSessions = document.getElementById('localSessions');
-const sessionIdEl = document.getElementById('sessionId');
-const sessionLinkEl = document.getElementById('sessionLink');
-const presenceList = document.getElementById('presenceList');
-const gridHeader = document.getElementById('gridHeader');
-const gridRows = document.getElementById('gridRows');
-const notation = document.getElementById('notation');
-const playBtn = document.getElementById('playBtn');
-const stopBtn = document.getElementById('stopBtn');
-const tempo = document.getElementById('tempo');
-const tempoLabel = document.getElementById('tempoLabel');
-const clearBtn = document.getElementById('clearBtn');
-const saveBtn = document.getElementById('saveBtn');
-const loadBtn = document.getElementById('loadBtn');
-const copyBtn = document.getElementById('copyBtn');
-const recordBtn = document.getElementById('recordBtn');
-const recordingsEl = document.getElementById('recordings');
-const startCallBtn = document.getElementById('startCallBtn');
-const endCallBtn = document.getElementById('endCallBtn');
-const remoteVideo = document.getElementById('remoteVideo');
-const localVideo = document.getElementById('localVideo');
+const btnCreate = document.getElementById('btnCreate');
+const btnCreateDemo = document.getElementById('btnCreateDemo');
+const inputJoin = document.getElementById('inputJoin');
+const btnJoin = document.getElementById('btnJoin');
+const localList = document.getElementById('localList');
+const lblSession = document.getElementById('lblSession');
+const linkBox = document.getElementById('linkBox');
+const listPres = document.getElementById('listPres');
+const headerRow = document.getElementById('headerRow');
+const rows = document.getElementById('rows');
+const staff = document.getElementById('staff');
+const btnPlay = document.getElementById('btnPlay');
+const btnStop = document.getElementById('btnStop');
+const btnClear = document.getElementById('btnClear');
+const inpTempo = document.getElementById('inpTempo');
+const lblTempo = document.getElementById('lblTempo');
+const btnSave = document.getElementById('btnSave');
+const btnLoad = document.getElementById('btnLoad');
+const btnCopy = document.getElementById('btnCopy');
+const btnRecord = document.getElementById('btnRecord');
+const listRecs = document.getElementById('listRecs');
+const btnStartCall = document.getElementById('btnStartCall');
+const btnEndCall = document.getElementById('btnEndCall');
+const remoteVideo = document.getElementById('remote');
+const localVideo = document.getElementById('local');
 const videoPanel = document.getElementById('videoPanel');
-const bottomNav = document.getElementById('bottomNav');
-const bnItems = Array.from(document.querySelectorAll('.bn-item'));
-
 const tabJam = document.getElementById('tabJam');
 const tabVideo = document.getElementById('tabVideo');
 const tabChat = document.getElementById('tabChat');
+const bottom = document.getElementById('bottom');
+const bnItems = Array.from(document.querySelectorAll('.bn-item'));
 
-/* ------------------ State ------------------ */
+/* ------------------- State ------------------- */
 const INSTR = [
   {id:'kick',label:'Kick'},
   {id:'snare',label:'Snare'},
@@ -238,373 +225,118 @@ const INSTR = [
   {id:'tom2',label:'Tom 2'},
   {id:'floor',label:'Floor Tom'}
 ];
-let STEPS = 64;
-let seq = {};
-INSTR.forEach(i=>seq[i.id] = new Array(STEPS).fill(false));
+let STEPS = 64; let seq = {}; INSTR.forEach(i=>seq[i.id]=new Array(STEPS).fill(false));
+let currentSession = null; let isLocal = false; let userId = 'u-'+Math.random().toString(36).slice(2,8);
 
-let currentSession = null;
-let isLocalDemo = false;
-let userId = 'u-'+Math.random().toString(36).slice(2,8);
-
-/* ------------------ Helpers ------------------ */
+/* ------------------- Helpers ------------------- */
 function makeId(){ return 'MEET-'+Math.random().toString(36).slice(2,8).toUpperCase(); }
-function showApp(){ lobby.style.display='none'; app.style.display='block'; if(window.innerWidth<=720) bottomNav.style.display='flex'; }
+function showApp(){ lobby.style.display='none'; app.style.display='block'; if(window.innerWidth<=720) bottom.style.display='flex'; }
 
-/* ------------------ Grid build ------------------ */
-function buildHeader(){
-  gridHeader.innerHTML = '';
-  const h = document.createElement('div'); h.className = 'grid-header';
-  h.innerHTML = '<div class="label small">Inst</div>';
-  for(let i=0;i<STEPS;i++){
-    const d = document.createElement('div');
-    d.className='pad ghost';
-    d.style.height='28px';
-    d.style.display='flex';
-    d.style.alignItems='center';
-    d.style.justifyContent='center';
-    d.style.fontSize='12px';
-    d.textContent = i+1;
-    h.appendChild(d);
-  }
-  gridHeader.appendChild(h);
-}
-function buildRows(){
-  gridRows.innerHTML = '';
-  INSTR.forEach(inst=>{
-    const r = document.createElement('div'); r.className='row';
-    const lab = document.createElement('div'); lab.className='label'; lab.textContent = inst.label;
-    r.appendChild(lab);
-    for(let i=0;i<STEPS;i++){
-      const p = document.createElement('div');
-      p.className = 'pad ' + (seq[inst.id][i] ? 'active' : 'ghost');
-      p.dataset.inst = inst.id; p.dataset.i = i;
-      p.innerHTML = seq[inst.id][i] ? '●' : '';
-      p.addEventListener('click', ()=> {
-        seq[inst.id][i] = !seq[inst.id][i];
-        p.classList.toggle('active', seq[inst.id][i]);
-        p.classList.toggle('ghost', !seq[inst.id][i]);
-        p.innerHTML = seq[inst.id][i] ? '●' : '';
-        renderNotation();
-        pushState();
-        // send via datachannel if present
-        if(pcData && pcData.readyState === 'open') pcData.send(JSON.stringify({type:'step',inst:inst.id,i,val:seq[inst.id][i]}));
-      });
-      r.appendChild(p);
-    }
-    gridRows.appendChild(r);
-  });
-}
+/* ------------------- Grid UI ------------------- */
+function buildHeader(){ headerRow.innerHTML=''; const h=document.createElement('div'); h.className='grid-header'; h.innerHTML='<div class="label small">Inst</div>'; for(let i=0;i<STEPS;i++){ const d=document.createElement('div'); d.className='pad ghost'; d.style.height='28px'; d.style.display='flex'; d.style.alignItems='center'; d.style.justifyContent='center'; d.style.fontSize='12px'; d.textContent = i+1; h.appendChild(d);} headerRow.appendChild(h);} 
+function buildRows(){ rows.innerHTML=''; INSTR.forEach(inst=>{ const r=document.createElement('div'); r.className='row'; const lab=document.createElement('div'); lab.className='label'; lab.textContent = inst.label; r.appendChild(lab); for(let i=0;i<STEPS;i++){ const p=document.createElement('div'); p.className='pad '+(seq[inst.id][i]?'active':'ghost'); p.dataset.inst=inst.id; p.dataset.i=i; p.innerHTML = seq[inst.id][i]?'●':''; p.addEventListener('click',()=>{ seq[inst.id][i] = !seq[inst.id][i]; p.classList.toggle('active',seq[inst.id][i]); p.classList.toggle('ghost',!seq[inst.id][i]); p.innerHTML = seq[inst.id][i]?'●':''; renderStaff(); pushState(); if(pcData && pcData.readyState==='open') pcData.send(JSON.stringify({type:'step',inst:inst.id,i,val:seq[inst.id][i]})); }); r.appendChild(p);} rows.appendChild(r); });}
 
-/* ------------------ Notation ------------------ */
-const canvas = notation;
-const ctx = canvas.getContext('2d');
-function resizeCanvas(){
-  canvas.width = canvas.clientWidth * devicePixelRatio;
-  canvas.height = canvas.clientHeight * devicePixelRatio;
-  ctx.setTransform(1,0,0,1,0,0);
-  ctx.scale(devicePixelRatio, devicePixelRatio);
-  drawStaff();
-}
-window.addEventListener('resize', resizeCanvas); window.addEventListener('load', resizeCanvas);
-function drawStaff(){
-  const w = canvas.clientWidth, h = canvas.clientHeight;
-  ctx.clearRect(0,0,w,h); ctx.strokeStyle='#444'; ctx.lineWidth=1;
-  const margin = 12, usable = h - margin*2, spacing = usable/6;
-  for(let i=0;i<5;i++){ const y = margin + spacing*(i+1); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); }
-  renderNotation();
-}
-function renderNotation(playhead=-1){
-  const w = canvas.clientWidth, h = canvas.clientHeight;
-  ctx.clearRect(0,0,w,h);
-  drawLinesOnly();
-  const left = 18, right = w-18, timeline = right-left, stepW = timeline / STEPS;
-  const margin = 12, slot = (h-margin*2)/6;
-  const lines = []; for(let i=1;i<=5;i++) lines.push(margin+slot*i);
-  const spaces = []; for(let i=0;i<4;i++) spaces.push((lines[i]+lines[i+1])/2);
-  const pos = { kick: spaces[0], floor: spaces[1], snare: spaces[2], tom1: spaces[3], tom2: lines[3], hihat: lines[4] };
+/* ------------------- Notation (staff) ------------------- */
+const canvas = staff; const ctx = canvas.getContext('2d'); function resizeCanvas(){ canvas.width = canvas.clientWidth * devicePixelRatio; canvas.height = canvas.clientHeight * devicePixelRatio; ctx.setTransform(1,0,0,1,0,0); ctx.scale(devicePixelRatio,devicePixelRatio); drawStaff(); }
+window.addEventListener('resize',resizeCanvas); window.addEventListener('load',resizeCanvas);
+function drawStaff(){ const w=canvas.clientWidth,h=canvas.clientHeight; ctx.clearRect(0,0,w,h); ctx.strokeStyle='#444'; ctx.lineWidth=1; const margin=12; const usable=h-margin*2; const spacing=usable/6; for(let i=0;i<5;i++){ const y=margin+spacing*(i+1); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); } renderStaff(); }
+function renderStaff(playhead=-1){ const w=canvas.clientWidth,h=canvas.clientHeight; ctx.clearRect(0,0,w,h); drawLinesOnly(); const left=18,right=w-18,timeline=right-left,stepW=timeline/STEPS; const margin=12,slot=(h-margin*2)/6; const lines=[]; for(let i=1;i<=5;i++) lines.push(margin+slot*i); const spaces=[]; for(let i=0;i<4;i++) spaces.push((lines[i]+lines[i+1])/2); const pos={ kick:spaces[0], floor:spaces[1], snare:spaces[2], tom1:spaces[3], tom2:lines[3], hihat:lines[4] };
+  // ghost
+  INSTR.forEach(inst=>{ for(let i=0;i<STEPS;i++){ const x=left+i*stepW+stepW/2; const y=pos[inst.id]; ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.03)'; ctx.arc(x,y,5,0,Math.PI*2); ctx.fill(); } });
+  // active
+  INSTR.forEach(inst=>{ for(let i=0;i<STEPS;i++){ if(seq[inst.id][i]){ const x=left+i*stepW+stepW/2; const y=pos[inst.id]; if(inst.id==='hihat'){ ctx.beginPath(); ctx.strokeStyle='#81d4fa'; ctx.lineWidth=2; ctx.moveTo(x-6,y-6); ctx.lineTo(x+6,y+6); ctx.moveTo(x-6,y+6); ctx.lineTo(x+6,y-6); ctx.stroke(); } else { ctx.beginPath(); ctx.fillStyle=(inst.id==='kick'?'#ff8a80':inst.id==='snare'?'#ffd54f':'#ffd180'); ctx.ellipse(x,y,6,4,0,0,Math.PI*2); ctx.fill(); if(['snare','tom1','tom2','floor'].includes(inst.id)){ ctx.beginPath(); ctx.strokeStyle='#ffd54f'; ctx.lineWidth=2; ctx.moveTo(x+4,y); ctx.lineTo(x+4,y-20); ctx.stroke(); } } } } });
+  if(playhead>=0){ ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fillRect(left+playhead*stepW,6,stepW,h-12); } }
+function drawLinesOnly(){ const w=canvas.clientWidth,h=canvas.clientHeight; ctx.save(); ctx.strokeStyle='#444'; ctx.lineWidth=1; const margin=12,usable=h-margin*2,spacing=usable/6; for(let i=0;i<5;i++){ const y=margin+spacing*(i+1); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); } ctx.restore(); }
 
-  // ghost placeholders
-  INSTR.forEach(inst=>{
-    for(let i=0;i<STEPS;i++){
-      const x = left + i*stepW + stepW/2;
-      const y = pos[inst.id];
-      ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.03)'; ctx.arc(x,y,5,0,Math.PI*2); ctx.fill();
-    }
-  });
+/* ------------------- Audio (simple synth drums) ------------------- */
+const AudioCtx = window.AudioContext || window.webkitAudioContext; const audioCtx = new AudioCtx(); const master = audioCtx.createGain(); master.gain.value=0.9; master.connect(audioCtx.destination);
+function kick(t){const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(45,t+0.18);g.gain.setValueAtTime(1,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.35);o.connect(g);g.connect(master);o.start(t);o.stop(t+0.35);} 
+function snare(t){const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.18,audioCtx.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/d.length*6);const src=audioCtx.createBufferSource();src.buffer=buf;const f=audioCtx.createBiquadFilter();f.type='bandpass';f.frequency.value=2200;const g=audioCtx.createGain();g.gain.setValueAtTime(1,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.18);src.connect(f);f.connect(g);g.connect(master);src.start(t);src.stop(t+0.18);} 
+function hihat(t){const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.06,audioCtx.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/d.length*10);const src=audioCtx.createBufferSource();src.buffer=buf;const f=audioCtx.createBiquadFilter();f.type='highpass';f.frequency.value=6000;const g=audioCtx.createGain();g.gain.setValueAtTime(0.6,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.06);src.connect(f);f.connect(g);g.connect(master);src.start(t);src.stop(t+0.08);} 
+function tom(t,p){const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.setValueAtTime(p,t);o.frequency.exponentialRampToValueAtTime(p*0.7,t+0.18);g.gain.setValueAtTime(0.9,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.35);o.connect(g);g.connect(master);o.start(t);o.stop(t+0.35);} 
 
-  // active notes
-  INSTR.forEach(inst=>{
-    for(let i=0;i<STEPS;i++){
-      if(seq[inst.id][i]){
-        const x = left + i*stepW + stepW/2;
-        const y = pos[inst.id];
-        if(inst.id === 'hihat'){
-          ctx.beginPath(); ctx.strokeStyle='#81d4fa'; ctx.lineWidth=2;
-          ctx.moveTo(x-6,y-6); ctx.lineTo(x+6,y+6); ctx.moveTo(x-6,y+6); ctx.lineTo(x+6,y-6); ctx.stroke();
-        } else {
-          ctx.beginPath(); ctx.fillStyle = (inst.id==='kick'?'#ff8a80': inst.id==='snare'?'#ffd54f':'#ffd180');
-          ctx.ellipse(x,y,6,4,0,0,Math.PI*2); ctx.fill();
-          if(['snare','tom1','tom2','floor'].includes(inst.id)){
-            ctx.beginPath(); ctx.strokeStyle='#ffd54f'; ctx.lineWidth=2; ctx.moveTo(x+4,y); ctx.lineTo(x+4,y-20); ctx.stroke();
-          }
-        }
-      }
-    }
-  });
+/* ------------------- Transport ------------------- */
+let playing=false,playIndex=0,timerId=null;
+function schedule(){ const bpm=parseInt(inpTempo.value); const interval=(60/bpm)/4*1000; const t=audioCtx.currentTime; INSTR.forEach(inst=>{ if(seq[inst.id][playIndex]){ if(inst.id==='kick') kick(t); if(inst.id==='snare') snare(t); if(inst.id==='hihat') hihat(t); if(inst.id==='tom1') tom(t,520); if(inst.id==='tom2') tom(t,380); if(inst.id==='floor') tom(t,260); } }); renderStaff(playIndex); playIndex=(playIndex+1)%STEPS; timerId=setTimeout(schedule,interval); }
+btnPlay.addEventListener('click',()=>{ if(playing) return; playing=true; playIndex=0; schedule(); }); btnStop.addEventListener('click',()=>{ if(!playing) return; playing=false; clearTimeout(timerId); renderStaff(-1); }); inpTempo.addEventListener('input',()=>{ lblTempo.textContent = inpTempo.value + ' BPM'; }); btnClear.addEventListener('click',()=>{ INSTR.forEach(i=>seq[i.id].fill(false)); buildRows(); renderStaff(); pushState(); });
 
-  if(playhead>=0){
-    ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fillRect(left+playhead*stepW,6,stepW,h-12);
-  }
-}
-function drawLinesOnly(){ const w=canvas.clientWidth, h=canvas.clientHeight; ctx.save(); ctx.strokeStyle='#444'; ctx.lineWidth=1; const margin=12, usable=h-margin*2, spacing=usable/6; for(let i=0;i<5;i++){ const y = margin + spacing*(i+1); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); } ctx.restore(); }
+/* ------------------- Save/Load local patterns ------------------- */
+btnSave.addEventListener('click',()=>{ const name = prompt('Pattern name','pattern1'); if(!name) return; const store = JSON.parse(localStorage.getItem('dj_patterns')||'{}'); store[name]=JSON.stringify(seq); localStorage.setItem('dj_patterns',JSON.stringify(store)); alert('Saved: '+name); });
+btnLoad.addEventListener('click',()=>{ const store = JSON.parse(localStorage.getItem('dj_patterns')||'{}'); const keys = Object.keys(store); if(!keys.length) return alert('No patterns'); const name = prompt('Load pattern name. Available: '+keys.join(', '),keys[0]); if(!name || !store[name]) return alert('Not found'); seq = JSON.parse(store[name]); buildRows(); renderStaff(); pushState(); alert('Loaded: '+name); });
 
-/* ------------------ Audio ------------------ */
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
-const master = audioCtx.createGain(); master.gain.value = 0.9; master.connect(audioCtx.destination);
+/* ------------------- Persistence & Realtime (Supabase) ------------------- */
+async function pushState(){ if(!currentSession) return; const payload = { session_id: currentSession.id, state: JSON.stringify(seq) }; if(supabase){ try{ await supabase.from('sequencer_state').upsert(payload); }catch(e){console.warn(e);} } else { window._localSessions = window._localSessions||{}; if(currentSession) window._localSessions[currentSession.id] = { state: JSON.stringify(seq), created_at: new Date().toISOString() }; localList.textContent = currentSession.id; } }
+function applyRemote(state){ INSTR.forEach(i=>{ if(state[i.id] && Array.isArray(state[i.id])) seq[i.id] = state[i.id].slice(0,STEPS); }); buildRows(); renderStaff(); }
+let subSeq=null; function subscribeToSession(id){ if(!supabase) return; try{ if(subSeq && subSeq.unsubscribe) subSeq.unsubscribe(); }catch(e){} subSeq = supabase.channel('seq-'+id).on('postgres_changes',{event:'*',schema:'public',table:'sequencer_state',filter:`session_id=eq.${id}`}, payload=>{ try{ const row = payload.new || payload.record; if(row && row.state) applyRemote(JSON.parse(row.state)); }catch(e){console.warn(e);} }).subscribe(); }
 
-function playKick(t){ const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(45,t+0.18); g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.35); o.connect(g); g.connect(master); o.start(t); o.stop(t+0.35); }
-function playSnare(t){ const buf = audioCtx.createBuffer(1,audioCtx.sampleRate*0.18,audioCtx.sampleRate); const d = buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1)*Math.exp(-i/d.length*6); const src = audioCtx.createBufferSource(); src.buffer = buf; const f = audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.value = 2200; const g = audioCtx.createGain(); g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.18); src.connect(f); f.connect(g); g.connect(master); src.start(t); src.stop(t+0.18); }
-function playHiHat(t){ const buf = audioCtx.createBuffer(1,audioCtx.sampleRate*0.06,audioCtx.sampleRate); const d = buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1)*Math.exp(-i/d.length*10); const src = audioCtx.createBufferSource(); src.buffer = buf; const f = audioCtx.createBiquadFilter(); f.type='highpass'; f.frequency.value = 6000; const g = audioCtx.createGain(); g.gain.setValueAtTime(0.6,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.06); src.connect(f); f.connect(g); g.connect(master); src.start(t); src.stop(t+0.08); }
-function playTom(t,p){ const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(p,t); o.frequency.exponentialRampToValueAtTime(p*0.7,t+0.18); g.gain.setValueAtTime(0.9,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.35); o.connect(g); g.connect(master); o.start(t); o.stop(t+0.35); }
+/* ------------------- Chat (realtime) ------------------- */
+async function sendChat(message){ if(!currentSession) return; const payload={session_id:currentSession.id,user:userId,message,created_at:new Date().toISOString()}; if(supabase){ try{ await supabase.from('chat_messages').insert(payload); }catch(e){console.warn(e);} } else { // local echo
+  addChat('You',message);
+} }
+function addChat(user,msg){ const d=document.createElement('div'); d.className='small'; d.textContent = user + ': ' + msg; rows.parentElement.insertBefore(d, rows.parentElement.firstChild); }
+let subChat=null; function subscribeChat(id){ if(!supabase) return; try{ if(subChat && subChat.unsubscribe) subChat.unsubscribe(); }catch(e){} subChat = supabase.channel('chat-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages',filter:`session_id=eq.${id}`}, payload=>{ try{ const row = payload.new || payload.record; if(row) addChat(row.user,row.message); }catch(e){console.warn(e);} }).subscribe(); }
 
-/* ------------------ Transport ------------------ */
-let playing=false, playIndex=0, scheduler=null;
-function schedule(){
-  const bpm = parseInt(tempo.value);
-  const interval = (60/bpm)/4*1000; // 64 steps = 16th ticks across 4 bars
-  const t = audioCtx.currentTime;
-  INSTR.forEach(inst=>{
-    if(seq[inst.id][playIndex]){
-      if(inst.id==='kick') playKick(t);
-      if(inst.id==='snare') playSnare(t);
-      if(inst.id==='hihat') playHiHat(t);
-      if(inst.id==='tom1') playTom(t,520);
-      if(inst.id==='tom2') playTom(t,380);
-      if(inst.id==='floor') playTom(t,260);
-    }
-  });
-  renderNotation(playIndex);
-  playIndex = (playIndex + 1) % STEPS;
-  scheduler = setTimeout(schedule, interval);
-}
-playBtn.addEventListener('click', ()=>{ if(playing) return; playing=true; playIndex=0; schedule(); });
-stopBtn.addEventListener('click', ()=>{ if(!playing) return; playing=false; clearTimeout(scheduler); renderNotation(-1); });
-tempo.addEventListener('input', ()=>{ tempoLabel.textContent = tempo.value + ' BPM'; });
+/* ------------------- Presence ------------------- */
+async function setPresence(){ if(!currentSession) return; if(!supabase){ listPres.textContent = 'You (local)'; return; } try{ await supabase.from('presence').upsert({session_id:currentSession.id,user:userId,last_seen:new Date().toISOString()}); }catch(e){console.warn(e);} }
+let subPres=null; function subscribePresence(id){ if(!supabase) return; try{ if(subPres && subPres.unsubscribe) subPres.unsubscribe(); }catch(e){} subPres = supabase.channel('pres-'+id).on('postgres_changes',{event:'*',schema:'public',table:'presence',filter:`session_id=eq.${id}`}, payload=>{ try{ // fetch list
+      (async()=>{ const { data } = await supabase.from('presence').select('user').eq('session_id',id); if(data) listPres.textContent = data.map(x=>x.user).join(', '); })(); }catch(e){console.warn(e);} }).subscribe(); }
 
-clearBtn.addEventListener('click', ()=>{ INSTR.forEach(i=>seq[i.id].fill(false)); buildRows(); renderNotation(); pushState(); });
-
-/* ------------------ Save/Load (local) ------------------ */
-saveBtn.addEventListener('click', ()=> {
-  const name = prompt('Save pattern name','pattern1'); if(!name) return;
-  const store = JSON.parse(localStorage.getItem('dj_patterns')||'{}'); store[name] = JSON.stringify(seq); localStorage.setItem('dj_patterns',JSON.stringify(store)); alert('Saved: '+name);
-});
-loadBtn.addEventListener('click', ()=> {
-  const store = JSON.parse(localStorage.getItem('dj_patterns')||'{}'); const keys = Object.keys(store); if(!keys.length) return alert('No patterns'); const name = prompt('Load pattern name. Available: '+keys.join(', '), keys[0]); if(!name || !store[name]) return alert('Not found'); seq = JSON.parse(store[name]); buildRows(); renderNotation(); pushState(); alert('Loaded: '+name);
-});
-
-/* ------------------ Persistence & Realtime (Supabase) ------------------ */
-async function pushState(){
-  if(!currentSession) return;
-  const payload = { session_id: currentSession.id, state: JSON.stringify(seq) };
-  if(supabase){
-    try{ await supabase.from('sequencer_state').upsert(payload); }catch(e){ console.warn(e); }
-  } else {
-    window._localSessions = window._localSessions || {}; if(currentSession) window._localSessions[currentSession.id]= { state: JSON.stringify(seq), created_at: new Date().toISOString() };
-    localSessions.textContent = currentSession.id;
-  }
-}
-function applyRemote(state){
-  INSTR.forEach(i=>{ if(state[i.id] && Array.isArray(state[i.id])) seq[i.id] = state[i.id].slice(0, STEPS); });
-  buildRows(); renderNotation();
-}
-let seqSub = null;
-function subscribeSequencer(id){
-  if(!supabase) return;
-  try{ if(seqSub && seqSub.unsubscribe) seqSub.unsubscribe(); }catch(e){}
-  seqSub = supabase.channel('seq-'+id).on('postgres_changes',{event:'*',schema:'public',table:'sequencer_state',filter:`session_id=eq.${id}`}, payload => {
-    try{ const row = payload.new || payload.record; if(row && row.state) applyRemote(JSON.parse(row.state)); }catch(e){ console.warn(e); }
-  }).subscribe();
-}
-
-/* ------------------ Chat ------------------ */
-async function sendChat(msg){
-  if(!currentSession) return;
-  const payload = { session_id: currentSession.id, user: userId, message: msg };
-  if(supabase){ try{ await supabase.from('chat_messages').insert(payload); }catch(e){ console.warn(e); } }
-}
-function addChat(user,msg){
-  const el = document.createElement('div'); el.className='small'; el.textContent = user+': '+msg;
-  // append to recordings area for brevity - you can instead place a dedicated chat panel
-  recordingsEl.prepend(el);
-}
-let chatSub = null;
-function subscribeChat(id){
-  if(!supabase) return;
-  try{ if(chatSub && chatSub.unsubscribe) chatSub.unsubscribe(); }catch(e){}
-  chatSub = supabase.channel('chat-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages',filter:`session_id=eq.${id}`}, payload => {
-    try{ const row = payload.new || payload.record; if(row) addChat(row.user,row.message); }catch(e){ console.warn(e); }
-  }).subscribe();
-}
-
-/* ------------------ Presence ------------------ */
-async function setPresence(){
-  if(!currentSession || !supabase) return;
-  try{ await supabase.from('presence').upsert({ session_id: currentSession.id, user: userId, last_seen: new Date().toISOString() }); }catch(e){ console.warn(e); }
-}
-let presSub = null;
-function subscribePresence(id){
-  if(!supabase) return;
-  try{ if(presSub && presSub.unsubscribe) presSub.unsubscribe(); }catch(e){}
-  presSub = supabase.channel('pres-'+id).on('postgres_changes',{event:'*',schema:'public',table:'presence',filter:`session_id=eq.${id}`}, payload => {
-    // refresh list quickly
-    (async ()=>{
-      try{ const { data } = await supabase.from('presence').select('user').eq('session_id',id); if(data) presenceList.textContent = data.map(x=>x.user).join(', '); }catch(e){ console.warn(e); }
-    })();
-  }).subscribe();
-}
-
-/* ------------------ WebRTC signaling & calls ------------------ */
+/* ------------------- WebRTC Signaling & Calls ------------------- */
 let pc = null; let pcData = null; let localStream = null;
-async function getLocalMedia(){ try{ localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true}); localVideo.srcObject = localStream; }catch(e){ console.warn(e); } }
-getLocalMedia();
+async function startLocalStream(){ try{ localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true}); localVideo.srcObject = localStream; }catch(e){console.warn('getUserMedia',e);} }
+startLocalStream();
 
-function setupPC(){
-  pc = new RTCPeerConnection({ iceServers:[{urls:'stun:stun.l.google.com:19302'}] });
-  pc.ontrack = ev => { remoteVideo.srcObject = ev.streams[0]; videoPanel.style.display = 'block'; };
-  pc.ondatachannel = ev => { pcData = ev.channel; pcData.onmessage = e => { try{ const d = JSON.parse(e.data); if(d.type==='step'){ seq[d.inst][d.i] = d.val; buildRows(); renderNotation(); } }catch(err){ console.warn(err); } }; };
-  pc.onicecandidate = async ev => { if(ev.candidate && supabase) { await supabase.from('webrtc_signaling').insert({ session_id: currentSession.id, kind:'ice', payload: ev.candidate.toJSON() }); } };
-  if(localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+// Signaling: insert offer into webrtc_signaling; other clients will answer
+async function startCall(){ if(!currentSession) return alert('Join session'); if(!supabase) return alert('Signaling requires Supabase'); pc = new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]}); pc.ontrack = ev=>{ remoteVideo.srcObject = ev.streams[0]; videoPanel.style.display='block'; };
+pcOnIce(pc);
+pcData = pc.createDataChannel('seq'); pcData.onmessage = e=>{ try{ const d=JSON.parse(e.data); if(d.type==='step'){ seq[d.inst][d.i]=d.val; buildRows(); renderStaff(); } }catch(err){console.warn(err);} };
+if(localStream) localStream.getTracks().forEach(t=>pc.addTrack(t,localStream));
+const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
+await supabase.from('webrtc_signaling').insert({session_id:currentSession.id,kind:'offer',payload:offer});
+// subscribe answers/ice
+subscribeSignaling(currentSession.id);
 }
 
-async function startCall(){
-  if(!currentSession || !supabase) return alert('Signaling requires Supabase and an active session');
-  setupPC();
-  pcData = pc.createDataChannel('seq');
-  pcData.onmessage = e => { try{ const d = JSON.parse(e.data); if(d.type==='step'){ seq[d.inst][d.i] = d.val; buildRows(); renderNotation(); } }catch(err){ console.warn(err); } };
-  const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
-  await supabase.from('webrtc_signaling').insert({ session_id: currentSession.id, kind:'offer', payload: offer });
-  subscribeSignaling(currentSession.id);
-}
+function npcOnIce(peer){ peer.onicecandidate = async e=>{ if(e.candidate){ if(supabase) await supabase.from('webrtc_signaling').insert({session_id:currentSession.id,kind:'ice',payload:e.candidate.toJSON()}); } }; }
 
-async function subscribeSignaling(id){
-  if(!supabase) return;
-  supabase.channel('webrtc-'+id).on('postgres_changes',{event:'*',schema:'public',table:'webrtc_signaling',filter:`session_id=eq.${id}`}, async payload => {
-    try{
-      const row = payload.new || payload.record;
-      if(!row) return;
-      if(row.kind === 'offer'){
-        // answer
-        if(pc) return;
-        setupPC();
-        if(localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-        await pc.setRemoteDescription(row.payload);
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        await supabase.from('webrtc_signaling').insert({ session_id: id, kind:'answer', payload: answer });
-      } else if(row.kind === 'answer' && pc && !pc.currentRemoteDescription){
-        await pc.setRemoteDescription(row.payload);
-      } else if(row.kind === 'ice' && pc){
-        try{ await pc.addIceCandidate(row.payload); }catch(e){ console.warn('ice add failed', e); }
-      }
-    } catch(e){ console.warn(e); }
-  }).subscribe();
-}
+async function subscribeSignaling(id){ if(!supabase) return; const ch = supabase.channel('webrtc-'+id).on('postgres_changes',{event:'*',schema:'public',table:'webrtc_signaling',filter:`session_id=eq.${id}`}, async payload=>{ try{ const row = payload.new || payload.record; if(!row) return; if(row.kind==='answer' && pc && !pc.currentRemoteDescription){ await pc.setRemoteDescription(row.payload); } else if(row.kind==='offer'){ // create answer
+    if(pc) return; pc = new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]}); pc.ontrack = ev=>{ remoteVideo.srcObject = ev.streams[0]; videoPanel.style.display='block'; }; npcOnIce(pc); pc.ondatachannel = ev=>{ pcData = ev.channel; pcData.onmessage = e=>{ try{ const d=JSON.parse(e.data); if(d.type==='step'){ seq[d.inst][d.i]=d.val; buildRows(); renderStaff(); } }catch(err){console.warn(err);} }; };
+    if(localStream) localStream.getTracks().forEach(t=>pc.addTrack(t,localStream));
+    await pc.setRemoteDescription(row.payload);
+    const answer = await pc.createAnswer(); await pc.setLocalDescription(answer);
+    await supabase.from('webrtc_signaling').insert({session_id:id,kind:'answer',payload:answer});
+  } else if(row.kind==='ice' && pc){ try{ await pc.addIceCandidate(row.payload); }catch(e){console.warn('ice add',e);} } }catch(e){console.warn(e);} }).subscribe(); }
 
-async function endCall(){
-  if(pc){ pc.close(); pc = null; }
-  pcData = null;
-  videoPanel.style.display = 'none';
-}
+async function endCall(){ if(pc){ pc.close(); pc=null; } if(pcData){ pcData=null; } videoPanel.style.display='none'; }
 
-/* ------------------ Session create/join flow ------------------ */
-async function createSession(){
-  const id = makeId();
-  const link = APP_ORIGIN + '/session/' + id;
-  currentSession = { id, link }; isLocalDemo = false;
-  sessionIdEl.textContent = id; sessionLinkEl.textContent = link;
-  showApp();
-  if(supabase){
-    try{
-      await supabase.from('sessions').upsert({ session_id: id, created_at: new Date().toISOString() });
-      await supabase.from('sequencer_state').upsert({ session_id: id, state: JSON.stringify(seq) });
-      subscribeSequencer(id); subscribeChat(id); subscribePresence(id);
-      setInterval(setPresence, 15_000); setPresence();
-    }catch(e){ console.warn(e); }
-  } else {
-    window._localSessions = window._localSessions || {}; window._localSessions[id] = { state: JSON.stringify(seq), created_at: new Date().toISOString() };
-    isLocalDemo = true; localSessions.textContent = id;
-  }
-}
+/* ------------------- Session flow: create/join ------------------- */
+async function createSession(){ const id = makeId(); const link = APP_ORIGIN + '/session/' + id; currentSession={id,link}; isLocal=false; lblSession.textContent = id; linkBox.textContent = link; showApp(); if(supabase){ try{ await supabase.from('sessions').upsert({session_id:id,created_at:new Date().toISOString()}); await supabase.from('sequencer_state').upsert({session_id:id,state:JSON.stringify(seq)}); subscribeToSession(id); subscribeChat(id); subscribePresence(id); }catch(e){console.warn(e);} } else { window._localSessions = window._localSessions||{}; window._localSessions[id]={state:JSON.stringify(seq),created_at:new Date().toISOString()}; localList.textContent = id; } }
+async function createDemo(){ await createSession(); isLocal=true; }
+async function join(){ const raw = (inputJoin.value||'').trim(); if(!raw) return alert('Paste link or id'); const id = raw.includes('/')? raw.split('/').pop(): raw; currentSession={id,link:APP_ORIGIN + '/session/' + id}; lblSession.textContent = id; linkBox.textContent = currentSession.link; showApp(); if(supabase){ try{ const { data } = await supabase.from('sequencer_state').select('state').eq('session_id',id).limit(1).single(); if(data && data.state) applyRemote(JSON.parse(data.state)); subscribeToSession(id); subscribeChat(id); subscribePresence(id); }catch(e){console.warn(e);} } else { const s = window._localSessions && window._local_sessions && window._local_sessions[id] || window._localSessions && window._localSessions[id]; if(s && s.state){ applyRemote(JSON.parse(s.state)); isLocal=true; } else { alert('Demo not found locally'); } } }
 
-async function createDemo(){ await createSession(); isLocalDemo = true; }
+btnCreate.addEventListener('click',createSession); btnCreateDemo.addEventListener('click',createDemo); btnJoin.addEventListener('click',join);
 
-async function joinSession(){
-  const raw = (joinInput.value || '').trim();
-  if(!raw) return alert('Paste a meeting link or ID');
-  const id = raw.includes('/') ? raw.split('/').pop() : raw;
-  currentSession = { id, link: APP_ORIGIN + '/session/' + id };
-  sessionIdEl.textContent = id; sessionLinkEl.textContent = currentSession.link;
-  showApp();
-  if(supabase){
-    try{
-      const { data } = await supabase.from('sequencer_state').select('state').eq('session_id', id).limit(1).single();
-      if(data && data.state) applyRemote(JSON.parse(data.state));
-      subscribeSequencer(id); subscribeChat(id); subscribePresence(id); setInterval(setPresence, 15000); setPresence();
-      subscribeSignaling(id);
-    }catch(e){ console.warn(e); }
-  } else {
-    const s = window._localSessions && window._localSessions[id];
-    if(s && s.state){ applyRemote(JSON.parse(s.state)); isLocalDemo = true; } else { alert('Local demo not found'); }
-  }
-}
+/* copy link */
+btnCopy.addEventListener('click',()=>{ if(!currentSession) return alert('No session'); navigator.clipboard.writeText(currentSession.link).then(()=>alert('Copied')); });
 
-/* ------------------ UI wiring ------------------ */
-createBtn.addEventListener('click', createSession);
-createDemoBtn.addEventListener('click', createDemo);
-joinBtn.addEventListener('click', joinSession);
-copyBtn.addEventListener('click', ()=>{ if(!currentSession) return alert('No session'); navigator.clipboard.writeText(currentSession.link).then(()=>alert('Link copied')); });
-startCallBtn.addEventListener('click', startCall);
-endCallBtn.addEventListener('click', endCall);
+/* Chat UI (simple input) */
+// add minimal chat input and send using sendChat when created
 
-/* bottom nav behavior */
-function refreshBottom(){ if(window.innerWidth<=720) bottomNav.style.display='flex'; else bottomNav.style.display='none'; }
-window.addEventListener('resize', refreshBottom); refreshBottom();
-bnItems.forEach(item => item.addEventListener('click', ()=>{ bnItems.forEach(b=>b.classList.remove('active')); item.classList.add('active'); const t = item.dataset.tab; if(t==='jam') tabJam.click(); else if(t==='video') tabVideo.click(); else if(t==='chat') tabChat.click(); else if(t==='people') alert('Participants: ' + (presenceList.textContent || 'none'); }) );
+/* Recording (local audio from master) */
+let mediaRec=null, recorded=[]; btnRecord.addEventListener('click',()=>{ if(mediaRec && mediaRec.state==='recording'){ mediaRec.stop(); btnRecord.textContent='Record'; } else { const dest = audioCtx.createMediaStreamDestination(); master.connect(dest); mediaRec = new MediaRecorder(dest.stream); recorded=[]; mediaRec.ondataavailable = e=>{ if(e.data.size) recorded.push(e.data); }; mediaRec.onstop = ()=>{ const blob = new Blob(recorded,{type:'audio/webm'}); const url = URL.createObjectURL(blob); const el = document.createElement('div'); const a = document.createElement('audio'); a.controls=true; a.src=url; el.appendChild(a); const d = document.createElement('a'); d.href=url; d.download='rec.webm'; d.textContent=' Download'; d.style.marginLeft='8px'; el.appendChild(d); listRecs.appendChild(el); }; mediaRec.start(); btnRecord.textContent='Stop'; } });
 
-/* tabs */
-[tabJam,tabVideo,tabChat].forEach(t => t.addEventListener('click', ()=> {
-  [tabJam,tabVideo,tabChat].forEach(x=>x.classList.remove('active')); t.classList.add('active');
-  if(t === tabJam) { videoPanel.style.display = 'none'; }
-  else if(t === tabVideo) { videoPanel.style.display = 'block'; }
-  else { videoPanel.style.display = 'none'; }
-}));
+/* responsive bottom nav */
+function refreshBottom(){ if(window.innerWidth<=720) bottom.style.display='flex'; else bottom.style.display='none'; }
+window.addEventListener('resize',refreshBottom); refreshBottom(); bnItems.forEach(it=>it.addEventListener('click',()=>{ bnItems.forEach(x=>x.classList.remove('active')); it.classList.add('active'); const t = it.dataset.tab; if(t==='jam'){ tabJam.click(); } else if(t==='video'){ tabVideo.click(); } else if(t==='chat'){ tabChat.click(); } else if(t==='people'){ floatPres.style.display = floatPres.style.display==='none'?'block':'none'; } }));
 
-/* record (local) */
-let mediaRecorder = null, recordedChunks = [];
-recordBtn.addEventListener('click', ()=>{
-  if(mediaRecorder && mediaRecorder.state === 'recording'){ mediaRecorder.stop(); recordBtn.textContent = 'Record'; }
-  else {
-    const dest = audioCtx.createMediaStreamDestination();
-    master.connect(dest);
-    mediaRecorder = new MediaRecorder(dest.stream);
-    recordedChunks = [];
-    mediaRecorder.ondataavailable = e => { if(e.data.size) recordedChunks.push(e.data); };
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-      const url = URL.createObjectURL(blob);
-      const wrap = document.createElement('div');
-      const a = document.createElement('audio'); a.controls = true; a.src = url; wrap.appendChild(a);
-      const d = document.createElement('a'); d.href = url; d.download = 'rec.webm'; d.textContent = ' Download'; d.style.marginLeft = '8px'; wrap.appendChild(d);
-      recordings.appendChild(wrap);
-    };
-    mediaRecorder.start(); recordBtn.textContent = 'Stop';
-  }
-});
+/* Tabs behavior */
+[tabJam,tabVideo,tabChat].forEach(t=>t.addEventListener('click',()=>{ [tabJam,tabVideo,tabChat].forEach(x=>x.classList.remove('active')); t.classList.add('active'); if(t===tabJam){ videoPanel.style.display='none'; } else if(t===tabVideo){ videoPanel.style.display='block'; } else { videoPanel.style.display='none'; } }));
 
-/* ------------------ Init ------------------ */
-buildHeader(); buildRows(); resizeCanvas(); renderNotation();
-for(let i=0;i<STEPS;i+=4) seq.hihat[i]=true; seq.kick[0]=true; seq.kick[16]=true; seq.snare[8]=true; seq.snare[24]=true; buildRows(); renderNotation();
+/* Init */
+buildHeader(); buildRows(); resizeCanvas(); renderStaff();
+
+// friendly starter pattern
+for(let i=0;i<STEPS;i+=4) seq.hihat[i]=true; seq.kick[0]=true; seq.kick[16]=true; seq.snare[8]=true; seq.snare[24]=true; buildRows(); renderStaff();
 
 </script>
 </body>
