@@ -11,18 +11,24 @@
     --bg:#050507;
     --panel:#0f1114;
     --card:#0b0b0d;
-    --accent:#7ef9ff;
-    --accent-2:#9b59ff;
+    --accent:#7ef9ff; /* neon cyan */
+    --accent-2:#9b59ff; /* neon purple */
     --muted:#9aa0a6;
     --glass: rgba(255,255,255,0.03);
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:Inter, system-ui, -apple-system, Arial, sans-serif;background:linear-gradient(180deg,#010103,#071018);color:#fff;min-height:100vh;display:flex;flex-direction:column}
-  #lobby{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:
+  /* Lobby full-screen */
+  #lobby{
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:
     radial-gradient(800px 400px at 10% 10%, rgba(123,58,255,0.06), transparent),
     radial-gradient(600px 300px at 90% 90%, rgba(0,240,255,0.04), transparent);
-    z-index:50;}
-  .lobby-card{width:760px;max-width:92vw;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:14px;padding:28px;display:grid;grid-template-columns:1fr 360px;gap:20px;box-shadow:0 10px 40px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03)}
+    z-index:50;
+  }
+  .lobby-card{
+    width:760px;max-width:92vw;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+    border-radius:14px;padding:28px;display:grid;grid-template-columns:1fr 360px;gap:20px;box-shadow:0 10px 40px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03)
+  }
   .lobby-left{padding:6px}
   .brand{display:flex;align-items:center;gap:14px}
   .brand .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#031;box-shadow:0 6px 18px rgba(124, 234, 255, 0.06)}
@@ -34,6 +40,7 @@
   .lobby-right{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:10px;padding:16px;border:1px solid rgba(255,255,255,0.03)}
   .input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff}
   .small{font-size:13px;color:var(--muted)}
+  /* Session container (hidden until join) */
   .container{display:none;grid-template-columns:1fr 360px;gap:18px;padding:18px;margin-top:72px}
   .left{display:flex;flex-direction:column;gap:12px}
   .video-stage{background:linear-gradient(180deg,#0b0b0d,#111217);border-radius:12px;padding:12px;min-height:360px;display:flex;gap:12px}
@@ -48,7 +55,7 @@
   .sequencer{padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent)}
   .seq-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
   .instrument{width:72px;color:var(--muted)}
-  .steps{display:grid;grid-template-columns:repeat(64,1fr);gap:6px;flex:1}
+  .steps{display:grid;grid-template-columns:repeat(16,1fr);gap:6px;flex:1}
   .step{height:30px;border-radius:6px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;cursor:pointer}
   .step.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021}
   .notation{height:160px;border-radius:8px;overflow:hidden}
@@ -170,12 +177,7 @@
       <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
         <button id="clearSeq" class="btn">Clear</button>
         <label class="small">Steps</label>
-        <select id="stepsCount" class="btn">
-          <option>8</option>
-          <option>16</option>
-          <option>32</option>
-          <option selected>64</option>
-        </select>
+        <select id="stepsCount" class="btn"><option>16</option><option>8</option></select>
       </div>
     </div>
 
@@ -207,21 +209,271 @@
 
 <footer style="margin-top:auto">Prototype — Supabase-ready. To enable real-time sessions, add your Supabase URL & Key in the script below.</footer>
 
+<!-- Supabase JS (v2 UMD) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+
 <script>
-/* ===== Sequencer changes ===== */
+/* =========================
+   CONFIG - Replace these
+   ========================= */
+const SUPABASE_URL = 'https://YOUR_SUPABASE_URL.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const APP_ORIGIN = window.location.origin;
+
+/* Initialize supabase client safely (UMD exposes `supabase` on window) */
+let supabase = null;
+if (!SUPABASE_URL.includes('YOUR_SUPABASE') && window.supabase && typeof window.supabase.createClient === 'function') {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} else {
+  console.warn('Supabase not configured — running in local demo mode. Replace SUPABASE_URL & KEY to enable cloud sync.');
+}
+
+/* ===== DOM refs ===== */
+const lobby = document.getElementById('lobby');
+const app = document.getElementById('app');
+const lobbyCreate = document.getElementById('lobbyCreate');
+const demoCreate = document.getElementById('demoCreate');
+const lobbyJoinInput = document.getElementById('lobbyJoinInput');
+const lobbyJoinBtn = document.getElementById('lobbyJoinBtn');
+const localSessionsBox = document.getElementById('localSessionsBox');
+
+const localVideo = document.getElementById('localVideo');
+const remoteVideo = document.getElementById('remoteVideo');
+const camBtn = document.getElementById('camBtn');
+const micBtn = document.getElementById('micBtn');
+const shareBtn = document.getElementById('shareBtn');
+const createRoom = document.getElementById('lobbyCreate');
+const joinRoom = document.getElementById('lobbyJoinBtn');
+const roomId = document.getElementById('lobbyJoinInput');
+const sendChat = document.getElementById('sendChat');
+const chatInput = document.getElementById('chatInput');
+const messages = document.getElementById('messages');
+const recs = document.getElementById('recs');
+const sessionShare = document.getElementById('sessionShare');
+const sessionInfoText = document.getElementById('sessionIdText');
+const sessionLinkBox = document.getElementById('sessionLinkBox');
+const sessionShareBox = document.getElementById('sessionShare');
+
+let localStream = null;
+let micEnabled = true;
+let camEnabled = true;
+let mediaRecorder = null;
+let recordedChunks = [];
+let currentSession = null; // { id, link }
+let isDemoLocal = false;
+
+/* ===== start preview ===== */
+async function startPreview(){
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    localVideo.srcObject = localStream;
+    remoteVideo.srcObject = localStream; // for demo until real WebRTC wired
+    setupAudioGraph();
+  }catch(e){console.error('getUserMedia failed',e)}
+}
+startPreview();
+
+camBtn.addEventListener('click',()=>{
+  if(!localStream) return;
+  camEnabled = !camEnabled;
+  localStream.getVideoTracks().forEach(t=>t.enabled = camEnabled);
+  camBtn.classList.toggle('toggled',camEnabled);
+  camBtn.textContent = camEnabled? 'Camera' : 'Camera Off';
+});
+micBtn.addEventListener('click',()=>{
+  if(!localStream) return;
+  micEnabled = !micEnabled;
+  localStream.getAudioTracks().forEach(t=>t.enabled = micEnabled);
+  micBtn.classList.toggle('toggled',micEnabled);
+  micBtn.textContent = micEnabled? 'Mic' : 'Mic Off';
+});
+shareBtn.addEventListener('click',async()=>{
+  try{
+    const s = await navigator.mediaDevices.getDisplayMedia({video:true});
+    remoteVideo.srcObject = s;
+  }catch(e){console.error('share failed',e)}
+});
+
+/* ===== Lobby actions ===== */
+function makeShareableId(){
+  const short = Math.random().toString(36).slice(2,8).toUpperCase();
+  return `MEET-${short}`;
+}
+async function enterSessionUI(){
+  // hide lobby, show app
+  lobby.style.display = 'none';
+  app.style.display = 'grid';
+  // update session info in header area
+  if(currentSession){
+    sessionInfoText.innerHTML = `Session: <span class="small">${currentSession.id}</span>`;
+    sessionLinkBox.textContent = currentSession.link || '';
+    sessionShareBox.innerHTML = `<div class="small">Share: <span class="small">${currentSession.link}</span></div>`;
+  }
+  // store local sessions list
+  updateLocalSessionsList();
+}
+
+/* Create session and enter */
+async function createSession(){
+  const id = makeShareableId();
+  const link = APP_ORIGIN + '/session/' + id;
+  currentSession = { id, link };
+  isDemoLocal = false;
+
+  sessionLinkBox.textContent = link;
+  sessionShareBox.innerHTML = `<div class="small">Share: <span class="small">${link}</span></div>`;
+
+  if (supabase){
+    try{
+      await supabase.from('sessions').upsert({ session_id: id, created_at: new Date().toISOString() });
+      await supabase.from('sequencer_state').upsert({ session_id: id, state: JSON.stringify(seq) });
+      subscribeToSession(id);
+    }catch(e){ console.warn('supabase create failed', e); }
+  } else {
+    // store local demo state
+    window._localSessions = window._localSessions || {};
+    window._localSessions[id] = { state: JSON.stringify(seq), created_at: new Date().toISOString() };
+    isDemoLocal = true;
+  }
+
+  await enterSessionUI();
+  alert('Session created: ' + id);
+}
+
+/* Local demo create (explicit) */
+async function createLocalDemo(){
+  await createSession();
+  // mark as local demo
+  isDemoLocal = true;
+}
+
+/* Join session (by ID or full link) */
+async function joinSession(){
+  const raw = (roomId.value || lobbyJoinInput.value || '').trim();
+  if(!raw) return alert('Paste a meeting link or ID');
+  const id = raw.includes('/')? raw.split('/').pop() : raw;
+  currentSession = { id, link: APP_ORIGIN + '/session/' + id };
+  sessionLinkBox.textContent = currentSession.link;
+  sessionShareBox.innerHTML = `<div class="small">Share: <span class="small">${currentSession.link}</span></div>`;
+
+  if(supabase){
+    try{
+      const { data, error } = await supabase.from('sequencer_state').select('state').eq('session_id', id).limit(1).single();
+      if(error && error.code === 'PGRST116'){
+        alert('No session found with id ' + id);
+        return;
+      }
+      if(data && data.state){
+        try{ applyRemoteState(JSON.parse(data.state)); } catch(e){ console.warn('parse fail', e); }
+      }
+      subscribeToSession(id);
+    }catch(e){ console.warn('supabase join failed', e); }
+  } else {
+    const s = window._localSessions && window._localSessions[id];
+    if(s && s.state){
+      applyRemoteState(JSON.parse(s.state));
+      isDemoLocal = true;
+    } else {
+      return alert('Local session not found — create session first (demo mode).');
+    }
+  }
+
+  await enterSessionUI();
+  alert('Joined session: ' + id);
+}
+
+/* Attach lobby button handlers */
+document.getElementById('lobbyCreate').addEventListener('click', createSession);
+document.getElementById('demoCreate').addEventListener('click', createLocalDemo);
+document.getElementById('lobbyJoinBtn').addEventListener('click', joinSession);
+document.getElementById('lobbyJoinInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') joinSession(); });
+
+/* display local sessions list */
+function updateLocalSessionsList(){
+  const s = window._localSessions || {};
+  const keys = Object.keys(s);
+  if(!keys.length){ localSessionsBox.textContent = 'No local sessions yet'; return; }
+  localSessionsBox.innerHTML = keys.map(k=>{
+    const t = new Date(s[k].created_at).toLocaleString();
+    return `<div style="margin-bottom:6px"><strong>${k}</strong><div class="small">${t}</div></div>`;
+  }).join('');
+}
+
+/* ====== Supabase realtime subscription scaffolding ====== */
+let supabaseSubscription = null;
+function subscribeToSession(sessionId){
+  if(!supabase) return;
+  try{
+    if(supabaseSubscription && supabaseSubscription.unsubscribe) supabaseSubscription.unsubscribe();
+  }catch(e){}
+  try{
+    supabaseSubscription = supabase.channel('realtime-sequencer-'+sessionId)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sequencer_state', filter: `session_id=eq.${sessionId}` }, payload => {
+        try{
+          if(payload.eventType === 'INSERT' || payload.eventType === 'UPDATE'){
+            const row = payload.new || payload.record || payload;
+            if(row && row.state){ applyRemoteState(JSON.parse(row.state)); }
+          }
+        }catch(e){ console.warn('apply remote state failed', e); }
+      })
+      .subscribe();
+  }catch(e){ console.warn('subscribe error', e); }
+}
+
+/* push local state to cloud (debounced) */
+let pushTimeout = null;
+function pushStateToCloud(){
+  if(!currentSession) return;
+  const payload = { session_id: currentSession.id, state: JSON.stringify(seq) };
+  if(supabase){
+    clearTimeout(pushTimeout);
+    pushTimeout = setTimeout(async ()=>{
+      try{ await supabase.from('sequencer_state').upsert(payload); } catch(e){ console.warn('upsert fail', e); }
+    }, 120);
+  } else {
+    window._localSessions = window._localSessions || {};
+    if(currentSession && window._localSessions[currentSession.id]) window._localSessions[currentSession.id].state = JSON.stringify(seq);
+  }
+}
+
+/* apply remote state to UI */
+function applyRemoteState(remoteState){
+  instruments.forEach(inst=>{
+    if(remoteState[inst.id] && Array.isArray(remoteState[inst.id])){
+      const arr = remoteState[inst.id].slice(0, steps);
+      seq[inst.id] = arr;
+    }
+  });
+  buildSequencer();
+  renderNotation();
+}
+
+/* =========================
+   Drum audio + sequencer
+   ========================= */
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioContext();
+let masterGain = audioCtx.createGain(); masterGain.gain.value = 0.9; masterGain.connect(audioCtx.destination);
+let drumGain = audioCtx.createGain(); drumGain.gain.value = 1; drumGain.connect(masterGain);
+let micSource = null;
+
+async function setupAudioGraph(){
+  if(!localStream) return;
+  if(!micSource){
+    micSource = audioCtx.createMediaStreamSource(localStream);
+    micSource.connect(masterGain);
+  }
+}
+function playKick(time){ const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(150, time); o.frequency.exponentialRampToValueAtTime(50, time+0.2); g.gain.setValueAtTime(1, time); g.gain.exponentialRampToValueAtTime(0.001, time+0.3); o.connect(g); g.connect(drumGain); o.start(time); o.stop(time+0.3); }
+function playSnare(time){ const bufferSize = audioCtx.sampleRate * 0.2; const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const data = buffer.getChannelData(0); for (let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * Math.exp(-i/bufferSize*6); } const noise = audioCtx.createBufferSource(); noise.buffer = buffer; const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type='bandpass'; noiseFilter.frequency.value=2000; const g = audioCtx.createGain(); g.gain.setValueAtTime(1, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); noise.connect(noiseFilter); noiseFilter.connect(g); g.connect(drumGain); noise.start(time); noise.stop(time+0.2); }
+function playHiHat(time){ const bufferSize = audioCtx.sampleRate * 0.05; const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const data = buffer.getChannelData(0); for (let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * Math.exp(-i/bufferSize*10); } const noise = audioCtx.createBufferSource(); noise.buffer = buffer; const filt = audioCtx.createBiquadFilter(); filt.type='highpass'; filt.frequency.value=7000; const g = audioCtx.createGain(); g.gain.setValueAtTime(0.6, time); g.gain.exponentialRampToValueAtTime(0.001, time+0.08); noise.connect(filt); filt.connect(g); g.connect(drumGain); noise.start(time); noise.stop(time+0.1); }
+
+/* ===== Sequencer & Notation setup ===== */
 const instruments = [{id:'kick',label:'Kick'},{id:'snare',label:'Snare'},{id:'hihat',label:'Hi-Hat'}];
-let steps = 64; // default to 64 steps
-let seq = {};
-instruments.forEach(inst => seq[inst.id] = new Array(steps).fill(false));
-
-const rows = document.getElementById('rows'); 
-const stepsCount = document.getElementById('stepsCount');
-const playSeq = document.getElementById('playSeq'); 
-const stopSeq = document.getElementById('stopSeq'); 
-const clearSeq = document.getElementById('clearSeq');
-
-/* Build sequencer UI */
+let steps = 16;
+let seq = {}; instruments.forEach(inst=>{seq[inst.id]=new Array(steps).fill(false)});
+const rows = document.getElementById('rows'); const stepsCount = document.getElementById('stepsCount');
+const playSeq = document.getElementById('playSeq'); const stopSeq = document.getElementById('stopSeq'); const clearSeq = document.getElementById('clearSeq');
 function buildSequencer(){
   rows.innerHTML='';
   instruments.forEach(inst=>{
@@ -243,23 +495,131 @@ function buildSequencer(){
   });
 }
 buildSequencer();
+stepsCount.addEventListener('change',()=>{ steps = parseInt(stepsCount.value); instruments.forEach(inst=>seq[inst.id]=new Array(steps).fill(false)); buildSequencer(); });
+clearSeq.addEventListener('click',()=>{ instruments.forEach(inst=>seq[inst.id].fill(false)); buildSequencer(); renderNotation(); pushStateToCloud(); });
 
-/* Change steps dynamically */
-stepsCount.addEventListener('change',()=>{
-  steps = parseInt(stepsCount.value);
-  instruments.forEach(inst => seq[inst.id] = new Array(steps).fill(false));
-  buildSequencer();
+let isPlaying=false; let currentStep=0; let schedulerId=null; const tempoControl = document.getElementById('tempo'); const tempoLabel = document.getElementById('tempoLabel');
+function scheduleStep(){
+  const bpm = parseInt(tempoControl.value);
+  const interval = (60 / bpm) / 4 * 1000; // 16th steps
+  const tNow = audioCtx.currentTime;
+  instruments.forEach(inst=>{
+    if(seq[inst.id][currentStep]){
+      if(inst.id==='kick') playKick(tNow);
+      if(inst.id==='snare') playSnare(tNow);
+      if(inst.id==='hihat') playHiHat(tNow);
+    }
+  });
+  renderNotation(currentStep);
+  currentStep = (currentStep+1) % steps;
+  schedulerId = setTimeout(scheduleStep, interval);
+}
+playSeq.addEventListener('click',()=>{ if(isPlaying) return; isPlaying=true; currentStep=0; scheduleStep(); playSeq.classList.add('toggled'); });
+stopSeq.addEventListener('click',()=>{ if(!isPlaying) return; isPlaying=false; clearTimeout(schedulerId); playSeq.classList.remove('toggled'); renderNotation(-1); });
+tempoControl.addEventListener('input',()=>{ tempoLabel.textContent = tempoControl.value + ' BPM'; });
+
+/* ===== Notation Canvas (5 lines) ===== */
+const canvas = document.getElementById('notationCanvas'); const ctx = canvas.getContext('2d');
+function resizeCanvas(){ canvas.width = canvas.clientWidth * devicePixelRatio; canvas.height = canvas.clientHeight * devicePixelRatio; ctx.setTransform(1,0,0,1,0,0); ctx.scale(devicePixelRatio, devicePixelRatio); drawStaff(); }
+window.addEventListener('resize',()=>{ resizeCanvas(); });
+resizeCanvas();
+
+function drawStaff(){
+  const w = canvas.clientWidth; const h = canvas.clientHeight; ctx.clearRect(0,0,w,h);
+  ctx.save(); ctx.strokeStyle = '#444'; ctx.lineWidth = 1;
+  const margin = 12; const linesY = [];
+  const usableH = h - margin*2; const spacing = usableH / 6; // five lines
+  for(let i=0;i<5;i++){ const y = margin + spacing*(i+1); linesY.push(y); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); }
+  ctx.restore();
   renderNotation();
+}
+
+function renderNotation(highlightStep=-1){
+  const w = canvas.clientWidth; const h = canvas.clientHeight; ctx.clearRect(0,0,w,h);
+  drawStaffLinesOnly();
+  const left = 14; const right = w - 14; const timelineW = right - left;
+  const stepW = timelineW / steps;
+  const staffPositions = { 'kick': 4, 'snare': 3, 'hihat': 1 }; // mapping rows (A = bottom-most index)
+  // ghost placeholders (A2)
+  instruments.forEach(inst=>{
+    for(let i=0;i<steps;i++){
+      const x = left + i*stepW + stepW/2;
+      const row = staffPositions[inst.id];
+      const y = 12 + (h-24)/6 * row;
+      ctx.beginPath(); ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.arc(x,y,6,0,Math.PI*2); ctx.fill();
+    }
+  });
+  // active notes (Option A notation)
+  instruments.forEach(inst=>{
+    for(let i=0;i<steps;i++){
+      if(seq[inst.id][i]){
+        const x = left + i*stepW + stepW/2;
+        const row = staffPositions[inst.id];
+        const y = 12 + (h-24)/6 * row;
+        if(inst.id==='hihat'){
+          ctx.beginPath(); ctx.strokeStyle='#81d4fa'; ctx.lineWidth=2; ctx.moveTo(x-6,y-6); ctx.lineTo(x+6,y+6); ctx.moveTo(x-6,y+6); ctx.lineTo(x+6,y-6); ctx.stroke();
+        } else {
+          ctx.beginPath(); ctx.fillStyle = (inst.id==='kick'?'#ff8a80':'#ffd54f'); ctx.ellipse(x,y,7,5,0,0,Math.PI*2); ctx.fill();
+          if(inst.id==='snare'){ ctx.beginPath(); ctx.strokeStyle = '#ffd54f'; ctx.lineWidth=2; ctx.moveTo(x+5,y); ctx.lineTo(x+5,y-28); ctx.stroke(); }
+        }
+      }
+    }
+  });
+  // playhead highlight
+  if(highlightStep>=0){ ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fillRect(left+highlightStep*stepW,6,stepW,h-12); }
+}
+
+function drawStaffLinesOnly(){ const w = canvas.clientWidth; const h = canvas.clientHeight; ctx.save(); ctx.strokeStyle = '#444'; ctx.lineWidth = 1; const margin = 12; const usableH = h - margin*2; const spacing = usableH / 6; for(let i=0;i<5;i++){ const y = margin + spacing*(i+1); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); } ctx.restore(); }
+
+/* ===== MediaRecorder (local) ===== */
+function startRecording(){
+  const dest = audioCtx.createMediaStreamDestination(); masterGain.connect(dest);
+  mediaRecorder = new MediaRecorder(dest.stream);
+  recordedChunks = [];
+  mediaRecorder.ondataavailable = e=>{ if(e.data.size>0) recordedChunks.push(e.data); };
+  mediaRecorder.onstop = ()=>{
+    const blob = new Blob(recordedChunks,{type:'audio/webm'});
+    const url = URL.createObjectURL(blob);
+    const el = document.createElement('div'); const a = document.createElement('audio'); a.controls = true; a.src = url; el.appendChild(a);
+    const dwn = document.createElement('a'); dwn.href = url; dwn.download='recording.webm'; dwn.textContent=' Download'; dwn.style.marginLeft='8px'; el.appendChild(dwn); recs.appendChild(el);
+  };
+  mediaRecorder.start();
+}
+function stopRecording(){ if(mediaRecorder && mediaRecorder.state==='recording') mediaRecorder.stop(); }
+const recordBtn = document.getElementById('recordBtn');
+recordBtn.addEventListener('click',()=>{
+  if(recordBtn.classList.contains('toggled')){ stopRecording(); recordBtn.classList.remove('toggled'); recordBtn.textContent='Record'; }
+  else{ startRecording(); recordBtn.classList.add('toggled'); recordBtn.textContent='Recording...'; }
 });
 
-/* Initialize sample pattern for 64 steps */
+/* ===== Chat & helpers ===== */
+sendChat.addEventListener('click',()=>{
+  const txt = chatInput.value.trim(); if(!txt) return;
+  addMessage('You',txt);
+  chatInput.value='';
+});
+function addMessage(who, txt){
+  const d = document.createElement('div'); d.className='msg'; d.textContent = who+': '+txt; messages.appendChild(d); messages.scrollTop = messages.scrollHeight;
+}
+chatInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ sendChat.click(); } });
+
+/* ===== init & sample pattern ===== */
 (function(){
-  seq.kick[0]=true; seq.kick[16]=true; seq.kick[32]=true; seq.kick[48]=true;
-  seq.snare[8]=true; seq.snare[24]=true; seq.snare[40]=true; seq.snare[56]=true;
-  for(let i=0;i<64;i+=4) seq.hihat[i]=true;
-  buildSequencer();
-  renderNotation();
+  seq.kick[0]=true; seq.kick[8]=true; seq.snare[4]=true; seq.snare[12]=true; for(let i=0;i<16;i+=2) seq.hihat[i]=true; buildSequencer(); renderNotation();
 })();
+
+/* ===== utility: allow entering link from address (optional) ===== */
+(function(){
+  // if URL contains /session/MEET-XXXX auto-fill
+  const parts = location.pathname.split('/');
+  if(parts.length>=3 && parts[1]==='session' && parts[2]){
+    lobbyJoinInput.value = parts[2];
+  }
+})();
+
+/* Make sure canvas is sized after fonts load */
+window.addEventListener('load', resizeCanvas);
+
 </script>
 </body>
 </html>
