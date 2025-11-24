@@ -35,6 +35,7 @@
   input[type=range]{width:160px}
   .room{display:flex;gap:8px;align-items:center}
   .small{font-size:13px;color:var(--muted)}
+  .shareLink{background:rgba(255,255,255,0.03);padding:8px;border-radius:8px;word-break:break-all}
   @media(max-width:900px){.container{grid-template-columns:1fr;}.right{order:2}}
 </style>
 </head>
@@ -61,8 +62,8 @@
 
     <div class="panel controls">
       <div class="room">
-        <button id="createRoom" class="btn">Create Room</button>
-        <input id="roomId" placeholder="Room ID" style="background:transparent;border:1px solid rgba(255,255,255,0.04);color:#fff;padding:8px;border-radius:8px" />
+        <button id="createRoom" class="btn">Create Session (Shareable Link)</button>
+        <input id="roomId" placeholder="Paste meeting link or ID" style="background:transparent;border:1px solid rgba(255,255,255,0.04);color:#fff;padding:8px;border-radius:8px" />
         <button id="joinRoom" class="btn">Join</button>
       </div>
       <div style="flex:1"></div>
@@ -104,7 +105,7 @@
     </div>
 
     <div class="panel chat">
-      <div><strong>Chat / Notes</strong></div>
+      <div style="display:flex;justify-content:space-between;align-items:center"><strong>Chat / Notes</strong><div id="sessionShare" class="small"></div></div>
       <div id="messages" style="margin-top:8px"></div>
       <div style="display:flex;gap:8px;margin-top:8px">
         <input id="chatInput" placeholder="Type message" style="flex:1;background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:#fff">
@@ -122,9 +123,24 @@
   </aside>
 </div>
 
-<footer>Prototype — fully client side. Multi-user live meetings require a simple signaling server (we can add next).</footer>
+<footer>Prototype — Supabase-ready. To enable real-time sessions, add your Supabase URL & Key in the script below.</footer>
+
+<!-- Supabase JS (v2) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 
 <script>
+// ====== CONFIG: replace with your Supabase details to enable real-time ======
+const SUPABASE_URL = 'https://YOUR_SUPABASE_URL.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const APP_ORIGIN = window.location.origin; // used for share link
+
+let supabase = null;
+if(SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes('YOUR_SUPABASE')){
+  supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} else {
+  console.warn('Supabase not configured — running in local demo mode. Replace SUPABASE_URL & KEY to enable cloud sync.');
+}
+
 // ======== Basic local video preview ========
 const localVideo = document.getElementById('localVideo');
 const remoteVideo = document.getElementById('remoteVideo');
@@ -138,12 +154,14 @@ const sendChat = document.getElementById('sendChat');
 const chatInput = document.getElementById('chatInput');
 const messages = document.getElementById('messages');
 const recs = document.getElementById('recs');
+const sessionShare = document.getElementById('sessionShare');
 
 let localStream = null;
 let micEnabled = true;
 let camEnabled = true;
 let mediaRecorder = null;
 let recordedChunks = [];
+let currentSession = null; // { id, link }
 
 async function startPreview(){
   try{
@@ -179,23 +197,107 @@ shareBtn.addEventListener('click',async()=>{
   }catch(e){console.error('share failed',e)}
 });
 
-createRoom.addEventListener('click',()=>{
-  const id = Math.random().toString(36).slice(2,9);
-  roomId.value = id;
-  alert('Room created: '+id+' (local demo)');
-});
-joinRoom.addEventListener('click',()=>{
-  if(!roomId.value) return alert('Enter room id');
-  alert('Joined room '+roomId.value+' (local demo)');
-});
+// ===== Session creation & joining (Supabase-backed) =====
+function makeShareableId(){
+  const short = Math.random().toString(36).slice(2,8).toUpperCase();
+  return `MEET-${short}`;
+}
 
-sendChat.addEventListener('click',()=>{
-  const txt = chatInput.value.trim(); if(!txt) return;
-  addMessage('You',txt);
-  chatInput.value='';
-});
-function addMessage(who, txt){
-  const d = document.createElement('div'); d.className='msg'; d.textContent = who+': '+txt; messages.appendChild(d); messages.scrollTop = messages.scrollHeight;
+async function createSession(){
+  const id = makeShareableId();
+  const link = APP_ORIGIN + '/session/' + id;
+  currentSession = {id, link};
+  sessionShare.innerHTML = '<div class="shareLink">Share this link: ' + link + '</div>';
+
+  if(supabase){
+    // upsert session row into 'sessions' table (session_id primary key)
+    await supabase.from('sessions').upsert({ session_id: id, created_at: new Date().toISOString() });
+    // create or reset sequencer state
+    await supabase.from('sequencer_state').upsert({ session_id: id, state: JSON.stringify(seq) });
+    subscribeToSession(id);
+  } else {
+    // local demo: store in memory
+    window._localSessions = window._localSessions || {};
+    window._localSessions[id] = {state: JSON.stringify(seq)};
+  }
+}
+
+async function joinSession(){
+  const raw = roomId.value.trim(); if(!raw) return alert('Paste a meeting link or ID');
+  // allow pasteable link or ID
+  const id = raw.includes('/')? raw.split('/').pop() : raw;
+  currentSession = { id, link: APP_ORIGIN + '/session/' + id };
+  sessionShare.innerHTML = '<div class="shareLink">Session: ' + currentSession.link + '</div>';
+
+  if(supabase){
+    // get latest state
+    const { data, error } = await supabase.from('sequencer_state').select('state').eq('session_id', id).limit(1).single();
+    if(error && error.code === 'PGRST116'){
+      // not found
+      alert('No session found with id '+id);
+      return;
+    }
+    if(data && data.state){
+      try{ const remoteState = JSON.parse(data.state); applyRemoteState(remoteState); }
+      catch(e){ console.warn('failed parse state',e); }
+    }
+    subscribeToSession(id);
+  } else {
+    // local demo
+    const s = window._localSessions && window._localSessions[id];
+    if(s && s.state){ applyRemoteState(JSON.parse(s.state)); }
+    else alert('Local session not found — create session first (demo mode).');
+  }
+}
+
+createRoom.addEventListener('click', async ()=>{ await createSession(); alert('Session created: '+currentSession.id); });
+joinRoom.addEventListener('click', async ()=>{ await joinSession(); });
+
+// Subscribe to changes in sequencer state for the session
+let supabaseSubscription = null;
+function subscribeToSession(sessionId){
+  if(!supabase) return;
+  // unsubscribe previous
+  if(supabaseSubscription && supabaseSubscription.unsubscribe) supabaseSubscription.unsubscribe();
+  // listen for changes in 'sequencer_state' table for this session
+  supabaseSubscription = supabase.channel('realtime-sequencer-'+sessionId)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sequencer_state', filter: `session_id=eq.${sessionId}` }, payload => {
+      try{
+        if(payload.eventType === 'INSERT' || payload.eventType === 'UPDATE'){
+          const row = payload.new || payload.record;
+          if(row && row.state){ applyRemoteState(JSON.parse(row.state)); }
+        }
+      }catch(e){ console.warn('apply remote state failed', e); }
+    })
+    .subscribe();
+}
+
+// Push local seq state to supabase
+let pushTimeout = null;
+function pushStateToCloud(){
+  if(!currentSession) return;
+  const payload = { session_id: currentSession.id, state: JSON.stringify(seq) };
+  if(supabase){
+    // debounce
+    clearTimeout(pushTimeout);
+    pushTimeout = setTimeout(async ()=>{
+      await supabase.from('sequencer_state').upsert(payload);
+    }, 150);
+  } else {
+    // local demo store
+    window._localSessions = window._localSessions || {};
+    if(currentSession && window._localSessions[currentSession.id]) window._localSessions[currentSession.id].state = JSON.stringify(seq);
+  }
+}
+
+function applyRemoteState(remoteState){
+  // remoteState expected as object {kick: [...], snare: [...], hihat: [...]}
+  instruments.forEach(inst=>{
+    if(remoteState[inst.id] && Array.isArray(remoteState[inst.id])){
+      seq[inst.id] = remoteState[inst.id].slice(0, steps);
+    }
+  });
+  buildSequencer(); renderNotation();
 }
 
 // ======== Audio context and simple drum sounds ========
@@ -222,12 +324,178 @@ function playKick(time){
   o.connect(g); g.connect(drumGain); o.start(time); o.stop(time+0.3);
 }
 function playSnare(time){
-  // noise + pitch
   const bufferSize = audioCtx.sampleRate * 0.2;
   const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
   const data = buffer.getChannelData(0);
   for (let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * Math.exp(-i/bufferSize*6); }
   const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+  const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type='bandpass'; noiseFilter.frequency.value=2000;
+  const g = audioCtx.createGain(); g.gain.setValueAtTime(1, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2);
+  noise.connect(noiseFilter); noiseFilter.connect(g); g.connect(drumGain);
+  noise.start(time); noise.stop(time+0.2);
+}
+function playHiHat(time){
+  const bufferSize = audioCtx.sampleRate * 0.05;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * Math.exp(-i/bufferSize*10); }
+  const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+  const filt = audioCtx.createBiquadFilter(); filt.type='highpass'; filt.frequency.value=7000;
+  const g = audioCtx.createGain(); g.gain.setValueAtTime(0.6, time); g.gain.exponentialRampToValueAtTime(0.001, time+0.08);
+  noise.connect(filt); filt.connect(g); g.connect(drumGain);
+  noise.start(time); noise.stop(time+0.1);
+}
+
+// ======== Sequencer & Notation ========
+const instruments = [{id:'kick',label:'Kick'},{id:'snare',label:'Snare'},{id:'hihat',label:'Hi-Hat'}];
+let steps = 16;
+let seq = {}; instruments.forEach(inst=>{seq[inst.id]=new Array(steps).fill(false)});
+const rows = document.getElementById('rows'); const stepsCount = document.getElementById('stepsCount');
+const playSeq = document.getElementById('playSeq'); const stopSeq = document.getElementById('stopSeq'); const clearSeq = document.getElementById('clearSeq');
+function buildSequencer(){
+  rows.innerHTML='';
+  instruments.forEach(inst=>{
+    const row = document.createElement('div'); row.className='seq-row';
+    const lab = document.createElement('div'); lab.className='instrument'; lab.textContent = inst.label; row.appendChild(lab);
+    const stepsWrap = document.createElement('div'); stepsWrap.className='steps';
+    for(let i=0;i<steps;i++){
+      const s = document.createElement('div'); s.className='step'; s.dataset.i=i; s.dataset.inst=inst.id; s.addEventListener('click',()=>{ seq[inst.id][i] = !seq[inst.id][i]; s.classList.toggle('active', seq[inst.id][i]); renderNotation(); pushStateToCloud(); });
+      // if remote state says active show active
+      if(seq[inst.id][i]) s.classList.add('active');
+      stepsWrap.appendChild(s);
+    }
+    row.appendChild(stepsWrap); rows.appendChild(row);
+  });
+}
+buildSequencer();
+stepsCount.addEventListener('change',()=>{ steps = parseInt(stepsCount.value); instruments.forEach(inst=>seq[inst.id]=new Array(steps).fill(false)); buildSequencer(); });
+clearSeq.addEventListener('click',()=>{ instruments.forEach(inst=>seq[inst.id].fill(false)); buildSequencer(); renderNotation(); pushStateToCloud(); });
+
+let isPlaying=false; let currentStep=0; let schedulerId=null; const tempoControl = document.getElementById('tempo'); const tempoLabel = document.getElementById('tempoLabel');
+function scheduleStep(){
+  const bpm = parseInt(tempoControl.value);
+  const interval = (60 / bpm) / 4 * 1000; // 16th steps
+  const tNow = audioCtx.currentTime;
+  instruments.forEach(inst=>{
+    if(seq[inst.id][currentStep]){
+      if(inst.id==='kick') playKick(tNow);
+      if(inst.id==='snare') playSnare(tNow);
+      if(inst.id==='hihat') playHiHat(tNow);
+    }
+  });
+  renderNotation(currentStep);
+  currentStep = (currentStep+1) % steps;
+  schedulerId = setTimeout(scheduleStep, interval);
+}
+playSeq.addEventListener('click',()=>{ if(isPlaying) return; isPlaying=true; currentStep=0; scheduleStep(); playSeq.classList.add('toggled'); });
+stopSeq.addEventListener('click',()=>{ if(!isPlaying) return; isPlaying=false; clearTimeout(schedulerId); playSeq.classList.remove('toggled'); renderNotation(-1); });
+tempoControl.addEventListener('input',()=>{ tempoLabel.textContent = tempoControl.value + ' BPM'; });
+
+// ===== Notation Canvas (5 lines) =====
+const canvas = document.getElementById('notationCanvas'); const ctx = canvas.getContext('2d');
+function resizeCanvas(){ canvas.width = canvas.clientWidth * devicePixelRatio; canvas.height = canvas.clientHeight * devicePixelRatio; ctx.scale(devicePixelRatio, devicePixelRatio); drawStaff(); }
+window.addEventListener('resize',()=>{ // redraw
+  ctx.setTransform(1,0,0,1,0,0); // reset
+  resizeCanvas();
+});
+resizeCanvas();
+
+function drawStaff(){
+  const w = canvas.clientWidth; const h = canvas.clientHeight; ctx.clearRect(0,0,w,h);
+  ctx.save(); ctx.strokeStyle = '#444'; ctx.lineWidth = 1;
+  const margin = 12; const linesY = [];
+  const usableH = h - margin*2; const spacing = usableH / 6; // five lines
+  for(let i=0;i<5;i++){ const y = margin + spacing*(i+1); linesY.push(y); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); }
+  ctx.restore();
+  // draw existing programmed notes as blocks along a timeline
+  renderNotation();
+}
+
+function renderNotation(highlightStep=-1){
+  const w = canvas.clientWidth; const h = canvas.clientHeight; ctx.clearRect(0,0,w,h); // reset
+  drawStaffLinesOnly();
+  // timeline width excluding margins
+  const left = 14; const right = w - 14; const timelineW = right - left;
+  const stepW = timelineW / steps;
+  // map instruments to staff positions (y)
+  const staffPositions = { 'kick': 4, 'snare': 3, 'hihat': 1 };
+  // draw ghost placeholders for all steps (A2)
+  instruments.forEach(inst=>{
+    for(let i=0;i<steps;i++){
+      const x = left + i*stepW + stepW/2;
+      const row = staffPositions[inst.id];
+      const y = 12 + (h-24)/6 * row;
+      // ghost placeholder
+      ctx.beginPath(); ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.arc(x,y,6,0,Math.PI*2); ctx.fill();
+    }
+  });
+  // draw active notes on top
+  instruments.forEach(inst=>{
+    for(let i=0;i<steps;i++){
+      if(seq[inst.id][i]){
+        const x = left + i*stepW + stepW/2;
+        const row = staffPositions[inst.id];
+        const y = 12 + (h-24)/6 * row;
+        // draw notation symbol per Option A (real notation)
+        if(inst.id==='hihat'){
+          // draw cross for hi-hat
+          ctx.beginPath(); ctx.strokeStyle='#81d4fa'; ctx.lineWidth=2; ctx.moveTo(x-6,y-6); ctx.lineTo(x+6,y+6); ctx.moveTo(x-6,y+6); ctx.lineTo(x+6,y-6); ctx.stroke();
+        } else {
+          // filled note head
+          ctx.beginPath(); ctx.fillStyle = (inst.id==='kick'?'#ff8a80':'#ffd54f'); ctx.ellipse(x,y,7,5,0,0,Math.PI*2); ctx.fill();
+          // stem for snare
+          if(inst.id==='snare'){
+            ctx.beginPath(); ctx.strokeStyle = '#ffd54f'; ctx.lineWidth=2; ctx.moveTo(x+5,y); ctx.lineTo(x+5,y-28); ctx.stroke();
+          }
+        }
+      }
+    }
+  });
+  // highlight playhead
+  if(highlightStep>=0){ const x = left + highlightStep*stepW + stepW/2; ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fillRect(left+highlightStep*stepW,6,stepW,h-12); }
+}
+
+function drawStaffLinesOnly(){ const w = canvas.clientWidth; const h = canvas.clientHeight; ctx.save(); ctx.strokeStyle = '#444'; ctx.lineWidth = 1; const margin = 12; const usableH = h - margin*2; const spacing = usableH / 6; for(let i=0;i<5;i++){ const y = margin + spacing*(i+1); ctx.beginPath(); ctx.moveTo(10,y); ctx.lineTo(w-10,y); ctx.stroke(); } ctx.restore(); }
+
+// ===== MediaRecorder for local recording (mic + drums mix) =====nfunction startRecording(){
+  // create a destination to capture audioCtx mixed output
+  const dest = audioCtx.createMediaStreamDestination(); masterGain.connect(dest);
+  // combine with video? For now record audio only
+  mediaRecorder = new MediaRecorder(dest.stream);
+  recordedChunks = [];
+  mediaRecorder.ondataavailable = e=>{ if(e.data.size>0) recordedChunks.push(e.data); };
+  mediaRecorder.onstop = ()=>{
+    const blob = new Blob(recordedChunks,{type:'audio/webm'});
+    const url = URL.createObjectURL(blob);
+    const el = document.createElement('div'); const a = document.createElement('audio'); a.controls = true; a.src = url; el.appendChild(a); const dwn = document.createElement('a'); dwn.href = url; dwn.download='recording.webm'; dwn.textContent=' Download'; dwn.style.marginLeft='8px'; el.appendChild(dwn); recs.appendChild(el);
+  };
+  mediaRecorder.start();
+}
+function stopRecording(){ if(mediaRecorder && mediaRecorder.state==='recording') mediaRecorder.stop(); }
+
+const recordBtn = document.getElementById('recordBtn');
+recordBtn.addEventListener('click',()=>{
+  if(recordBtn.classList.contains('toggled')){ stopRecording(); recordBtn.classList.remove('toggled'); recordBtn.textContent='Record'; }
+  else{ startRecording(); recordBtn.classList.add('toggled'); recordBtn.textContent='Recording...'; }
+});
+
+// ===== Simple UI glue =====n// render notation initially
+function init(){ drawStaff(); }
+init();
+
+// ===== small helpers: draw on load =====
+(function(){
+  // friendly sample pattern
+  seq.kick[0]=true; seq.kick[8]=true; seq.snare[4]=true; seq.snare[12]=true; for(let i=0;i<16;i+=2) seq.hihat[i]=true; buildSequencer(); renderNotation();
+})();
+
+// ===== Chat send with enter =====
+chatInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ sendChat.click(); } });
+
+</script>
+</body>
+</html>
+ffer;
   const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type='bandpass'; noiseFilter.frequency.value=2000;
   const g = audioCtx.createGain(); g.gain.setValueAtTime(1, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2);
   noise.connect(noiseFilter); noiseFilter.connect(g); g.connect(drumGain);
