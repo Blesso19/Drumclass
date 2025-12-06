@@ -2,19 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Notation Maker PRO</title>
+<title>Drum Notation Maker PRO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 :root{
   --bg:#050814;
-  --panel:rgba(22,30,60,0.88);
-  --glass:rgba(255,255,255,0.08);
-  --accent:#7df9ff;
-  --accent2:#9b5cff;
+  --panel:rgba(22,30,60,.85);
+  --glass:rgba(255,255,255,.08);
+  --accent:#70f3ff;
+  --accent2:#a16bff;
   --danger:#ff5c6c;
-  --text:#ffffff;
-  --muted:#9ba4d6;
 }
 
 *{box-sizing:border-box}
@@ -22,68 +20,62 @@
 body{
   margin:0;
   background:radial-gradient(circle at top,#0b1440,#050814);
-  color:var(--text);
-  font-family:system-ui,-apple-system;
+  font-family:system-ui;
+  color:#fff;
 }
 
 header{
   padding:14px;
-  text-align:center;
   font-size:22px;
+  text-align:center;
   font-weight:700;
   background:linear-gradient(90deg,var(--accent2),var(--accent));
-  -webkit-background-clip:text;
-  color:transparent;
+  color:#000;
 }
 
-/* LAYOUT */
 .app{
   max-width:1200px;
+  padding:10px;
   margin:auto;
-  padding:10px;
 }
 
-/* SYMBOL PALETTE */
-.palette{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(54px,1fr));
+/* TOOLBAR */
+.toolbar{
+  display:flex;
   gap:10px;
-  padding:14px;
+  flex-wrap:wrap;
   background:var(--panel);
+  padding:12px;
   border-radius:18px;
-  backdrop-filter:blur(12px);
 }
 
-.sym, .control{
-  background:var(--glass);
-  border:1px solid rgba(255,255,255,.15);
+.sym, .ctrl{
+  padding:10px 14px;
   border-radius:14px;
-  padding:10px;
-  font-size:20px;
-  color:var(--text);
+  border:1px solid rgba(255,255,255,.2);
+  background:var(--glass);
+  font-size:18px;
   cursor:pointer;
-  transition:.2s;
-}
-
-.sym:hover{
-  transform:scale(1.15);
-  box-shadow:0 0 14px var(--accent);
 }
 
 .sym.active{
   background:linear-gradient(135deg,var(--accent2),var(--accent));
   color:#000;
-  font-weight:700;
+  font-weight:bold;
 }
 
-.control.delete-all{
-  background:var(--danger);
-  font-weight:700;
+.ctrl.clear{background:var(--danger)}
+
+select{
+  background:var(--glass);
+  color:#fff;
+  border-radius:12px;
+  padding:8px;
 }
 
 /* CANVAS */
 .canvas-wrap{
-  margin-top:16px;
+  margin-top:14px;
   background:var(--panel);
   border-radius:20px;
   padding:14px;
@@ -91,171 +83,152 @@ header{
 
 canvas{
   width:100%;
+  border-radius:14px;
   background:#070d2a;
-  border-radius:16px;
-}
-
-/* FOOTER */
-.footer{
-  text-align:center;
-  font-size:50px;
-  color:var(--muted);
-  padding:10px;
 }
 </style>
 </head>
 
 <body>
-
-<header>🎼 Notation Maker PRO</header>
+<header>🎼 Drum Notation Maker PRO</header>
 
 <div class="app">
 
-<div class="palette">
+<div class="toolbar">
   <button class="sym" data-s="●">●</button>
   <button class="sym" data-s="◦">◦</button>
   <button class="sym" data-s="×">×</button>
   <button class="sym" data-s="𝅘𝅥">𝅘𝅥</button>
   <button class="sym" data-s="𝅗𝅥">𝅗𝅥</button>
-  <button class="sym" data-s="𝅝">𝅝</button>
   <button class="sym" data-s="𝄽">𝄽</button>
-  <button class="sym" data-s="p">p</button>
-  <button class="sym" data-s="mf">mf</button>
-  <button class="sym" data-s="f">f</button>
-  <button class="control delete-all" id="clearAll">🗑 Clear</button>
+
+  <select id="timeSig">
+    <option>4/4</option>
+    <option>3/4</option>
+    <option>6/8</option>
+    <option>2/4</option>
+  </select>
+
+  <button class="ctrl" id="addStaff">➕ Add Staff</button>
+  <button class="ctrl clear" id="clearAll">🗑 Clear</button>
 </div>
 
 <div class="canvas-wrap">
-  <canvas id="staff" width="1200" height="520"></canvas>
+  <canvas id="score" width="1200" height="600"></canvas>
 </div>
 
-</div>
-
-<div class="footer">
-Click to add notes (lines, spaces, above & below) • Click note to delete
 </div>
 
 <script>
-const canvas=document.getElementById("staff");
+const canvas=document.getElementById("score");
 const ctx=canvas.getContext("2d");
 
-const state={
-  active:"●",
-  notes:[]
-};
-
-/* STAFF CONFIG */
-const staffTop=200;
-const lineGap=34;
-const lines=5;
-const extraPositions=4; // above & below
-const totalPositions=(lines*2-1)+(extraPositions*2);
+let activeSymbol="●";
+const staffGap=160;
+const lineGap=28;
 const left=80;
 const right=1120;
-const hitRadius=20;
+const bars=4; // bars per staff
 
-/* SELECT SYMBOL */
-document.querySelectorAll(".sym").forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll(".sym").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    state.active=btn.dataset.s;
+const score={
+  time:"4/4",
+  staffs:[{notes:[]}]
+};
+
+/* SYMBOL SELECT */
+document.querySelectorAll(".sym").forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll(".sym").forEach(s=>s.classList.remove("active"));
+    b.classList.add("active");
+    activeSymbol=b.dataset.s;
   };
 });
 document.querySelector(".sym").classList.add("active");
 
+document.getElementById("timeSig").onchange=e=>{
+  score.time=e.target.value;
+  draw();
+};
+
+/* ADD STAFF */
+document.getElementById("addStaff").onclick=()=>{
+  score.staffs.push({notes:[]});
+  canvas.height=score.staffs.length*staffGap+200;
+  draw();
+};
+
 /* CLEAR */
 document.getElementById("clearAll").onclick=()=>{
-  if(confirm("Delete all notes?")){
-    state.notes=[];
-    draw();
-  }
+  score.staffs=[{notes:[]}];
+  canvas.height=600;
+  draw();
 };
 
 /* DRAW */
 function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  /* STAFF */
+score.staffs.forEach((staff,idx)=>{
+  const top=100+idx*staffGap;
+
+  /* STAFF LINES */
   ctx.strokeStyle="#b8c9ff";
   ctx.lineWidth=2;
-  for(let i=0;i<lines;i++){
-    const y=staffTop+i*lineGap;
+  for(let i=0;i<5;i++){
     ctx.beginPath();
-    ctx.moveTo(left,y);
-    ctx.lineTo(right,y);
+    ctx.moveTo(left,top+i*lineGap);
+    ctx.lineTo(right,top+i*lineGap);
     ctx.stroke();
   }
 
-  /* NOTES + LEDGER */
-  state.notes.forEach(n=>{
-    drawLedger(n);
-    ctx.fillStyle="#fff";
-    ctx.font="52px serif"; // BIG NOTES
+  /* TIME SIG */
+  ctx.font="28px serif";
+  ctx.fillText(score.time.split("/")[0],left-40,top+lineGap);
+  ctx.fillText(score.time.split("/")[1],left-40,top+lineGap*3);
+
+  /* BAR LINES */
+  const barW=(right-left)/bars;
+  for(let i=0;i<=bars;i++){
+    ctx.beginPath();
+    ctx.moveTo(left+i*barW,top);
+    ctx.lineTo(left+i*barW,top+lineGap*4);
+    ctx.stroke();
+  }
+  /* END DOUBLE BAR */
+  ctx.lineWidth=4;
+  ctx.beginPath();
+  ctx.moveTo(right+6,top);
+  ctx.lineTo(right+6,top+lineGap*4);
+  ctx.stroke();
+  ctx.lineWidth=2;
+
+  /* NOTES */
+  staff.notes.forEach(n=>{
+    ctx.font="60px serif";
     ctx.textAlign="center";
     ctx.textBaseline="middle";
     ctx.fillText(n.s,n.x,n.y);
   });
-}
-
-/* LEDGER LINES */
-function drawLedger(note){
-  const topY=staffTop;
-  const bottomY=staffTop+lineGap*(lines-1);
-
-  ctx.strokeStyle="#b8c9ff";
-  ctx.lineWidth=2;
-
-  if(note.y < topY){
-    for(let y=topY-lineGap;y>=note.y;y-=lineGap){
-      ctx.beginPath();
-      ctx.moveTo(note.x-20,y);
-      ctx.lineTo(note.x+20,y);
-      ctx.stroke();
-    }
-  }
-
-  if(note.y > bottomY){
-    for(let y=bottomY+lineGap;y<=note.y;y+=lineGap){
-      ctx.beginPath();
-      ctx.moveTo(note.x-20,y);
-      ctx.lineTo(note.x+20,y);
-      ctx.stroke();
-    }
-  }
-}
-
-/* HIT TEST */
-function hitTest(x,y){
-  return state.notes.findIndex(n =>
-    Math.hypot(n.x-x,n.y-y)<hitRadius
-  );
-}
-
-/* POINTER */
-canvas.addEventListener("pointerdown",e=>{
-  const r=canvas.getBoundingClientRect();
-  const x=(e.clientX-r.left)*(canvas.width/r.width);
-  let y=(e.clientY-r.top)*(canvas.height/r.height);
-
-  const hit=hitTest(x,y);
-  if(hit!==-1){
-    state.notes.splice(hit,1);
-    draw();
-    return;
-  }
-
-  const unit=lineGap/2;
-  const minY=staffTop-extraPositions*lineGap;
-  const maxY=staffTop+(lines-1+extraPositions)*lineGap;
-
-  let idx=Math.round((y-minY)/unit);
-  idx=Math.max(0,Math.min(totalPositions-1,idx));
-  y=minY+idx*unit;
-
-  state.notes.push({x,y,s:state.active});
-  draw();
 });
+}
+
+/* NOTE INPUT */
+canvas.onclick=e=>{
+const r=canvas.getBoundingClientRect();
+const x=(e.clientX-r.left)*(canvas.width/r.width);
+let y=(e.clientY-r.top)*(canvas.height/r.height);
+
+score.staffs.forEach((staff,idx)=>{
+const top=100+idx*staffGap;
+if(y>top-40 && y<top+lineGap*5+40){
+  const unit=lineGap/2;
+  let row=Math.round((y-top+lineGap)/unit);
+  let snapY=top-lineGap+row*unit;
+  staff.notes.push({x,y:snapY,s:activeSymbol});
+}
+});
+draw();
+};
 
 draw();
 </script>
