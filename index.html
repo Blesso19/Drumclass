@@ -8,10 +8,11 @@
 <style>
 :root{
   --bg:#050814;
-  --panel:rgba(22,30,60,0.8);
+  --panel:rgba(22,30,60,0.85);
   --glass:rgba(255,255,255,0.08);
   --accent:#7df9ff;
   --accent2:#9b5cff;
+  --danger:#ff5c6c;
   --text:#ffffff;
   --muted:#9ba4d6;
 }
@@ -20,17 +21,15 @@
 
 body{
   margin:0;
-  background:radial-gradient(circle at top, #0b1440, #050814);
+  background:radial-gradient(circle at top,#0b1440,#050814);
   color:var(--text);
   font-family:system-ui,-apple-system;
 }
 
-/* HEADER */
 header{
   padding:14px;
   text-align:center;
   font-size:22px;
-  letter-spacing:1px;
   font-weight:700;
   background:linear-gradient(90deg,var(--accent2),var(--accent));
   -webkit-background-clip:text;
@@ -44,31 +43,31 @@ header{
   padding:10px;
 }
 
-/* SYMBOL BOX */
+/* PALETTE */
 .palette{
   display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(48px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(48px,1fr));
   gap:8px;
   padding:12px;
   background:var(--panel);
-  border-radius:16px;
+  border-radius:18px;
   backdrop-filter:blur(12px);
-  box-shadow:0 0 20px rgba(124,249,255,0.15);
+  box-shadow:0 0 20px rgba(124,249,255,.15);
 }
 
-/* BUTTON */
-.sym{
+/* BUTTONS */
+.sym, .control{
   background:var(--glass);
-  border:1px solid rgba(255,255,255,0.12);
-  border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
   padding:8px;
-  font-size:18px;
+  font-size:16px;
   color:var(--text);
   cursor:pointer;
   transition:.2s;
 }
 
-.sym:hover{
+.sym:hover, .control:hover{
   transform:scale(1.1);
   box-shadow:0 0 12px var(--accent);
 }
@@ -79,20 +78,28 @@ header{
   font-weight:700;
 }
 
+.control.delete-all{
+  background:var(--danger);
+  color:white;
+  font-weight:700;
+}
+
+.control.delete-all:hover{
+  box-shadow:0 0 12px var(--danger);
+}
+
 /* CANVAS */
 .canvas-wrap{
   margin-top:14px;
   background:var(--panel);
-  border-radius:18px;
+  border-radius:20px;
   padding:12px;
-  backdrop-filter:blur(12px);
 }
 
 canvas{
   width:100%;
-  height:auto;
   background:#070d2a;
-  border-radius:14px;
+  border-radius:16px;
 }
 
 /* FOOTER */
@@ -104,6 +111,7 @@ canvas{
 }
 </style>
 </head>
+
 <body>
 
 <header>🎼 Notation Maker PRO</header>
@@ -112,6 +120,7 @@ canvas{
 
   <!-- SYMBOL PALETTE -->
   <div class="palette" id="palette">
+
     <!-- NOTES -->
     <button class="sym" data-s="●">●</button>
     <button class="sym" data-s="◦">◦</button>
@@ -134,12 +143,10 @@ canvas{
     <!-- ARTICULATION -->
     <button class="sym" data-s=">">></button>
     <button class="sym" data-s="𝆓">𝆓</button>
-    <button class="sym" data-s="///">///</button>
 
     <!-- DYNAMICS -->
     <button class="sym" data-s="pp">pp</button>
     <button class="sym" data-s="p">p</button>
-    <button class="sym" data-s="mp">mp</button>
     <button class="sym" data-s="mf">mf</button>
     <button class="sym" data-s="f">f</button>
     <button class="sym" data-s="ff">ff</button>
@@ -147,20 +154,20 @@ canvas{
     <!-- TEXT -->
     <button class="sym" data-s="rit.">rit.</button>
     <button class="sym" data-s="cresc.">cresc.</button>
-    <button class="sym" data-s="dim.">dim.</button>
-    <button class="sym" data-s="D.C.">D.C.</button>
-    <button class="sym" data-s="Fine">Fine</button>
+
+    <!-- CONTROLS -->
+    <button class="control delete-all" id="clearAll">🗑 Clear All</button>
   </div>
 
   <!-- STAFF -->
   <div class="canvas-wrap">
-    <canvas id="staff" width="1100" height="420"></canvas>
+    <canvas id="staff" width="1100" height="440"></canvas>
   </div>
 
 </div>
 
 <div class="footer">
-Select symbol → tap/click on staff to place
+Select symbol → Click staff to add • Click note to delete • Clear All deletes everything
 </div>
 
 <script>
@@ -172,14 +179,15 @@ const state={
   items:[]
 };
 
-/* STAFF */
-const staffTop=140;
-const lineGap=24;
+/* STAFF CONFIG */
+const staffTop=150;
+const lineGap=26;
 const lines=5;
 const left=60;
 const right=1040;
+const hitRadius=12;
 
-/* PALETTE */
+/* PALETTE LOGIC */
 document.querySelectorAll(".sym").forEach(btn=>{
   btn.onclick=()=>{
     document.querySelectorAll(".sym").forEach(b=>b.classList.remove("active"));
@@ -188,6 +196,14 @@ document.querySelectorAll(".sym").forEach(btn=>{
   };
 });
 document.querySelector(".sym").classList.add("active");
+
+/* CLEAR ALL */
+document.getElementById("clearAll").onclick=()=>{
+  if(confirm("Delete all notes?")){
+    state.items=[];
+    draw();
+  }
+};
 
 /* DRAW STAFF */
 function draw(){
@@ -213,12 +229,28 @@ function draw(){
   });
 }
 
-/* PLACE SYMBOL */
+/* HIT TEST */
+function findNote(x,y){
+  return state.items.findIndex(n=>{
+    return Math.hypot(n.x-x,n.y-y)<hitRadius;
+  });
+}
+
+/* POINTER */
 canvas.addEventListener("pointerdown",e=>{
   const r=canvas.getBoundingClientRect();
   const x=(e.clientX-r.left)*(canvas.width/r.width);
   let y=(e.clientY-r.top)*(canvas.height/r.height);
 
+  // Delete if hit
+  const hit=findNote(x,y);
+  if(hit!==-1){
+    state.items.splice(hit,1);
+    draw();
+    return;
+  }
+
+  // Snap to staff
   let idx=Math.round((y-staffTop)/lineGap);
   idx=Math.max(0,Math.min(lines-1,idx));
   y=staffTop+idx*lineGap;
