@@ -3,559 +3,266 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Drum 5-Line Notation Maker — Pro</title>
+<title>Drum 5‑Line Notation Maker — Pro (Fixed)</title>
 <style>
 :root{--bg:#0b1020;--card:#0f1724;--muted:#9aa4bf;--accent:#7ce3ff;--accent2:#8ef78e}
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
-body{background:linear-gradient(180deg,#061024 0%, #071827 50%, #071826 100%);color:#e6eef8;padding:18px}
-.container{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:420px 1fr;gap:18px}
-.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;box-shadow:0 6px 30px rgba(2,6,23,0.6)}
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
+body{background:linear-gradient(180deg,#061024 0%, #071827 50%, #071826 100%);color:#e6eef8;padding:16px}
+.container{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:420px 1fr;gap:16px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:14px;box-shadow:0 6px 30px rgba(2,6,23,.6)}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .brand{display:flex;gap:12px;align-items:center}
-.logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#6f7eff);display:flex;align-items:center;justify-content:center;font-weight:700;color:#041025}
-.title{font-size:16px;font-weight:700}
+.logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#6f7eff);display:flex;align-items:center;justify-content:center;font-weight:800;color:#041025}
+.title{font-size:16px;font-weight:800}
 .subtitle{font-size:12px;color:var(--muted)}
-.controls{display:flex;gap:8px;align-items:center}
-.btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:10px;color:var(--muted);cursor:pointer;font-weight:600}
-.btn:hover{border-color:rgba(124,227,255,0.25);color:var(--accent)}
-.play{background:linear-gradient(90deg,var(--accent),#6f7eff);color:#041025;border:none}
-.side-panel{display:flex;flex-direction:column;gap:12px}
-.section-title{font-size:13px;color:var(--muted);margin-bottom:6px}
-.kv{display:flex;justify-content:space-between;align-items:center}
-.range{width:100%}
-.instrument-list{display:flex;flex-direction:column;gap:8px}
-.instrument{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent)}
-.instrument .sw{margin-left:auto}
-.staff-wrap{position:relative}
-.staff{background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.00));padding:12px;border-radius:12px;min-height:320px;border:1px solid rgba(255,255,255,0.03)}
-.canvas{width:100%;height:380px;border-radius:8px;background:linear-gradient(180deg,#071027,#071824);display:block}
-.grid-controls{display:flex;gap:8px;align-items:center;margin-top:8px}
+.btn{background:transparent;border:1px solid rgba(255,255,255,.08);padding:8px 10px;border-radius:10px;color:#c6d3f0;cursor:pointer;font-weight:600}
+.btn:hover{border-color:rgba(124,227,255,.4);color:var(--accent)}
+.btn.play{background:linear-gradient(90deg,var(--accent),#6f7eff);color:#041025;border:none}
 .small{font-size:12px;padding:6px 8px}
-.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-.legend{display:flex;gap:10px;align-items:center}
-.note-dot{width:12px;height:12px;border-radius:50%;background:var(--accent);display:inline-block}
-.footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:var(--muted);font-size:13px}
-.setting-row{display:flex;gap:8px;align-items:center}
-.input{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:6px 8px;border-radius:8px;color:inherit}
-.import-file{display:none}
-.right-top{display:flex;gap:8px}
-.badge{background:linear-gradient(90deg,#17223a,#0e1b2b);padding:6px 8px;border-radius:999px;font-weight:600;font-size:12px;color:var(--muted)}
-/* responsive */
-@media (max-width:980px){.container{grid-template-columns:1fr;padding-bottom:40px}.card{padding:12px}}
+.section-title{font-size:13px;color:var(--muted);margin:10px 0 6px}
+.instrument{display:flex;align-items:center;gap:8px;padding:6px;border-radius:8px;background:rgba(255,255,255,.02)}
+.input{background:transparent;border:1px solid rgba(255,255,255,.08);padding:6px 8px;border-radius:8px;color:inherit}
+.staff{border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:10px;background:linear-gradient(180deg,#071027,#071824)}
+.canvas{width:100%;height:400px;display:block;border-radius:10px}
+.palette{display:flex;flex-wrap:wrap;gap:6px}
+.badge{background:#101a33;padding:6px 10px;border-radius:999px;font-size:12px;color:#a8b4da}
+.footer{display:flex;justify-content:space-between;margin-top:8px;color:var(--muted);font-size:12px}
+@media(max-width:980px){.container{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="card">
-    <div class="header">
-      <div class="brand">
-        <div class="logo">5L</div>
-        <div>
-          <div class="title">Drum 5-Line Notation Maker — Pro</div>
-          <div class="subtitle">Place notes on a 5-line staff, play, export, save & share</div>
-        </div>
-      </div>
-      <div class="controls">
-        <button class="btn" id="undoBtn">Undo</button>
-        <button class="btn" id="redoBtn">Redo</button>
-        <button class="btn play" id="playBtn">Play</button>
+
+<!-- LEFT PANEL -->
+<div class="card">
+  <div class="header">
+    <div class="brand">
+      <div class="logo">5L</div>
+      <div>
+        <div class="title">Drum 5‑Line Notation Maker</div>
+        <div class="subtitle">Symbols • Click • Playback (FIXED)</div>
       </div>
     </div>
-
-    <div class="section-title">Instruments</div>
-    <div class="instrument-list" id="instruments"></div>
-
-    <div style="height:12px"></div>
-    <div class="section-title">Timeline & Export</div>
-    <div class="kv">
-      <div class="setting-row">
-        <label>Tempo</label>
-        <input id="tempo" class="input" type="number" min="40" max="240" value="100" style="width:84px;margin-left:8px">
-      </div>
-      <div class="setting-row">
-        <label>Beats / Bar</label>
-        <input id="beatsPerBar" class="input" type="number" min="1" max="16" value="4" style="width:66px;margin-left:8px">
-      </div>
-    </div>
-
-    <div style="height:8px"></div>
-    <div class="grid-controls">
-      <button class="btn small" id="addBar">+ Add Bar</button>
-      <button class="btn small" id="clearBtn">Clear Notes</button>
-      <button class="btn small" id="exportPNG">Export PNG</button>
-      <button class="btn small" id="saveJSON">Save JSON</button>
-      <label class="btn small">
-        Load JSON <input id="importJSON" class="import-file" type="file" accept="application/json">
-      </label>
-    </div>
-
-    <div style="height:12px"></div>
-    <div class="section-title">Playback Options</div>
-    <div class="kv">
-      <label><input type="checkbox" id="metronome"/> Metronome</label>
-      <label style="margin-left:12px"><input type="checkbox" id="loop" checked /> Loop</label>
-    </div>
-
-    <div style="height:12px"></div>
-    <div class="section-title">Tips</div>
-    <div style="color:var(--muted);font-size:13px;line-height:1.4">
-      Click on the staff to add or remove notes. Drag horizontally to create multiple notes quickly. Use export to save an image or save JSON to continue later.
-    </div>
-
+    <button class="btn play" id="playBtn">Play</button>
   </div>
 
-  <div class="card staff-wrap">
-    <div class="toolbar">
-      <!-- Note Symbol Palette -->
-      <div class="legend" id="symbolPalette" style="gap:6px;flex-wrap:wrap">
-        <button class="btn small" data-symbol="note" title="Note">●</button>
-        <button class="btn small" data-symbol="x" title="Hi‑hat X">×</button>
-        <button class="btn small" data-symbol="ghost" title="Ghost note">◦</button>
-        <button class="btn small" data-symbol="accent" title="Accent">▶</button>
-        <button class="btn small" data-symbol="flam" title="Flam">𝆓</button>
-        <button class="btn small" data-symbol="roll" title="Roll">///</button>
-        <span style="color:var(--muted);font-size:12px">Selected: <b id="activeSymbol">●</b></span>
-      </div>
-      <div class="legend">
-        <span class="note-dot"></span>
-        <div style="color:var(--muted);font-size:13px">Percussion note</div>
-      </div>
-      <div style="flex:1"></div>
-      <div class="right-top">
-        <div class="badge" id="barsBadge">Bars: 1</div>
-        <div class="badge" id="cursorInfo">Cursor: -</div>
-      </div>
-    </div>
+  <div class="section-title">Note Symbols</div>
+  <div class="palette" id="symbolPalette">
+    <button class="btn small" data-symbol="note">●</button>
+    <button class="btn small" data-symbol="x">×</button>
+    <button class="btn small" data-symbol="ghost">◦</button>
+    <button class="btn small" data-symbol="accent">▶</button>
+    <button class="btn small" data-symbol="flam">𝆓</button>
+    <button class="btn small" data-symbol="roll">///</button>
+    <span class="badge">Selected: <b id="activeSymbol">●</b></span>
+  </div>
 
-    <div class="staff" id="staff">
-      <canvas id="canvas" class="canvas"></canvas>
-    </div>
-    <div class="footer">
-      <div>Click to toggle notes • Hold Shift and drag for fast painting</div>
-      <div id="status">Ready</div>
-    </div>
+  <div class="section-title">Settings</div>
+  <div style="display:flex;gap:10px;align-items:center">
+    Tempo
+    <input id="tempo" class="input" type="number" value="100" min="40" max="240" style="width:80px">
+  </div>
+
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <button class="btn small" id="addBar">+ Bar</button>
+    <button class="btn small" id="clear">Clear</button>
+    <button class="btn small" id="undo">Undo</button>
+    <button class="btn small" id="redo">Redo</button>
   </div>
 </div>
 
+<!-- RIGHT PANEL -->
+<div class="card">
+  <div class="staff">
+    <canvas id="canvas" class="canvas"></canvas>
+  </div>
+  <div class="footer">
+    <div id="info">Bars: 1 | Notes: 0</div>
+    <div>Click staff to place notes</div>
+  </div>
+</div>
+</div>
+
 <script>
-/* Drum 5-Line Notation Maker — Single-file app
-   Features implemented:
-   - 5-line staff rendering (SVG-like on canvas)
-   - Multiple instruments mapped to staff lines
-   - Click to add/remove notes, shift-drag to paint
-   - Playback with WebAudio (synthesized drum sounds)
-   - Tempo, beats per bar, add/remove bars
-   - Save / Load JSON, Export PNG
-   - Undo/Redo
-*/
-
-// --- State ---
+/**********************
+ STATE
+**********************/
 const state = {
-  activeSymbol: 'note',
-  tempo: 100,
-  beatsPerBar: 4,
-  subdivisions: 4, // 16th notes by default (4 subdivisions per beat)
-  bars: 1,
-  instruments: [
-    {id:'kick', name:'Kick', line:4, enabled:true},
-    {id:'snare', name:'Snare', line:2, enabled:true},
-    {id:'hh', name:'Hi-Hat', line:0, enabled:true},
-    {id:'tom1', name:'Tom 1', line:3, enabled:true},
-    {id:'ride', name:'Ride', line:1, enabled:true}
+  activeSymbol:'note',
+  tempo:100,
+  bars:1,
+  beatsPerBar:4,
+  subdivisions:4,
+  instruments:[
+    {id:'hihat',line:0},
+    {id:'snare',line:1},
+    {id:'kick',line:3}
   ],
-  notes: [], // {bar,subdiv, instrumentId}
-  undoStack: [],
-  redoStack: []
-}
+  notes:[],
+  undo:[],
+  redo:[]
+};
 
-// --- DOM ---
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const tempoInput = document.getElementById('tempo');
-const beatsPerBarInput = document.getElementById('beatsPerBar');
-const barsBadge = document.getElementById('barsBadge');
-const status = document.getElementById('status');
-const playBtn = document.getElementById('playBtn');
-const addBarBtn = document.getElementById('addBar');
-const clearBtn = document.getElementById('clearBtn');
-const exportPNG = document.getElementById('exportPNG');
-const saveJSON = document.getElementById('saveJSON');
-const importJSON = document.getElementById('importJSON');
-const undoBtn = document.getElementById('undoBtn');
-const redoBtn = document.getElementById('redoBtn');
-
-// instruments list
-const instrumentsDiv = document.getElementById('instruments');
-
-// canvas sizing
-function resizeCanvas(){
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = Math.floor(rect.width * devicePixelRatio);
-  canvas.height = Math.floor(rect.height * devicePixelRatio);
+/**********************
+ CANVAS SETUP
+**********************/
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+function resize(){
+  canvas.width=canvas.clientWidth*devicePixelRatio;
+  canvas.height=canvas.clientHeight*devicePixelRatio;
   ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-  drawStaff();
+  draw();
 }
-window.addEventListener('resize', resizeCanvas);
+window.addEventListener('resize',resize);
+resize();
 
-// --- Render staff and notes ---
-function drawStaff(){
-  const w = canvas.width / devicePixelRatio;
-  const h = canvas.height / devicePixelRatio;
+/**********************
+ DRAW STAFF
+**********************/
+function draw(){
+  const w=canvas.width/devicePixelRatio;
+  const h=canvas.height/devicePixelRatio;
   ctx.clearRect(0,0,w,h);
 
-  // background
-  ctx.fillStyle = 'rgba(255,255,255,0.02)';
-  ctx.fillRect(0,0,w,h);
+  const left=40, right=w-20;
+  const top=60;
+  const gap=26;
 
-  // margins
-  const pad = 18;
-  const staffTop = 36;
-  const staffHeight = 220;
-  const left = pad, right = w - pad;
-
-  // draw 5 lines
-  const lineGap = staffHeight / 6; // spacing
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-  ctx.lineWidth = 1;
+  ctx.strokeStyle='rgba(255,255,255,.2)';
   for(let i=0;i<5;i++){
-    const y = staffTop + i*lineGap + 6;
-    ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(left,top+i*gap);
+    ctx.lineTo(right,top+i*gap);
+    ctx.stroke();
   }
 
-  // draw vertical bar separators based on state.bars and subdivisions
-  const totalSlots = state.bars * state.beatsPerBar * state.subdivisions;
-  const slotW = (right-left) / totalSlots;
-  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  const totalSlots=state.bars*state.beatsPerBar*state.subdivisions;
+  const slotW=(right-left)/totalSlots;
+
+  ctx.strokeStyle='rgba(255,255,255,.08)';
   for(let i=0;i<=totalSlots;i++){
-    const x = left + i*slotW;
-    if(i % (state.subdivisions) === 0) { // beat lines stronger
-      ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth=1.2;
-    } else { ctx.strokeStyle = 'rgba(255,255,255,0.02)'; ctx.lineWidth=0.8; }
-    ctx.beginPath();ctx.moveTo(x,staffTop-6);ctx.lineTo(x,staffTop+lineGap*4+18);ctx.stroke();
+    const x=left+i*slotW;
+    ctx.beginPath();ctx.moveTo(x,top-10);ctx.lineTo(x,top+gap*4+10);ctx.stroke();
   }
 
-  // draw instrument labels on left
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.font = '12px system-ui';
-  // map instrument line (0..4) top to bottom
-  state.instruments.forEach(inst=>{
-    const y = staffTop + inst.line*lineGap + 6;
-    ctx.fillText(inst.name, 8, y+4);
-  });
-
-  // draw notes
   state.notes.forEach(n=>{
-    const inst = state.instruments.find(i=>i.id===n.instrumentId);
+    const inst=state.instruments.find(i=>i.id===n.instrumentId);
     if(!inst) return;
-    const x = left + (n.bar*state.beatsPerBar*state.subdivisions + n.subdiv) * slotW + slotW/2;
-    const y = staffTop + inst.line*lineGap + 6;
-
-    drawNote(x,y,n.symbol||'note');
+    const x=left+(n.index*slotW)+slotW/2;
+    const y=top+inst.line*gap;
+    drawSymbol(x,y,n.symbol);
   });
+
+  document.getElementById('info').textContent=`Bars: ${state.bars} | Notes: ${state.notes.length}`;
 }
 
-function drawNote(x,y,symbol){
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.font='14px system-ui';
-  ctx.fillStyle='rgba(124,227,255,0.95)';
-  let char='●';
-  if(symbol==='x') char='×';
-  if(symbol==='ghost') char='◦';
-  if(symbol==='accent') char='▶';
-  if(symbol==='flam') char='𝆓';
-  if(symbol==='roll') char='///';
-  ctx.fillText(char,x,y);
-}
-  ctx.fillStyle = 'rgba(124,227,255,0.95)';
-  ctx.beginPath();
-  ctx.ellipse(x,y,7,5,0,0,Math.PI*2);
-  ctx.fill();
-  ctx.fillStyle='rgba(3,8,15,0.8)';
-  ctx.font='10px system-ui';
+function drawSymbol(x,y,sym){
+  ctx.save();
+  ctx.fillStyle='#7ce3ff';
+  ctx.font='16px system-ui';
   ctx.textAlign='center';
-  ctx.fillText('\u25CF', x, y+3); // small dot
+  ctx.textBaseline='middle';
+  let s='●';
+  if(sym==='x') s='×';
+  if(sym==='ghost') s='◦';
+  if(sym==='accent') s='▶';
+  if(sym==='flam') s='𝆓';
+  if(sym==='roll') s='///';
+  ctx.fillText(s,x,y);
+  ctx.restore();
 }
 
-// --- Symbol Palette Logic ---
-const activeSymbolUI = document.getElementById('activeSymbol');
-document.getElementById('symbolPalette').querySelectorAll('button').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    state.activeSymbol = btn.dataset.symbol;
-    activeSymbolUI.textContent = btn.textContent;
+/**********************
+ NOTE PLACEMENT (✅ FIXED)
+**********************/
+canvas.addEventListener('click',e=>{
+  const rect=canvas.getBoundingClientRect();
+  const x=e.clientX-rect.left;
+  const y=e.clientY-rect.top;
+
+  const left=40, right=canvas.clientWidth-20;
+  const top=60, gap=26;
+  const totalSlots=state.bars*state.beatsPerBar*state.subdivisions;
+  const slotW=(right-left)/totalSlots;
+  if(x<left||x>right) return;
+
+  const index=Math.floor((x-left)/slotW);
+  let nearest=null, best=999;
+  state.instruments.forEach(i=>{
+    const yy=top+i.line*gap;
+    const d=Math.abs(yy-y);
+    if(d<best){best=d;nearest=i;}
   });
+  toggle(index,nearest.id);
 });
 
-// --- Interaction: click to toggle notes ---
-let isPainting=false, paintMode=null;
-canvas.addEventListener('pointerdown', e=>{
-  const rect = canvas.getBoundingClientRect();
-  const x = (e.clientX-rect.left);
-  const y = (e.clientY-rect.top);
-  isPainting=true;
-  paintMode = e.shiftKey ? 'paint' : 'toggle';
-  handleCanvasClick(x,y);
-});
-canvas.addEventListener('pointermove', e=>{
-  if(!isPainting) return;
-  const rect = canvas.getBoundingClientRect();
-  const x = (e.clientX-rect.left);
-  const y = (e.clientY-rect.top);
-  if(paintMode==='paint') addNoteFromXY(x,y);
-});
-window.addEventListener('pointerup', ()=>{isPainting=false;paintMode=null});
-
-function handleCanvasClick(x,y){
-  const rect = canvas.getBoundingClientRect();
-  const w = rect.width; const h = rect.height;
-  const pad = 18; const left = pad; const right = w-pad; const staffTop = 36; const staffHeight=220; const lineGap = staffHeight/6;
-  const totalSlots = state.bars * state.beatsPerBar * state.subdivisions;
-  const slotW = (right-left) / totalSlots;
-  if(x<left || x>right || y<staffTop-20 || y>staffTop+lineGap*4+20) return;
-  // determine subdiv index
-  const absIdx = Math.floor((x-left)/slotW);
-  const bar = Math.floor(absIdx / (state.beatsPerBar*state.subdivisions));
-  const subdiv = absIdx % (state.beatsPerBar*state.subdivisions);
-  // find nearest instrument line
-  let nearest=null; let best=1e9;
-  state.instruments.forEach(inst=>{
-    const yy = staffTop + inst.line*lineGap + 6;
-    const d = Math.abs(yy - y);
-    if(d<best){best=d;nearest=inst}
-  });
-  toggleNote(bar,subdiv,nearest.id);
+function toggle(index,instrumentId){
+  saveUndo();
+  const n=state.notes.find(n=>n.index===index&&n.instrumentId===instrumentId);
+  if(n){
+    n.symbol=state.activeSymbol;
+  }else{
+    state.notes.push({index,instrumentId,symbol:state.activeSymbol});
+  }
+  draw();
 }
 
-function addNoteFromXY(x,y){
-  const rect = canvas.getBoundingClientRect();
-  const w = rect.width; const pad = 18; const left = pad; const right = w-pad; const staffTop = 36; const staffHeight=220; const lineGap = staffHeight/6;
-  const totalSlots = state.bars * state.beatsPerBar * state.subdivisions;
-  const slotW = (right-left) / totalSlots;
-  const absIdx = Math.floor((x-left)/slotW);
-  if(absIdx<0 || absIdx>=totalSlots) return;
-  const bar = Math.floor(absIdx / (state.beatsPerBar*state.subdivisions));
-  const subdiv = absIdx % (state.beatsPerBar*state.subdivisions);
-  let nearest=null; let best=1e9;
-  state.instruments.forEach(inst=>{
-    const yy = staffTop + inst.line*lineGap + 6;
-    const d = Math.abs(yy - y);
-    if(d<best){best=d;nearest=inst}
-  });
-  addNote(bar,subdiv,nearest.id);
-}
-
-function toggleNote(bar,subdiv,instrumentId){
-  const idx = state.notes.findIndex(n=>n.bar===bar && n.subdiv===subdiv && n.instrumentId===instrumentId);
-  if(idx>=0){ pushUndo(); state.notes.splice(idx,1); saveStatePreview(); drawStaff(); return; }
-  addNote(bar,subdiv,instrumentId);
-}
-function addNote(bar,subdiv,instrumentId){
-  // avoid duplicates
-  if(state.notes.some(n=>n.bar===bar && n.subdiv===subdiv && n.instrumentId===instrumentId)) return;
-  pushUndo();
-  state.notes.push({bar,subdiv,instrumentId, symbol: state.activeSymbol});
-  saveStatePreview();
-  drawStaff();
-}
-
-function clearNotes(){ pushUndo(); state.notes=[]; drawStaff(); saveStatePreview(); }
-
-// --- Undo/Redo ---
-function pushUndo(){
-  state.undoStack.push(JSON.stringify({notes:state.notes.slice()}));
-  if(state.undoStack.length>100) state.undoStack.shift();
-  state.redoStack.length=0;
+/**********************
+ UNDO / REDO
+**********************/
+function saveUndo(){
+  state.undo.push(JSON.stringify(state.notes));
+  state.redo.length=0;
 }
 function undo(){
-  if(!state.undoStack.length) return;
-  const last = state.undoStack.pop();
-  state.redoStack.push(JSON.stringify({notes:state.notes.slice()}));
-  const data = JSON.parse(last);
-  state.notes = data.notes;
-  drawStaff();
+  if(!state.undo.length) return;
+  state.redo.push(JSON.stringify(state.notes));
+  state.notes=JSON.parse(state.undo.pop());
+  draw();
 }
 function redo(){
-  if(!state.redoStack.length) return;
-  const last = state.redoStack.pop();
-  state.undoStack.push(JSON.stringify({notes:state.notes.slice()}));
-  const data = JSON.parse(last);
-  state.notes = data.notes;
-  drawStaff();
+  if(!state.redo.length) return;
+  state.undo.push(JSON.stringify(state.notes));
+  state.notes=JSON.parse(state.redo.pop());
+  draw();
 }
-undoBtn.addEventListener('click', undo);
-redoBtn.addEventListener('click', redo);
 
-// --- Bars control ---
-addBarBtn.addEventListener('click', ()=>{ pushUndo(); state.bars++; barsBadge.textContent = 'Bars: '+state.bars; drawStaff(); saveStatePreview(); });
-clearBtn.addEventListener('click', ()=>{ if(confirm('Clear all notes?')) clearNotes(); });
-
-// tempo and beats
-tempoInput.addEventListener('change', e=>{ state.tempo = parseInt(e.target.value)||100; });
-beatsPerBarInput.addEventListener('change', e=>{ state.beatsPerBar = parseInt(e.target.value)||4; barsBadge.textContent = 'Bars: '+state.bars; drawStaff(); saveStatePreview(); });
-
-// save & load JSON
-saveJSON.addEventListener('click', ()=>{
-  const blob = new Blob([JSON.stringify({meta:{tempo:state.tempo,beatsPerBar:state.beatsPerBar,subdivisions:state.subdivisions,bars:state.bars,instruments:state.instruments}, notes:state.notes},null,2)],{type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download='drum-notation.json'; a.click(); URL.revokeObjectURL(url);
-});
-importJSON.addEventListener('change', e=>{
-  const f = e.target.files[0]; if(!f) return; const reader = new FileReader();
-  reader.onload = ev =>{
-    try{
-      const data = JSON.parse(ev.target.result);
-      pushUndo();
-      if(data.meta){ state.tempo=data.meta.tempo||state.tempo; state.beatsPerBar=data.meta.beatsPerBar||state.beatsPerBar; state.subdivisions=data.meta.subdivisions||state.subdivisions; state.bars=data.meta.bars||state.bars; state.instruments = data.meta.instruments||state.instruments; }
-      state.notes = data.notes||[]; barsBadge.textContent = 'Bars: '+state.bars; drawStaff(); saveStatePreview();
-    }catch(err){ alert('Invalid JSON'); }
-  };
-  reader.readAsText(f);
-});
-
-// export PNG
-exportPNG.addEventListener('click', ()=>{
-  const link = document.createElement('a');
-  link.href = canvas.toDataURL('image/png');
-  link.download = 'drum-notation.png';
-  link.click();
-});
-
-// instrument UI
-function renderInstruments(){
-  instrumentsDiv.innerHTML='';
-  state.instruments.forEach(inst=>{
-    const div = document.createElement('div'); div.className='instrument';
-    div.innerHTML = `<div style="width:12px;height:12px;border-radius:3px;background:linear-gradient(90deg,${randomAccent(inst.id)},#6f7eff)"></div><div>${inst.name}</div><div class="sw"><label><input type='checkbox' data-id='${inst.id}' ${inst.enabled? 'checked':''}/> enabled</label></div>`;
-    instrumentsDiv.appendChild(div);
-  });
-  instrumentsDiv.querySelectorAll('input[type=checkbox]').forEach(ch=>{
-    ch.addEventListener('change', e=>{
-      const id = e.target.dataset.id; const inst = state.instruments.find(i=>i.id===id); if(inst) inst.enabled = e.target.checked; drawStaff(); saveStatePreview();
-    });
-  });
-}
-function randomAccent(seed){
-  // deterministic-ish color per id
-  let h=0; for(let i=0;i<seed.length;i++) h= (h*31 + seed.charCodeAt(i))%360;
-  return `hsl(${h} 90% 60%)`;
-}
-renderInstruments();
-
-// initial draw
-setTimeout(resizeCanvas,60);
-
-// --- Audio engine (simple synthesized drums) ---
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
-let isPlaying=false, playTimer=null;
-
-function playSequence(){
-  if(isPlaying){ stopPlayback(); return; }
-  isPlaying=true; playBtn.textContent='Stop';
-  const lookahead = 0.1; // seconds
-  const scheduleAheadTime = 0.1;
-  const startTime = audioCtx.currentTime + 0.05;
-  const secondsPerBeat = 60/state.tempo;
-  const secondsPerSubdiv = secondsPerBeat / state.subdivisions;
-  // prepare timeline
-  const events = [];
+/**********************
+ AUDIO (simple)
+**********************/
+const audio=new (window.AudioContext||window.webkitAudioContext)();
+function play(){
+  audio.resume();
+  const spb=60/state.tempo;
   state.notes.forEach(n=>{
-    const time = startTime + (n.bar*state.beatsPerBar*state.subdivisions + n.subdiv) * secondsPerSubdiv;
-    const inst = n.instrumentId;
-    events.push({time,inst});
+    const t=audio.currentTime+n.index*(spb/state.subdivisions);
+    const o=audio.createOscillator();
+    const g=audio.createGain();
+    o.frequency.value=200;
+    g.gain.setValueAtTime(0.8,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+.2);
+    o.connect(g);g.connect(audio.destination);
+    o.start(t);o.stop(t+.21);
   });
-  if(state.metronome) {
-    // not implemented as property; reading UI
-  }
-  // schedule
-  events.forEach(ev=>{
-    playDrumAt(ev.inst || ev.instrumentId, ev.time || ev.time);
-  });
-  // If looping, schedule repeated plays
-  if(document.getElementById('loop').checked){
-    const sequenceDuration = state.bars * state.beatsPerBar * secondsPerBeat;
-    let iteration=1;
-    function scheduleLoop(){
-      if(!isPlaying) return;
-      const base = startTime + iteration*sequenceDuration;
-      events.forEach(ev=> playDrumAt(ev.inst, base + (ev.time - startTime)));
-      iteration++;
-      setTimeout(scheduleLoop, sequenceDuration*1000 - 50);
-    }
-    setTimeout(scheduleLoop, (startTime - audioCtx.currentTime + sequenceDuration)*1000);
-  } else {
-    // stop after sequence
-    const seqDur = state.bars * state.beatsPerBar * secondsPerBeat + 0.2;
-    setTimeout(()=>{ stopPlayback(); }, seqDur*1000);
-  }
 }
 
-function stopPlayback(){ isPlaying=false; playBtn.textContent='Play'; }
-
-function playDrumAt(inst, time){
-  const t = time || (audioCtx.currentTime + 0.02);
-  // simple synth per instrument
-  if(inst==='kick'){
-    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-    o.type='sine'; o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(40,t+0.15);
-    g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.4);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(t); o.stop(t+0.5);
-  } else if(inst==='snare'){
-    // noise burst
-    const bufferSize = audioCtx.sampleRate * 0.2;
-    const buffer = audioCtx.createBuffer(1,bufferSize,audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for(let i=0;i<bufferSize;i++) data[i]=(Math.random()*2-1)*Math.exp(-i/bufferSize*6);
-    const src = audioCtx.createBufferSource(); src.buffer=buffer; const g=audioCtx.createGain(); g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.2);
-    src.connect(g); g.connect(audioCtx.destination); src.start(t);
-  } else if(inst==='hh' || inst==='ride'){
-    const bufferSize = audioCtx.sampleRate * 0.06;
-    const buffer = audioCtx.createBuffer(1,bufferSize,audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for(let i=0;i<bufferSize;i++) data[i]=(Math.random()*2-1)*Math.exp(-i/bufferSize*12);
-    const src = audioCtx.createBufferSource(); src.buffer=buffer; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.6,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.08);
-    src.connect(g); g.connect(audioCtx.destination); src.start(t);
-  } else { // toms and others
-    const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sine';
-    let f = 220; if(inst==='tom1') f=160; if(inst==='ride') f=500;
-    o.frequency.setValueAtTime(f,t); o.frequency.exponentialRampToValueAtTime(f*0.6,t+0.25);
-    g.gain.setValueAtTime(0.9,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.6);
-    o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t+0.6);
-  }
-}
-
-playBtn.addEventListener('click', async ()=>{
-  if(audioCtx.state==='suspended') await audioCtx.resume();
-  playSequence();
+/**********************
+ UI EVENTS
+**********************/
+document.getElementById('symbolPalette').querySelectorAll('button').forEach(b=>{
+  b.onclick=()=>{
+    state.activeSymbol=b.dataset.symbol;
+    document.getElementById('activeSymbol').textContent=b.textContent;
+  };
 });
-
-// expose metronome state
-state.metronome = document.getElementById('metronome').checked;
-document.getElementById('metronome').addEventListener('change', e=>state.metronome=e.target.checked);
-
-// status & preview saving
-function saveStatePreview(){
-  document.getElementById('status').textContent = `Notes: ${state.notes.length}`;
-}
-
-// initial
-saveStatePreview();
-
-// keyboard shortcuts
-window.addEventListener('keydown', e=>{
-  if((e.ctrlKey||e.metaKey) && e.key==='s'){ e.preventDefault(); saveJSON.click(); }
-  if((e.ctrlKey||e.metaKey) && e.key==='z'){ e.preventDefault(); undo(); }
-  if((e.ctrlKey||e.metaKey) && e.key==='y'){ e.preventDefault(); redo(); }
-});
-
-// small helper to ensure canvas shows nicely on different sizes
-(function initCanvasSize(){
-  const wrap = canvas.parentElement;
-  function setH(){ canvas.style.height = (wrap.clientHeight - 36) + 'px'; }
-  setH(); window.addEventListener('resize', setH); setTimeout(()=>{ resizeCanvas(); },120);
-})();
-
+document.getElementById('tempo').onchange=e=>state.tempo=e.target.value;
+document.getElementById('addBar').onclick=()=>{state.bars++;draw();};
+document.getElementById('clear').onclick=()=>{saveUndo();state.notes=[];draw();};
+document.getElementById('undo').onclick=undo;
+document.getElementById('redo').onclick=redo;
+document.getElementById('playBtn').onclick=play;
 </script>
 </body>
 </html>
