@@ -36,7 +36,6 @@ header{
   color:transparent;
 }
 
-/* LAYOUT */
 .app{
   max-width:1200px;
   margin:auto;
@@ -46,30 +45,28 @@ header{
 /* PALETTE */
 .palette{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(48px,1fr));
-  gap:8px;
-  padding:12px;
+  grid-template-columns:repeat(auto-fill,minmax(52px,1fr));
+  gap:10px;
+  padding:14px;
   background:var(--panel);
   border-radius:18px;
   backdrop-filter:blur(12px);
-  box-shadow:0 0 20px rgba(124,249,255,.15);
 }
 
-/* BUTTONS */
 .sym, .control{
   background:var(--glass);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:12px;
-  padding:8px;
-  font-size:16px;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:14px;
+  padding:10px;
+  font-size:18px;
   color:var(--text);
   cursor:pointer;
   transition:.2s;
 }
 
 .sym:hover, .control:hover{
-  transform:scale(1.1);
-  box-shadow:0 0 12px var(--accent);
+  transform:scale(1.12);
+  box-shadow:0 0 14px var(--accent);
 }
 
 .sym.active{
@@ -80,20 +77,15 @@ header{
 
 .control.delete-all{
   background:var(--danger);
-  color:white;
   font-weight:700;
-}
-
-.control.delete-all:hover{
-  box-shadow:0 0 12px var(--danger);
 }
 
 /* CANVAS */
 .canvas-wrap{
-  margin-top:14px;
+  margin-top:16px;
   background:var(--panel);
   border-radius:20px;
-  padding:12px;
+  padding:14px;
 }
 
 canvas{
@@ -105,89 +97,71 @@ canvas{
 /* FOOTER */
 .footer{
   text-align:center;
-  font-size:12px;
+  font-size:13px;
   color:var(--muted);
   padding:10px;
 }
 </style>
 </head>
-
 <body>
 
 <header>🎼 Notation Maker PRO</header>
 
 <div class="app">
 
-  <!-- SYMBOL PALETTE -->
-  <div class="palette" id="palette">
+<div class="palette">
+  <!-- NOTES -->
+  <button class="sym" data-s="●">●</button>
+  <button class="sym" data-s="◦">◦</button>
+  <button class="sym" data-s="×">×</button>
+  <button class="sym" data-s="𝅘𝅥">𝅘𝅥</button>
+  <button class="sym" data-s="𝅗𝅥">𝅗𝅥</button>
+  <button class="sym" data-s="𝅝">𝅝</button>
 
-    <!-- NOTES -->
-    <button class="sym" data-s="●">●</button>
-    <button class="sym" data-s="◦">◦</button>
-    <button class="sym" data-s="×">×</button>
-    <button class="sym" data-s="𝅘𝅥">𝅘𝅥</button>
-    <button class="sym" data-s="𝅗𝅥">𝅗𝅥</button>
-    <button class="sym" data-s="𝅝">𝅝</button>
+  <!-- RESTS -->
+  <button class="sym" data-s="𝄽">𝄽</button>
+  <button class="sym" data-s="𝄾">𝄾</button>
 
-    <!-- RESTS -->
-    <button class="sym" data-s="𝄻">𝄻</button>
-    <button class="sym" data-s="𝄼">𝄼</button>
-    <button class="sym" data-s="𝄽">𝄽</button>
-    <button class="sym" data-s="𝄾">𝄾</button>
+  <!-- DYNAMICS -->
+  <button class="sym" data-s="p">p</button>
+  <button class="sym" data-s="mf">mf</button>
+  <button class="sym" data-s="f">f</button>
 
-    <!-- ACCIDENTALS -->
-    <button class="sym" data-s="#">#</button>
-    <button class="sym" data-s="♭">♭</button>
-    <button class="sym" data-s="♮">♮</button>
+  <!-- TEXT -->
+  <button class="sym" data-s="rit.">rit.</button>
 
-    <!-- ARTICULATION -->
-    <button class="sym" data-s=">">></button>
-    <button class="sym" data-s="𝆓">𝆓</button>
+  <!-- CONTROL -->
+  <button class="control delete-all" id="clearAll">🗑 Clear</button>
+</div>
 
-    <!-- DYNAMICS -->
-    <button class="sym" data-s="pp">pp</button>
-    <button class="sym" data-s="p">p</button>
-    <button class="sym" data-s="mf">mf</button>
-    <button class="sym" data-s="f">f</button>
-    <button class="sym" data-s="ff">ff</button>
-
-    <!-- TEXT -->
-    <button class="sym" data-s="rit.">rit.</button>
-    <button class="sym" data-s="cresc.">cresc.</button>
-
-    <!-- CONTROLS -->
-    <button class="control delete-all" id="clearAll">🗑 Clear All</button>
-  </div>
-
-  <!-- STAFF -->
-  <div class="canvas-wrap">
-    <canvas id="staff" width="1100" height="440"></canvas>
-  </div>
+<div class="canvas-wrap">
+  <canvas id="staff" width="1200" height="480"></canvas>
+</div>
 
 </div>
 
 <div class="footer">
-Select symbol → Click staff to add • Click note to delete • Clear All deletes everything
+Click symbol → tap line OR space to add • Tap note to delete • Clear removes all
 </div>
 
 <script>
-const canvas = document.getElementById("staff");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("staff");
+const ctx=canvas.getContext("2d");
 
 const state={
   active:"●",
-  items:[]
+  notes:[]
 };
 
-/* STAFF CONFIG */
-const staffTop=150;
-const lineGap=26;
-const lines=5;
-const left=60;
-const right=1040;
-const hitRadius=12;
+/* STAFF SETTINGS (BIGGER & CLEAR) */
+const staffTop=140;
+const lineGap=34;            // BIGGER gap
+const totalPositions = 9;    // 5 lines + 4 spaces
+const left=70;
+const right=1130;
+const hitRadius=16;
 
-/* PALETTE LOGIC */
+/* SYMBOL SELECT */
 document.querySelectorAll(".sym").forEach(btn=>{
   btn.onclick=()=>{
     document.querySelectorAll(".sym").forEach(b=>b.classList.remove("active"));
@@ -199,20 +173,21 @@ document.querySelector(".sym").classList.add("active");
 
 /* CLEAR ALL */
 document.getElementById("clearAll").onclick=()=>{
-  if(confirm("Delete all notes?")){
-    state.items=[];
+  if(confirm("Delete all notation?")){
+    state.notes=[];
     draw();
   }
 };
 
-/* DRAW STAFF */
+/* DRAW */
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  ctx.strokeStyle="#9db4ff";
-  ctx.lineWidth=1;
+  /* STAFF */
+  ctx.strokeStyle="#b5c7ff";
+  ctx.lineWidth=2;
 
-  for(let i=0;i<lines;i++){
+  for(let i=0;i<5;i++){
     const y=staffTop+i*lineGap;
     ctx.beginPath();
     ctx.moveTo(left,y);
@@ -220,20 +195,22 @@ function draw(){
     ctx.stroke();
   }
 
-  state.items.forEach(n=>{
-    ctx.fillStyle="#fff";
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
-    ctx.font="20px serif";
+  /* NOTES */
+  ctx.fillStyle="#fff";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.font="26px serif";
+
+  state.notes.forEach(n=>{
     ctx.fillText(n.s,n.x,n.y);
   });
 }
 
-/* HIT TEST */
-function findNote(x,y){
-  return state.items.findIndex(n=>{
-    return Math.hypot(n.x-x,n.y-y)<hitRadius;
-  });
+/* NOTE HIT TEST */
+function hitTest(x,y){
+  return state.notes.findIndex(n =>
+    Math.hypot(n.x-x,n.y-y) < hitRadius
+  );
 }
 
 /* POINTER */
@@ -242,20 +219,24 @@ canvas.addEventListener("pointerdown",e=>{
   const x=(e.clientX-r.left)*(canvas.width/r.width);
   let y=(e.clientY-r.top)*(canvas.height/r.height);
 
-  // Delete if hit
-  const hit=findNote(x,y);
+  // Delete if clicked
+  const hit=hitTest(x,y);
   if(hit!==-1){
-    state.items.splice(hit,1);
+    state.notes.splice(hit,1);
     draw();
     return;
   }
 
-  // Snap to staff
-  let idx=Math.round((y-staffTop)/lineGap);
-  idx=Math.max(0,Math.min(lines-1,idx));
-  y=staffTop+idx*lineGap;
+  /* SNAP TO LINE OR SPACE */
+  const unit=lineGap/2;
+  let idx=Math.round((y-staffTop)/unit);
+  idx=Math.max(0, Math.min(totalPositions-1, idx));
+  y=staffTop+idx*unit;
 
-  state.items.push({x,y,s:state.active});
+  state.notes.push({
+    x,y,
+    s:state.active
+  });
   draw();
 });
 
