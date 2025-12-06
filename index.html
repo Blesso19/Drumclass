@@ -117,16 +117,6 @@ body{background:linear-gradient(180deg,#061024 0%, #071827 50%, #071826 100%);co
         <button class="btn small" data-symbol="roll" title="Roll">///</button>
         <span style="color:var(--muted);font-size:12px">Selected: <b id="activeSymbol">●</b></span>
       </div>
-      <!-- Note Symbol Palette -->
-      <div class="legend" id="symbolPalette" style="gap:6px;flex-wrap:wrap">
-        <button class="btn small" data-symbol="note" title="Note">●</button>
-        <button class="btn small" data-symbol="x" title="Hi‑hat X">×</button>
-        <button class="btn small" data-symbol="ghost" title="Ghost note">◦</button>
-        <button class="btn small" data-symbol="accent" title="Accent">▶</button>
-        <button class="btn small" data-symbol="flam" title="Flam">𝆓</button>
-        <button class="btn small" data-symbol="roll" title="Roll">///</button>
-        <span style="color:var(--muted);font-size:12px">Selected: <b id="activeSymbol">●</b></span>
-      </div>
       <div class="legend">
         <span class="note-dot"></span>
         <div style="color:var(--muted);font-size:13px">Percussion note</div>
@@ -134,8 +124,8 @@ body{background:linear-gradient(180deg,#061024 0%, #071827 50%, #071826 100%);co
       <div style="flex:1"></div>
       <div class="right-top">
         <div class="badge" id="barsBadge">Bars: 1</div>
-        <div class="badge" id="cursorInfo">Cconst state = {
-  activeSymbol: 'note',      </div>
+        <div class="badge" id="cursorInfo">Cursor: -</div>
+      </div>
     </div>
 
     <div class="staff" id="staff">
@@ -241,34 +231,15 @@ function drawStaff(){
     const x = left + i*slotW;
     if(i % (state.subdivisions) === 0) { // beat lines stronger
       ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth=1.2;
-    } else { ctx.sdrawNote(x,y,n.symbol||'note');rgba(255,2function drawNote(x,y,symbol){
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.font='14px system-ui';
-  ctx.fillStyle='rgba(124,227,255,0.95)';
-  let char='●';
-  if(symbol==='x') char='×';
-  if(symbol==='ghost') char='◦';
-  if(symbol==='accent') char='▶';
-  if(symbol==='flam') char='𝆓';
-  if(symbol==='roll') char='///';
-  ctx.fillText(char,x,y);
-}Width=0.8; }
+    } else { ctx.strokeStyle = 'rgba(255,255,255,0.02)'; ctx.lineWidth=0.8; }
     ctx.beginPath();ctx.moveTo(x,staffTop-6);ctx.lineTo(x,staffTop+lineGap*4+18);ctx.stroke();
   }
 
   // draw instrument labels on left
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.font = '12px system-ui';
-  // map instrument line (0..4) t// --- Symbol Palette Logic ---
-const activeSymbolUI = document.getElementById('activeSymbol');
-document.getElementById('symbolPalette').querySelectorAll('button').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    state.activeSymbol = btn.dataset.symbol;
-    activeSymbolUI.textContent = btn.textContent;
-  });
-});
-
-// --- Interaction: click to toggle notes ---=>{
+  // map instrument line (0..4) top to bottom
+  state.instruments.forEach(inst=>{
     const y = staffTop + inst.line*lineGap + 6;
     ctx.fillText(inst.name, 8, y+4);
   });
@@ -280,7 +251,7 @@ document.getElementById('symbolPalette').querySelectorAll('button').forEach(btn=
     const x = left + (n.bar*state.beatsPerBar*state.subdivisions + n.subdiv) * slotW + slotW/2;
     const y = staffTop + inst.line*lineGap + 6;
 
-    
+    drawNote(x,y,n.symbol||'note');
   });
 }
 
@@ -292,6 +263,10 @@ function drawNote(x,y,symbol){
   if(symbol==='x') char='×';
   if(symbol==='ghost') char='◦';
   if(symbol==='accent') char='▶';
+  if(symbol==='flam') char='𝆓';
+  if(symbol==='roll') char='///';
+  ctx.fillText(char,x,y);
+}
   ctx.fillStyle = 'rgba(124,227,255,0.95)';
   ctx.beginPath();
   ctx.ellipse(x,y,7,5,0,0,Math.PI*2);
@@ -301,6 +276,15 @@ function drawNote(x,y,symbol){
   ctx.textAlign='center';
   ctx.fillText('\u25CF', x, y+3); // small dot
 }
+
+// --- Symbol Palette Logic ---
+const activeSymbolUI = document.getElementById('activeSymbol');
+document.getElementById('symbolPalette').querySelectorAll('button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    state.activeSymbol = btn.dataset.symbol;
+    activeSymbolUI.textContent = btn.textContent;
+  });
+});
 
 // --- Interaction: click to toggle notes ---
 let isPainting=false, paintMode=null;
@@ -346,7 +330,8 @@ function addNoteFromXY(x,y){
   const rect = canvas.getBoundingClientRect();
   const w = rect.width; const pad = 18; const left = pad; const right = w-pad; const staffTop = 36; const staffHeight=220; const lineGap = staffHeight/6;
   const totalSlots = state.bars * state.beatsPerBar * state.subdivisions;
-  const slotW = (rstate.notes.push({bar,subdiv,instrumentId, symbol: state.activeSymbol});th.floor((x-left)/slotW);
+  const slotW = (right-left) / totalSlots;
+  const absIdx = Math.floor((x-left)/slotW);
   if(absIdx<0 || absIdx>=totalSlots) return;
   const bar = Math.floor(absIdx / (state.beatsPerBar*state.subdivisions));
   const subdiv = absIdx % (state.beatsPerBar*state.subdivisions);
@@ -368,12 +353,12 @@ function addNote(bar,subdiv,instrumentId){
   // avoid duplicates
   if(state.notes.some(n=>n.bar===bar && n.subdiv===subdiv && n.instrumentId===instrumentId)) return;
   pushUndo();
-  state.notes.push({bar,subdiv,instrumentId});
+  state.notes.push({bar,subdiv,instrumentId, symbol: state.activeSymbol});
   saveStatePreview();
   drawStaff();
 }
 
-function clearNotes(){ pushUndo(); state.aff(); saveStatePreview(); }
+function clearNotes(){ pushUndo(); state.notes=[]; drawStaff(); saveStatePreview(); }
 
 // --- Undo/Redo ---
 function pushUndo(){
