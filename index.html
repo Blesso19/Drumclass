@@ -90,7 +90,7 @@ canvas{
 </head>
 
 <body>
-<header>🎼 Drum Notation Maker PRO</header>
+<header>🥁 Drum Notation Maker PRO</header>
 
 <div class="app">
 
@@ -126,9 +126,9 @@ const ctx=canvas.getContext("2d");
 let activeSymbol="●";
 const staffGap=160;
 const lineGap=28;
-const left=80;
+const left=120;
 const right=1120;
-const bars=4; // bars per staff
+const bars=4;
 
 const score={
   time:"4/4",
@@ -145,6 +145,7 @@ document.querySelectorAll(".sym").forEach(b=>{
 });
 document.querySelector(".sym").classList.add("active");
 
+/* TIME SIGNATURE */
 document.getElementById("timeSig").onchange=e=>{
   score.time=e.target.value;
   draw();
@@ -181,10 +182,16 @@ score.staffs.forEach((staff,idx)=>{
     ctx.stroke();
   }
 
-  /* TIME SIG */
-  ctx.font="28px serif";
-  ctx.fillText(score.time.split("/")[0],left-40,top+lineGap);
-  ctx.fillText(score.time.split("/")[1],left-40,top+lineGap*3);
+  /* DRUM CLEF */
+  ctx.font="48px serif";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.fillText("𝄥", left-60, top+lineGap*2);
+
+  /* TIME SIGNATURE */
+  ctx.font="30px serif";
+  ctx.fillText(score.time.split("/")[0], left-20, top+lineGap);
+  ctx.fillText(score.time.split("/")[1], left-20, top+lineGap*3);
 
   /* BAR LINES */
   const barW=(right-left)/bars;
@@ -194,7 +201,8 @@ score.staffs.forEach((staff,idx)=>{
     ctx.lineTo(left+i*barW,top+lineGap*4);
     ctx.stroke();
   }
-  /* END DOUBLE BAR */
+
+  /* DOUBLE END BAR */
   ctx.lineWidth=4;
   ctx.beginPath();
   ctx.moveTo(right+6,top);
@@ -204,7 +212,7 @@ score.staffs.forEach((staff,idx)=>{
 
   /* NOTES */
   staff.notes.forEach(n=>{
-    ctx.font="60px serif";
+    ctx.font="62px serif";
     ctx.textAlign="center";
     ctx.textBaseline="middle";
     ctx.fillText(n.s,n.x,n.y);
@@ -232,6 +240,5 @@ draw();
 
 draw();
 </script>
-
 </body>
 </html>
