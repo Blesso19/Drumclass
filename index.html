@@ -79,6 +79,7 @@ select{
   background:var(--panel);
   border-radius:20px;
   padding:14px;
+  color:#FFFFFF;
 }
 
 canvas{
@@ -213,7 +214,6 @@ score.staffs.forEach((staff,idx)=>{
   /* NOTES */
   staff.notes.forEach(n=>{
     ctx.font="62px serif";
-    ctx.color="white";
     ctx.textAlign="center";
     ctx.textBaseline="middle";
     ctx.fillText(n.s,n.x,n.y);
