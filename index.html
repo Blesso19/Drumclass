@@ -1,268 +1,234 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Drum 5‑Line Notation Maker — Pro (Fixed)</title>
+<meta charset="UTF-8">
+<title>Notation Maker PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-:root{--bg:#0b1020;--card:#0f1724;--muted:#9aa4bf;--accent:#7ce3ff;--accent2:#8ef78e}
+:root{
+  --bg:#050814;
+  --panel:rgba(22,30,60,0.8);
+  --glass:rgba(255,255,255,0.08);
+  --accent:#7df9ff;
+  --accent2:#9b5cff;
+  --text:#ffffff;
+  --muted:#9ba4d6;
+}
+
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
-body{background:linear-gradient(180deg,#061024 0%, #071827 50%, #071826 100%);color:#e6eef8;padding:16px}
-.container{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:420px 1fr;gap:16px}
-.card{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:14px;box-shadow:0 6px 30px rgba(2,6,23,.6)}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.brand{display:flex;gap:12px;align-items:center}
-.logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#6f7eff);display:flex;align-items:center;justify-content:center;font-weight:800;color:#041025}
-.title{font-size:16px;font-weight:800}
-.subtitle{font-size:12px;color:var(--muted)}
-.btn{background:transparent;border:1px solid rgba(255,255,255,.08);padding:8px 10px;border-radius:10px;color:#c6d3f0;cursor:pointer;font-weight:600}
-.btn:hover{border-color:rgba(124,227,255,.4);color:var(--accent)}
-.btn.play{background:linear-gradient(90deg,var(--accent),#6f7eff);color:#041025;border:none}
-.small{font-size:12px;padding:6px 8px}
-.section-title{font-size:13px;color:var(--muted);margin:10px 0 6px}
-.instrument{display:flex;align-items:center;gap:8px;padding:6px;border-radius:8px;background:rgba(255,255,255,.02)}
-.input{background:transparent;border:1px solid rgba(255,255,255,.08);padding:6px 8px;border-radius:8px;color:inherit}
-.staff{border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:10px;background:linear-gradient(180deg,#071027,#071824)}
-.canvas{width:100%;height:400px;display:block;border-radius:10px}
-.palette{display:flex;flex-wrap:wrap;gap:6px}
-.badge{background:#101a33;padding:6px 10px;border-radius:999px;font-size:12px;color:#a8b4da}
-.footer{display:flex;justify-content:space-between;margin-top:8px;color:var(--muted);font-size:12px}
-@media(max-width:980px){.container{grid-template-columns:1fr}}
+
+body{
+  margin:0;
+  background:radial-gradient(circle at top, #0b1440, #050814);
+  color:var(--text);
+  font-family:system-ui,-apple-system;
+}
+
+/* HEADER */
+header{
+  padding:14px;
+  text-align:center;
+  font-size:22px;
+  letter-spacing:1px;
+  font-weight:700;
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+/* LAYOUT */
+.app{
+  max-width:1200px;
+  margin:auto;
+  padding:10px;
+}
+
+/* SYMBOL BOX */
+.palette{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(48px,1fr));
+  gap:8px;
+  padding:12px;
+  background:var(--panel);
+  border-radius:16px;
+  backdrop-filter:blur(12px);
+  box-shadow:0 0 20px rgba(124,249,255,0.15);
+}
+
+/* BUTTON */
+.sym{
+  background:var(--glass);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:10px;
+  padding:8px;
+  font-size:18px;
+  color:var(--text);
+  cursor:pointer;
+  transition:.2s;
+}
+
+.sym:hover{
+  transform:scale(1.1);
+  box-shadow:0 0 12px var(--accent);
+}
+
+.sym.active{
+  background:linear-gradient(135deg,var(--accent2),var(--accent));
+  color:#000;
+  font-weight:700;
+}
+
+/* CANVAS */
+.canvas-wrap{
+  margin-top:14px;
+  background:var(--panel);
+  border-radius:18px;
+  padding:12px;
+  backdrop-filter:blur(12px);
+}
+
+canvas{
+  width:100%;
+  height:auto;
+  background:#070d2a;
+  border-radius:14px;
+}
+
+/* FOOTER */
+.footer{
+  text-align:center;
+  font-size:12px;
+  color:var(--muted);
+  padding:10px;
+}
 </style>
 </head>
 <body>
-<div class="container">
 
-<!-- LEFT PANEL -->
-<div class="card">
-  <div class="header">
-    <div class="brand">
-      <div class="logo">5L</div>
-      <div>
-        <div class="title">Drum 5‑Line Notation Maker</div>
-        <div class="subtitle">Symbols • Click • Playback (FIXED)</div>
-      </div>
-    </div>
-    <button class="btn play" id="playBtn">Play</button>
+<header>🎼 Notation Maker PRO</header>
+
+<div class="app">
+
+  <!-- SYMBOL PALETTE -->
+  <div class="palette" id="palette">
+    <!-- NOTES -->
+    <button class="sym" data-s="●">●</button>
+    <button class="sym" data-s="◦">◦</button>
+    <button class="sym" data-s="×">×</button>
+    <button class="sym" data-s="𝅘𝅥">𝅘𝅥</button>
+    <button class="sym" data-s="𝅗𝅥">𝅗𝅥</button>
+    <button class="sym" data-s="𝅝">𝅝</button>
+
+    <!-- RESTS -->
+    <button class="sym" data-s="𝄻">𝄻</button>
+    <button class="sym" data-s="𝄼">𝄼</button>
+    <button class="sym" data-s="𝄽">𝄽</button>
+    <button class="sym" data-s="𝄾">𝄾</button>
+
+    <!-- ACCIDENTALS -->
+    <button class="sym" data-s="#">#</button>
+    <button class="sym" data-s="♭">♭</button>
+    <button class="sym" data-s="♮">♮</button>
+
+    <!-- ARTICULATION -->
+    <button class="sym" data-s=">">></button>
+    <button class="sym" data-s="𝆓">𝆓</button>
+    <button class="sym" data-s="///">///</button>
+
+    <!-- DYNAMICS -->
+    <button class="sym" data-s="pp">pp</button>
+    <button class="sym" data-s="p">p</button>
+    <button class="sym" data-s="mp">mp</button>
+    <button class="sym" data-s="mf">mf</button>
+    <button class="sym" data-s="f">f</button>
+    <button class="sym" data-s="ff">ff</button>
+
+    <!-- TEXT -->
+    <button class="sym" data-s="rit.">rit.</button>
+    <button class="sym" data-s="cresc.">cresc.</button>
+    <button class="sym" data-s="dim.">dim.</button>
+    <button class="sym" data-s="D.C.">D.C.</button>
+    <button class="sym" data-s="Fine">Fine</button>
   </div>
 
-  <div class="section-title">Note Symbols</div>
-  <div class="palette" id="symbolPalette">
-    <button class="btn small" data-symbol="note">●</button>
-    <button class="btn small" data-symbol="x">×</button>
-    <button class="btn small" data-symbol="ghost">◦</button>
-    <button class="btn small" data-symbol="accent">▶</button>
-    <button class="btn small" data-symbol="flam">𝆓</button>
-    <button class="btn small" data-symbol="roll">///</button>
-    <span class="badge">Selected: <b id="activeSymbol">●</b></span>
+  <!-- STAFF -->
+  <div class="canvas-wrap">
+    <canvas id="staff" width="1100" height="420"></canvas>
   </div>
 
-  <div class="section-title">Settings</div>
-  <div style="display:flex;gap:10px;align-items:center">
-    Tempo
-    <input id="tempo" class="input" type="number" value="100" min="40" max="240" style="width:80px">
-  </div>
-
-  <div style="display:flex;gap:8px;margin-top:10px">
-    <button class="btn small" id="addBar">+ Bar</button>
-    <button class="btn small" id="clear">Clear</button>
-    <button class="btn small" id="undo">Undo</button>
-    <button class="btn small" id="redo">Redo</button>
-  </div>
 </div>
 
-<!-- RIGHT PANEL -->
-<div class="card">
-  <div class="staff">
-    <canvas id="canvas" class="canvas"></canvas>
-  </div>
-  <div class="footer">
-    <div id="info">Bars: 1 | Notes: 0</div>
-    <div>Click staff to place notes</div>
-  </div>
-</div>
+<div class="footer">
+Select symbol → tap/click on staff to place
 </div>
 
 <script>
-/**********************
- STATE
-**********************/
-const state = {
-  activeSymbol:'note',
-  tempo:100,
-  bars:1,
-  beatsPerBar:4,
-  subdivisions:4,
-  instruments:[
-    {id:'hihat',line:0},
-    {id:'snare',line:1},
-    {id:'kick',line:3}
-  ],
-  notes:[],
-  undo:[],
-  redo:[]
+const canvas = document.getElementById("staff");
+const ctx = canvas.getContext("2d");
+
+const state={
+  active:"●",
+  items:[]
 };
 
-/**********************
- CANVAS SETUP
-**********************/
-const canvas=document.getElementById('canvas');
-const ctx=canvas.getContext('2d');
-function resize(){
-  canvas.width=canvas.clientWidth*devicePixelRatio;
-  canvas.height=canvas.clientHeight*devicePixelRatio;
-  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-  draw();
-}
-window.addEventListener('resize',resize);
-resize();
+/* STAFF */
+const staffTop=140;
+const lineGap=24;
+const lines=5;
+const left=60;
+const right=1040;
 
-/**********************
- DRAW STAFF
-**********************/
+/* PALETTE */
+document.querySelectorAll(".sym").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll(".sym").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    state.active=btn.dataset.s;
+  };
+});
+document.querySelector(".sym").classList.add("active");
+
+/* DRAW STAFF */
 function draw(){
-  const w=canvas.width/devicePixelRatio;
-  const h=canvas.height/devicePixelRatio;
-  ctx.clearRect(0,0,w,h);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  const left=40, right=w-20;
-  const top=60;
-  const gap=26;
+  ctx.strokeStyle="#9db4ff";
+  ctx.lineWidth=1;
 
-  ctx.strokeStyle='rgba(255,255,255,.2)';
-  for(let i=0;i<5;i++){
+  for(let i=0;i<lines;i++){
+    const y=staffTop+i*lineGap;
     ctx.beginPath();
-    ctx.moveTo(left,top+i*gap);
-    ctx.lineTo(right,top+i*gap);
+    ctx.moveTo(left,y);
+    ctx.lineTo(right,y);
     ctx.stroke();
   }
 
-  const totalSlots=state.bars*state.beatsPerBar*state.subdivisions;
-  const slotW=(right-left)/totalSlots;
-
-  ctx.strokeStyle='rgba(255,255,255,.08)';
-  for(let i=0;i<=totalSlots;i++){
-    const x=left+i*slotW;
-    ctx.beginPath();ctx.moveTo(x,top-10);ctx.lineTo(x,top+gap*4+10);ctx.stroke();
-  }
-
-  state.notes.forEach(n=>{
-    const inst=state.instruments.find(i=>i.id===n.instrumentId);
-    if(!inst) return;
-    const x=left+(n.index*slotW)+slotW/2;
-    const y=top+inst.line*gap;
-    drawSymbol(x,y,n.symbol);
+  state.items.forEach(n=>{
+    ctx.fillStyle="#fff";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.font="20px serif";
+    ctx.fillText(n.s,n.x,n.y);
   });
-
-  document.getElementById('info').textContent=`Bars: ${state.bars} | Notes: ${state.notes.length}`;
 }
 
-function drawSymbol(x,y,sym){
-  ctx.save();
-  ctx.fillStyle='#7ce3ff';
-  ctx.font='16px system-ui';
-  ctx.textAlign='center';
-  ctx.textBaseline='middle';
-  let s='●';
-  if(sym==='x') s='×';
-  if(sym==='ghost') s='◦';
-  if(sym==='accent') s='▶';
-  if(sym==='flam') s='𝆓';
-  if(sym==='roll') s='///';
-  ctx.fillText(s,x,y);
-  ctx.restore();
-}
+/* PLACE SYMBOL */
+canvas.addEventListener("pointerdown",e=>{
+  const r=canvas.getBoundingClientRect();
+  const x=(e.clientX-r.left)*(canvas.width/r.width);
+  let y=(e.clientY-r.top)*(canvas.height/r.height);
 
-/**********************
- NOTE PLACEMENT (✅ FIXED)
-**********************/
-canvas.addEventListener('click',e=>{
-  const rect=canvas.getBoundingClientRect();
-  const x=e.clientX-rect.left;
-  const y=e.clientY-rect.top;
+  let idx=Math.round((y-staffTop)/lineGap);
+  idx=Math.max(0,Math.min(lines-1,idx));
+  y=staffTop+idx*lineGap;
 
-  const left=40, right=canvas.clientWidth-20;
-  const top=60, gap=26;
-  const totalSlots=state.bars*state.beatsPerBar*state.subdivisions;
-  const slotW=(right-left)/totalSlots;
-  if(x<left||x>right) return;
-
-  const index=Math.floor((x-left)/slotW);
-  let nearest=null, best=999;
-  state.instruments.forEach(i=>{
-    const yy=top+i.line*gap;
-    const d=Math.abs(yy-y);
-    if(d<best){best=d;nearest=i;}
-  });
-  toggle(index,nearest.id);
+  state.items.push({x,y,s:state.active});
+  draw();
 });
 
-function toggle(index,instrumentId){
-  saveUndo();
-  const n=state.notes.find(n=>n.index===index&&n.instrumentId===instrumentId);
-  if(n){
-    n.symbol=state.activeSymbol;
-  }else{
-    state.notes.push({index,instrumentId,symbol:state.activeSymbol});
-  }
-  draw();
-}
-
-/**********************
- UNDO / REDO
-**********************/
-function saveUndo(){
-  state.undo.push(JSON.stringify(state.notes));
-  state.redo.length=0;
-}
-function undo(){
-  if(!state.undo.length) return;
-  state.redo.push(JSON.stringify(state.notes));
-  state.notes=JSON.parse(state.undo.pop());
-  draw();
-}
-function redo(){
-  if(!state.redo.length) return;
-  state.undo.push(JSON.stringify(state.notes));
-  state.notes=JSON.parse(state.redo.pop());
-  draw();
-}
-
-/**********************
- AUDIO (simple)
-**********************/
-const audio=new (window.AudioContext||window.webkitAudioContext)();
-function play(){
-  audio.resume();
-  const spb=60/state.tempo;
-  state.notes.forEach(n=>{
-    const t=audio.currentTime+n.index*(spb/state.subdivisions);
-    const o=audio.createOscillator();
-    const g=audio.createGain();
-    o.frequency.value=200;
-    g.gain.setValueAtTime(0.8,t);
-    g.gain.exponentialRampToValueAtTime(0.001,t+.2);
-    o.connect(g);g.connect(audio.destination);
-    o.start(t);o.stop(t+.21);
-  });
-}
-
-/**********************
- UI EVENTS
-**********************/
-document.getElementById('symbolPalette').querySelectorAll('button').forEach(b=>{
-  b.onclick=()=>{
-    state.activeSymbol=b.dataset.symbol;
-    document.getElementById('activeSymbol').textContent=b.textContent;
-  };
-});
-document.getElementById('tempo').onchange=e=>state.tempo=e.target.value;
-document.getElementById('addBar').onclick=()=>{state.bars++;draw();};
-document.getElementById('clear').onclick=()=>{saveUndo();state.notes=[];draw();};
-document.getElementById('undo').onclick=undo;
-document.getElementById('redo').onclick=redo;
-document.getElementById('playBtn').onclick=play;
+draw();
 </script>
+
 </body>
 </html>
