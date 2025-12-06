@@ -8,7 +8,7 @@
 <style>
 :root{
   --bg:#050814;
-  --panel:rgba(22,30,60,0.85);
+  --panel:rgba(22,30,60,0.88);
   --glass:rgba(255,255,255,0.08);
   --accent:#7df9ff;
   --accent2:#9b5cff;
@@ -36,16 +36,17 @@ header{
   color:transparent;
 }
 
+/* LAYOUT */
 .app{
   max-width:1200px;
   margin:auto;
   padding:10px;
 }
 
-/* PALETTE */
+/* SYMBOL PALETTE */
 .palette{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(52px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(54px,1fr));
   gap:10px;
   padding:14px;
   background:var(--panel);
@@ -58,14 +59,14 @@ header{
   border:1px solid rgba(255,255,255,.15);
   border-radius:14px;
   padding:10px;
-  font-size:18px;
+  font-size:20px;
   color:var(--text);
   cursor:pointer;
   transition:.2s;
 }
 
-.sym:hover, .control:hover{
-  transform:scale(1.12);
+.sym:hover{
+  transform:scale(1.15);
   box-shadow:0 0 14px var(--accent);
 }
 
@@ -103,6 +104,7 @@ canvas{
 }
 </style>
 </head>
+
 <body>
 
 <header>🎼 Notation Maker PRO</header>
@@ -110,38 +112,27 @@ canvas{
 <div class="app">
 
 <div class="palette">
-  <!-- NOTES -->
   <button class="sym" data-s="●">●</button>
   <button class="sym" data-s="◦">◦</button>
   <button class="sym" data-s="×">×</button>
   <button class="sym" data-s="𝅘𝅥">𝅘𝅥</button>
   <button class="sym" data-s="𝅗𝅥">𝅗𝅥</button>
   <button class="sym" data-s="𝅝">𝅝</button>
-
-  <!-- RESTS -->
   <button class="sym" data-s="𝄽">𝄽</button>
-  <button class="sym" data-s="𝄾">𝄾</button>
-
-  <!-- DYNAMICS -->
   <button class="sym" data-s="p">p</button>
   <button class="sym" data-s="mf">mf</button>
   <button class="sym" data-s="f">f</button>
-
-  <!-- TEXT -->
-  <button class="sym" data-s="rit.">rit.</button>
-
-  <!-- CONTROL -->
   <button class="control delete-all" id="clearAll">🗑 Clear</button>
 </div>
 
 <div class="canvas-wrap">
-  <canvas id="staff" width="1200" height="480"></canvas>
+  <canvas id="staff" width="1200" height="520"></canvas>
 </div>
 
 </div>
 
 <div class="footer">
-Click symbol → tap line OR space to add • Tap note to delete • Clear removes all
+Click to add notes (lines, spaces, above & below) • Click note to delete
 </div>
 
 <script>
@@ -153,15 +144,17 @@ const state={
   notes:[]
 };
 
-/* STAFF SETTINGS (BIGGER & CLEAR) */
-const staffTop=140;
-const lineGap=34;            // BIGGER gap
-const totalPositions = 9;    // 5 lines + 4 spaces
-const left=70;
-const right=1130;
-const hitRadius=16;
+/* STAFF CONFIG */
+const staffTop=200;
+const lineGap=34;
+const lines=5;
+const extraPositions=4; // above & below
+const totalPositions=(lines*2-1)+(extraPositions*2);
+const left=80;
+const right=1120;
+const hitRadius=20;
 
-/* SYMBOL SELECT */
+/* SELECT SYMBOL */
 document.querySelectorAll(".sym").forEach(btn=>{
   btn.onclick=()=>{
     document.querySelectorAll(".sym").forEach(b=>b.classList.remove("active"));
@@ -171,9 +164,9 @@ document.querySelectorAll(".sym").forEach(btn=>{
 });
 document.querySelector(".sym").classList.add("active");
 
-/* CLEAR ALL */
+/* CLEAR */
 document.getElementById("clearAll").onclick=()=>{
-  if(confirm("Delete all notation?")){
+  if(confirm("Delete all notes?")){
     state.notes=[];
     draw();
   }
@@ -184,10 +177,9 @@ function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   /* STAFF */
-  ctx.strokeStyle="#b5c7ff";
+  ctx.strokeStyle="#b8c9ff";
   ctx.lineWidth=2;
-
-  for(let i=0;i<5;i++){
+  for(let i=0;i<lines;i++){
     const y=staffTop+i*lineGap;
     ctx.beginPath();
     ctx.moveTo(left,y);
@@ -195,21 +187,48 @@ function draw(){
     ctx.stroke();
   }
 
-  /* NOTES */
-  ctx.fillStyle="#fff";
-  ctx.textAlign="center";
-  ctx.textBaseline="middle";
-  ctx.font="26px serif";
-
+  /* NOTES + LEDGER */
   state.notes.forEach(n=>{
+    drawLedger(n);
+    ctx.fillStyle="#fff";
+    ctx.font="32px serif"; // BIG NOTES
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
     ctx.fillText(n.s,n.x,n.y);
   });
 }
 
-/* NOTE HIT TEST */
+/* LEDGER LINES */
+function drawLedger(note){
+  const topY=staffTop;
+  const bottomY=staffTop+lineGap*(lines-1);
+
+  ctx.strokeStyle="#b8c9ff";
+  ctx.lineWidth=2;
+
+  if(note.y < topY){
+    for(let y=topY-lineGap;y>=note.y;y-=lineGap){
+      ctx.beginPath();
+      ctx.moveTo(note.x-20,y);
+      ctx.lineTo(note.x+20,y);
+      ctx.stroke();
+    }
+  }
+
+  if(note.y > bottomY){
+    for(let y=bottomY+lineGap;y<=note.y;y+=lineGap){
+      ctx.beginPath();
+      ctx.moveTo(note.x-20,y);
+      ctx.lineTo(note.x+20,y);
+      ctx.stroke();
+    }
+  }
+}
+
+/* HIT TEST */
 function hitTest(x,y){
   return state.notes.findIndex(n =>
-    Math.hypot(n.x-x,n.y-y) < hitRadius
+    Math.hypot(n.x-x,n.y-y)<hitRadius
   );
 }
 
@@ -219,7 +238,6 @@ canvas.addEventListener("pointerdown",e=>{
   const x=(e.clientX-r.left)*(canvas.width/r.width);
   let y=(e.clientY-r.top)*(canvas.height/r.height);
 
-  // Delete if clicked
   const hit=hitTest(x,y);
   if(hit!==-1){
     state.notes.splice(hit,1);
@@ -227,16 +245,15 @@ canvas.addEventListener("pointerdown",e=>{
     return;
   }
 
-  /* SNAP TO LINE OR SPACE */
   const unit=lineGap/2;
-  let idx=Math.round((y-staffTop)/unit);
-  idx=Math.max(0, Math.min(totalPositions-1, idx));
-  y=staffTop+idx*unit;
+  const minY=staffTop-extraPositions*lineGap;
+  const maxY=staffTop+(lines-1+extraPositions)*lineGap;
 
-  state.notes.push({
-    x,y,
-    s:state.active
-  });
+  let idx=Math.round((y-minY)/unit);
+  idx=Math.max(0,Math.min(totalPositions-1,idx));
+  y=minY+idx*unit;
+
+  state.notes.push({x,y,s:state.active});
   draw();
 });
 
